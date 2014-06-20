@@ -41,6 +41,7 @@
 /* Authentication */
 $route['auth'] = 'auth/index';
 $route['editor'] = 'auth/index';
+$route['profile']= 'auth/profile';
 $route['login'] = 'auth/login';
 $route['logout'] = 'auth/logout';
 $route['logs'] = 'auth/logs';
