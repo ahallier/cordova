@@ -1,35 +1,10 @@
+<h1>My profile</h1>
+<p>Edit your profile information below</p>
 
-<h1>Profile<h1> 
-<?php
+<?php 
 $attr = array('autocomplete' => 'off');
-echo form_open(uri_string(), $attr);//what is this path?
-
-//echo "<label for='firstname'>First name:</label>". form_input('username', set_value($user->username));
-//echo "Password : ". form_input('password', set_value($user->password));
-//echo "Username : ". form_input('username', set_value($user->username));
-//echo form_submit('submit', 'Submit');
-//echo form_close();
+echo form_open(uri_string(), $attr);
 ?>
-        <label for="first_name">First name:</label> 
-        <input type="text" name="first_name" value=<?php echo $user->first_name?>>
-        <label for='last_name'>Last name:</label>  
-        <input type='text' name='last_name' value=<?php echo $user->last_name?>>
-        <label for='username'>Username: </label> 
-        <input type='text' name='username' value=<?php echo $user->username?>>
-        <label for='email'>Email: </label> 
-  
-        <input type='text' name='email' value=<?php echo $user->email?>>
-        <label for='company'>Company Name: </label> 
-        <input type='text' name='company' value=<?php echo $user->company?>>
-        <label for="phone">Phone: </label> 
-        <input type="text" name="phone" value=<?php echo $user->phone?>>
-        <label for="password">New Password: </label> 
-        <input type="text" name="password">
-        <label for="passwordconfirm">Confirm New Password: </label> 
-        <input type="text" name="passwordconfirm"><br>
-        <input type="submit" value="Update">
-    </form> 
-<!--
       <p>
             <?php echo lang('edit_user_fname_label', 'first_name');?>
             <?php echo form_input($first_name);?>
@@ -70,3 +45,9 @@ echo form_open(uri_string(), $attr);//what is this path?
             <?php echo form_input($password_confirm);?>
       </p>
 
+      <?php echo form_hidden('id', $user->id);?>
+      <?php echo form_hidden($csrf); ?>
+
+      <p><?php echo form_submit('submit', lang('edit_user_submit_btn'));?></p>
+
+<?php echo form_close();?>
