@@ -27,7 +27,7 @@
         <li><a href="<?php echo site_url('genes'); ?>"><i class="icon-pencil icon-white"></i> Edit</a></li>
         <li><a href="<?php echo site_url('variations/unreleased'); ?>"><i class="icon-edit icon-white"></i> Review changes</a></li>
        <li id="nav-login"><a href="<?php echo login_url(); ?>"><i></i> <?php echo login_text(); ?></a></li>
-       <li id="nav-login"><a href="<?php echo site_url('auth/profile'); ?>"><i class="glyphicon glyphicon-user"><span class="glyphicon glyphicon-user"></span>Profile</i></a></li> 
+       <li id="nav-login"><a href="<?php echo site_url('auth/profile'); ?>"><i class="icon-user icon-white"></i>Profile</a></li> 
       </ul>
     </div>
   </div>
