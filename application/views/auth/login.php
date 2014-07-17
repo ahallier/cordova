@@ -6,6 +6,7 @@
     <h2 class="form-login-heading">Log in</h2>
     <input name="identity" type="text" class="input-block-level" value="<?php echo set_value('identity'); ?>" placeholder="Username" autofocus>
     <input name="password" type="password" class="input-block-level" placeholder="Password">
+    <a href="forgotpassword">Forgot Password?</a>
     <label class="checkbox">
       <input name="remember" type="checkbox" value="remember" <?php echo $rememberme ?>> Remember me
     </label>
