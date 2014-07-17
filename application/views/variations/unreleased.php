@@ -62,11 +62,21 @@ echo form_open('variations/submit', $attributes);
 
     <div class="row-fluid">
         <!-- "Release changes" button (hide if no variant changes exist) -->
-        <div id="release-changes-wrapper" class="span3 rounded <?php echo hidden(empty($variants)); ?>">
+        <div id="release-changes-wrapper" class="span3 rounded <?php echo hidden(($this->version == 0) || (empty($variants))); ?>">
             <h4>Ready to release these changes?</h4> 
-            <button id="release-variant-changes" type="button" class="btn btn-primary btn-medium" data-toggle="modal" data-target="#modal-release-confirm">Release changes</button>
+            <form action="" method="">
+              <input type="radio" name="versioning" value="minorVersion">Minor Version<br>
+              <input type="radio" name="versioning" value="majorVersion">Major Version
+              <button id="release-variant-changes" type="submit" class="btn btn-primary btn-medium" data-toggle="modal" data-target="#modal-release-confirm">Release changes</button>
+            </form>
         </div>
-    
+
+        <!-- "Initial release" button (display for Version 0 only) -->
+          <div id="initial-release-wrapper" class="span3 rounded <?php echo hidden(($this->version != 0)); ?>">
+            <h4>Create an initial release?</h4> 
+          <button name="release-changes" class="btn btn-medium btn-primary" type="submit" value="Release">Create</button>
+        </div>
+
         <!-- "Special release options" tab (hide if no variant changes exist) -->
         <div id="special-release-options" class="span4 accordion <?php echo hidden(empty($variants)); ?>">
             <div class="accordion-group">
@@ -104,7 +114,7 @@ echo form_open('variations/submit', $attributes);
         </div>
     
         <!-- "Confirm/Unconfirm all" buttons (hide if no variant changes exist) -->
-        <span id="confirm-toggles" class="span4 offset1 <?php echo hidden(empty($variants)); ?>">
+        <span id="confirm-toggles" class="span4 <?php echo hidden(empty($variants)); ?>">
             <label id="unconfirm-all" class="hold-change" type="button">
                 <i class="icon-off"></i>
             </label>
@@ -113,12 +123,6 @@ echo form_open('variations/submit', $attributes);
             </label>
             <span id="confirm-all-label">Confirm/unconfirm all</span>
         </span>
-    </div>
-
-    <!-- "Initial release" button (display for Version 0 only) -->
-    <div id="initial-release-wrapper" class="rounded <?php echo hidden(($this->version != 0)); ?>">
-        <h4>Create an initial release?</h4> 
-        <button name="release-changes" class="btn btn-medium btn-primary" type="submit" value="Release">Create</button>
     </div>
 
     <!-- "Release changes" confirmation modal -->
