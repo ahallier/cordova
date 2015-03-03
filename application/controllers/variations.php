@@ -23,6 +23,8 @@ class Variations extends MY_Controller {
     $this->strings = $this->config->item('strings');
 		// Initialize db tables data
 		$this->tables = $this->config->item('tables');
+    $this->load->helper(array('form','url'));
+    $this->load->helper('file');
   }
 
   /**
@@ -224,6 +226,110 @@ class Variations extends MY_Controller {
       redirect($this->uri->uri_string()); // reload the page
     }
 
+    $this->load->view($this->editor_layout, $data);
+  
+}
+  public function upload_genes_file() {
+
+    $data['title'] = "Uplaod Genes";
+    $data['content'] = 'variations/upload_genes';
+    $this->load->helper('file');
+    if($this->input->post('file'))
+    { 
+      $file = $this->input->post('file');
+      $this->session->set_flashdata('genes', $genes);
+      $file_path = '/asap/cordova_pipeline/mygenes.txt'; 
+      $this->session->set_flashdata('file_path', $file_path);
+      write_file($file_path, $file);
+      redirect('variations/select_database');
+    }
+    $this->load->view($this->editor_layout, $data);
+
+  }
+    
+  
+  public function upload_genes() {
+    //redirect_all_nonmembers();
+    $data['title'] = "Uplaod Genes";
+    $data['content'] = 'variations/upload_genes';
+    $this->load->helper('file');
+    if($this->input->post('text'))
+    {
+      $genes = $this->input->post('text');
+      $this->session->set_flashdata('genes', $genes);
+      $file_path = "/asap/cordova_pipeline/mygenes.txt";
+      $this->session->set_flashdata('file_path', $file_path);
+      //if(!write_file('/asap/cordova_pipeline/andrea.txt', "andrea rules", 'r+'))
+      //{
+      //  die("cant write file");
+      //}
+      //write_file("$file_path/mygenes.txt", $genes);
+      $myFile = "testFile.txt";
+      if($fh = fopen("/asap/cordova_pipeline/mygenes.txt", 'w+')){ 
+        fwrite($fh, $genes);
+        fclose($fh);
+        redirect('variations/query_public_database');
+      }
+    }
+    //$config['upload_path']='/var/www/html/cordova_arh/applications/uploads/';
+    //$this->load->library('upload', $config);
+    //if (!$this->upload->do_upload("file"))
+    //{
+    //  $data = array('error'=>$this->upload->display_errors());
+    //  $this->load->view($this->editor_layout, $data);
+      //$this->load->view('variations/select_databases', $data);
+    //}
+    //else
+    //{
+    //  $data = array('upload_data' => $this->variations->data());
+    //  $this->load->view('variations/select_databases',$data);
+    //}
+    //if($this->input->post('form_upload_genes')) {
+    //  $this->variations_model->uplad_genes();
+    //}
+    $this->load->view($this->editor_layout, $data);
+  }
+
+  public function query_public_database() {
+    //redirect_all_nonmembers();
+    //$this->load->helper('file');
+    $data['title'] = "Query Public Databases";
+    $data['content'] = 'variations/query_public_database';
+    $genes = $this->session->flashdata('genes');
+    $data['genes'] = $genes;
+    //$file_path = $this->session->flashdata('file_path');
+    
+    
+    //$input_file = $file_path;
+    //$output_file = '/asap/GenomeSnax/outputGenes.txt';
+    //$input_file = '/asap/GenomeSnax/tmp/inputGenes.txt';
+    //$output_file = '/asap/GenomeSnax/tmp/outputGenes.txt';
+
+    //exec("/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/GenomeSnax/genomesnax.rb --source hgmd,clinvar,dbsnp,dbnsfp,evs --type gene --in $input_file --out $output_file"); 
+    //if(isset($_POST['submit']))
+    if($this->input->post('submit'))
+    {
+      //die("/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/GenomeSnax/genomesnax.rb --source hgmd,clinvar,dbsnp,dbnsfp,evs --type gene --in /asap/GenomeSnax/tmp/inputGenes.txt --out /asap/GenomeSnax/tmp/outputGenes.txt --progress");
+      die('before exec');
+      //exec("/asap/cordova_pipeline/pipeline.sh");
+      redirect('variations/norm_nomenclature');
+    }
+    //exec("/asap/cordova_pipeline/pipeline.sh", $output, $return);
+    //if(!$return){
+    //  die("Search complete!");
+    //}
+    //else{
+    //  die("Failed to execute.");
+    //}
+    //redirect('variations/norm_nomenclature');
+    $this->load->view($this->editor_layout, $data);
+  }
+
+  public function norm_nomenclature() {
+    //redirect_all_nonmembers();
+    $data['title'] = "Normalize Nomenclature";
+    $data['content'] = 'variations/norm_nomenclature';
+    
     $this->load->view($this->editor_layout, $data);
   }
 

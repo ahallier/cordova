@@ -143,7 +143,8 @@ class Ion_auth
 		{
 			// Get user information
             $user = $this->where($this->config->item('identity', 'ion_auth'), $identity)->where('active', 1)->users()->row();  //changed to get_user_by_identity from email
-
+//printf($user->{$this->config->item('identity', 'ion_auth')});
+//die();
 			if ($user)
 			{
 				$data = array(
@@ -154,7 +155,7 @@ class Ion_auth
 				if(!$this->config->item('use_ci_email', 'ion_auth'))
 				{
 					$this->set_message('forgot_password_successful');
-					return $data;
+          return $data;
 				}
 				else
 				{
@@ -164,6 +165,13 @@ class Ion_auth
 					$this->email->to($user->email);
 					$this->email->subject($this->config->item('site_title', 'ion_auth') . ' - ' . $this->lang->line('email_forgotten_password_subject'));
 					$this->email->message($message);
+//          print($this->config->item('admin_email', 'ion_auth'));
+//					$message = $this->load->view($this->config->item('email_templates', 'ion_auth').$this->config->item('email_forgot_password', 'ion_auth'), $data, true);
+//					$this->email->clear();
+//					$this->email->from('sean.ephraim@gmail.com', "Sean E");
+//					$this->email->to($user->email);
+//					$this->email->subject($this->config->item('site_title', 'ion_auth') . ' - ' . $this->lang->line('email_forgotten_password_subject'));
+//					$this->email->message($message);
 
 					if ($this->email->send())
 					{
@@ -172,6 +180,7 @@ class Ion_auth
 					}
 					else
 					{
+          die('not sending');
 						$this->set_error('forgot_password_unsuccessful');
 						return FALSE;
 					}

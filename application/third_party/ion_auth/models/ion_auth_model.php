@@ -695,8 +695,10 @@ class Ion_auth_model extends CI_Model
 	 **/
 	public function forgotten_password($identity)
 	{
+    
 		if (empty($identity))
 		{
+      //identity is not empty
 			$this->trigger_events(array('post_forgotten_password', 'post_forgotten_password_unsuccessful'));
 			return FALSE;
 		}
@@ -704,7 +706,8 @@ class Ion_auth_model extends CI_Model
 		//All some more randomness
 		$activation_code_part = "";
 		if(function_exists("openssl_random_pseudo_bytes")) {
-			$activation_code_part = openssl_random_pseudo_bytes(128);
+      //funciton does exsist
+      $activation_code_part = openssl_random_pseudo_bytes(128);
 		}
 
 		for($i=0;$i<1024;$i++) {
@@ -721,16 +724,18 @@ class Ion_auth_model extends CI_Model
 		    'forgotten_password_code' => $key,
 		    'forgotten_password_time' => time()
 		);
-
+    //got to here
 		$this->db->update($this->tables['users'], $update, array($this->identity_column => $identity));
-
+    
 		$return = $this->db->affected_rows() == 1;
 
-		if ($return)
-			$this->trigger_events(array('post_forgotten_password', 'post_forgotten_password_successful'));
-		else
+		if ($return){
+			//return sucessful
+      $this->trigger_events(array('post_forgotten_password', 'post_forgotten_password_successful'));
+    }
+    else{
 			$this->trigger_events(array('post_forgotten_password', 'post_forgotten_password_unsuccessful'));
-
+    }
 		return $return;
 	}
 
@@ -893,6 +898,17 @@ class Ion_auth_model extends CI_Model
 		                  ->where($this->identity_column, $this->db->escape_str($identity))
 		                  ->limit(1)
 		                  ->get($this->tables['users']);
+    /**********************************************************
+    * Andrea Hallier added this if statement
+    * to allow a user to log in with either user name or email
+    ***********************************************************/
+    if($query->num_rows() == 0){
+        $query = $this->db->select($this->identity_column . ', username, email, id, password, active, last_login')
+        ->where('username', $this->db->escape_str($identity))
+        ->limit(1)
+        ->get($this->tables['users']);
+    }
+
 
 		if($this->is_time_locked_out($identity))
 		{

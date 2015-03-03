@@ -358,23 +358,20 @@ class Auth extends MY_Controller {
     $data['title'] = 'Forgot password';
     $data['content'] = 'auth/forgot_password';
     $this->config->load('ion_auth');
-    $this->config->set_item('identity', 'email');
     $this->load->library('form_validation');
 		$this->form_validation->set_rules('identity', 'Email', 'trim|required|valid_email');
     $this->form_validation->set_message('required', 'You must enter your email address.');
 
 		if ($this->form_validation->run() !== false) {
-      // passed validation!
       $identity = $this->input->post('identity');
 
       if ($this->ion_auth->email_check($identity)) {
-        // email exists!
-			  // load the user with that email
+			  //load the user with that email
 			  $config_tables = $this->config->item('tables', 'ion_auth');
-			  $user = $this->db->where('email', $this->input->post('email'))->limit('1')->get($config_tables['users'])->row();
-			  // run the forgotten password method to email an activation code to the user
-			  $success = $this->ion_auth->forgotten_password($user->{$this->config->item('identity', 'ion_auth')});
-  
+			  
+        $user = $this->db->where('email', $this->input->post('email'))->limit('1')->get($config_tables['users'])->row();
+        //run the forgotten password method to email an activation code to the user
+			  $success = $this->ion_auth->forgotten_password($identity);
 		    if ($success) {
           // email sent successfully!
           $this->session->set_flashdata('success', '<p>An email has been sent to you with instructions on regaining access to your account.</p>');

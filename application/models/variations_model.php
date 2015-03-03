@@ -1785,6 +1785,17 @@ EOF;
   public function num_variants_in_queue() {
     return $this->db->count_all($this->tables['vd_queue']);
   }
+  /**
+   * Upload gene list for database curation
+   *
+   * @author Andrea Hallier
+   */
+
+  public function upload_genes() {
+    //$this->load->database();
+    $data = $this->input->post('gene_text_input');
+    $this->db->insert('genes', $data);
+  }
 }
 
 /* End of file variations_model.php */
