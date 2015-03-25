@@ -344,9 +344,59 @@ ini_set("allow_url_fopen", true);
 //if ( !file_exists($dir) ) {
 //   mkdir ($dir, 0744);
 // }
+
+
+
+
+
+//////////////////////////////////////////////////////////////////////
+
+//////MOVED EVERYTHING FROM HERE TO NORM_NOMENCLATURE////////////////////
+
+////////////////////////////////////////////////////////////////////////
+
+
+
+      //$this->session->set_flashdata('uniqueDiseases', $uniqueDiseases);
+      //$this->session->set_flashdata('diseaseLocationArray', $diseaseLocationArray);
+      redirect('variations/norm_nomenclature');
+    }
+
+    //$handle = popen("tail -f /etc/httpd/logs/access.log 2>&1", 'r');
+    //while(!feof($handle)) {
+    //  $buffer = fgets($handle);
+    //  echo "$buffer<br/>\n";
+    //  ob_flush();
+    //  flush();
+    //}
+    //pclose($handle);
+
+
+
+    //exec("/asap/cordova_pipeline/pipeline.sh", $output, $return);
+    //if(!$return){
+    //  die("Search complete!");
+    //}
+    //else{
+    //  die("Failed to execute.");
+    //}
+    //redirect('variations/norm_nomenclature');
+    $this->load->view($this->editor_layout, $data);
+  }
+
+  public function norm_nomenclature() {
+    //redirect_all_nonmembers();
+    $data['title'] = "Normalize Nomenclature";
+    $data['content'] = 'variations/norm_nomenclature';
+   
+
+
+
       $diseaseNames = fopen('/ahallier/tmp/diseaseNames.txt', "w");
       $file_handle = fopen("/var/www/html/cordova_arh/application/controllers/myvariants.final.txt", "r");
+      //array of names of diseases from final file
       $diseaseArray = array();
+      //array of names of diseases and thier associated id from final file
       $diseaseLocationArray = array();
       while (!feof($file_handle)) {
          $line = fgets($file_handle);
@@ -391,38 +441,14 @@ ini_set("allow_url_fopen", true);
           $searchArray[$currentDisease] = $stack;
         }
       }
-      $result = array_unique($diseaseArray);
-      sort($result);
-      redirect('variations/norm_nomenclature');
-    }
-
-    //$handle = popen("tail -f /etc/httpd/logs/access.log 2>&1", 'r');
-    //while(!feof($handle)) {
-    //  $buffer = fgets($handle);
-    //  echo "$buffer<br/>\n";
-    //  ob_flush();
-    //  flush();
-    //}
-    //pclose($handle);
+      $uniqueDiseases = array_unique($diseaseArray);
+      sort($uniqueDiseases);
+      
+      $data['uniqueDiseases'] = $uniqueDiseases;
+      
 
 
 
-    //exec("/asap/cordova_pipeline/pipeline.sh", $output, $return);
-    //if(!$return){
-    //  die("Search complete!");
-    //}
-    //else{
-    //  die("Failed to execute.");
-    //}
-    //redirect('variations/norm_nomenclature');
-    $this->load->view($this->editor_layout, $data);
-  }
-
-  public function norm_nomenclature() {
-    //redirect_all_nonmembers();
-    $data['title'] = "Normalize Nomenclature";
-    $data['content'] = 'variations/norm_nomenclature';
-    
     $this->load->view($this->editor_layout, $data);
   }
 
