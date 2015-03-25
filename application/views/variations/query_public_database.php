@@ -12,7 +12,6 @@
 <p>You have chosen to submit: </p>
 <?php echo $genes; ?>
 <br/>
-<?php echo form_open('vairations/query_public_database', $attributes)?>
-<input type="checkbox" name="okToSubmit" value="okToSubmit">The above genes are correct.</input>
+<?php echo form_open('variations/query_public_database', $attributes)?>
 <input type="submit" value="submit" id="submit" name="submit"></input>
 </form>

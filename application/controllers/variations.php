@@ -253,10 +253,10 @@ class Variations extends MY_Controller {
     $data['title'] = "Uplaod Genes";
     $data['content'] = 'variations/upload_genes';
     $this->load->helper('file');
-    if($this->input->post('text'))
+    if($this->input->post('text-submit'))
     {
-      $genes = $this->input->post('text');
-      $this->session->set_flashdata('genes', $genes);
+      $genesOrFile = $this->input->post('text');
+      $this->session->set_flashdata('genes', $genesOrFile);
       $file_path = "/asap/cordova_pipeline/mygenes.txt";
       $this->session->set_flashdata('file_path', $file_path);
       //if(!write_file('/asap/cordova_pipeline/andrea.txt', "andrea rules", 'r+'))
@@ -271,6 +271,18 @@ class Variations extends MY_Controller {
         redirect('variations/query_public_database');
       }
     }
+    if($this->input->post('file-submit'))
+    {
+      $this->load->library('upload');
+      $this->upload->set_allowed_types('*');
+      $genesOrFile = $_FILES["file"]["name"];
+      $this->session->set_flashdata('genes', $genesOrFile);
+      $file_path = '/asap/cordova_pipeline/mygenes.txt'; 
+      $this->session->set_flashdata('file_path', $file_path);
+      move_uploaded_file($_FILES["file"]["tmp_name"], "/asap/cordova_pipeline/mygenes.txt");
+      redirect('variations/query_public_database');
+    }
+
     //$config['upload_path']='/var/www/html/cordova_arh/applications/uploads/';
     //$this->load->library('upload', $config);
     //if (!$this->upload->do_upload("file"))
@@ -310,10 +322,91 @@ class Variations extends MY_Controller {
     if($this->input->post('submit'))
     {
       //die("/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/GenomeSnax/genomesnax.rb --source hgmd,clinvar,dbsnp,dbnsfp,evs --type gene --in /asap/GenomeSnax/tmp/inputGenes.txt --out /asap/GenomeSnax/tmp/outputGenes.txt --progress");
-      die('before exec');
-      //exec("/asap/cordova_pipeline/pipeline.sh");
+      //exec('/asap/cordova_pipeline/pipeline.sh > /tmp/cordova_pipeline.txt');
+      //`/asap/cordova_pipeline/pipeline.sh > /tmp/cordova_pipeline.txt`;
+    //mygenes->myregions genes2regions is working
+    //$output = shell_exec('/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/cordova_pipeline/genes2regions.rb /asap/cordova_pipeline/mygenes.txt > /asap/cordova_pipeline/myregions.txt');
+    //myregions->myvariants regions2variants is not working
+    //shell_exec('/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/cordova_pipeline/regions2variants.rb /asap/cordova_pipeline/myregions.txt > /asap/cordova_pipeline/myvariants.txt');
+    //myvariants->myvariants.map map is working
+    //shell_exec('/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/cordova_pipeline/map.rb /asap/cordova_pipeline/myvariants.txt > /asap/cordova_pipeline/myvariants.map.txt');
+    //.map->.list this cut is not working
+    //shell_exec('-cut -f1 /asap/cordova_pipeline/myvariants.map.txt > /asap/cordova_pipeline/myvariants.list.txt');
+    //.list-> .kafeen Kaffeen not working
+    //shell_exec('/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/kafeen/kafeen.rb /asap/cordova_pipeline/myvariants.list.txt > /asap/cordova_pipeline/myvariants.kafeen.txt');
+    //annotate with hgmd/clinvar
+    //shell_exec('/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby annotate_with_hgmd_clinvar.rb /asap/cordova_pipeline/myvariants.kafeen.txt /asap/cordova_pipeline/myvariants.map.txt > asap/cordova_pipeline/myvariants.hgmd_clinvar.txt');
+    //overide kafeen 
+    //shell_exec('');
+//die(var_dump($output));
+ini_set("allow_url_fopen", true);
+//$dir = '/var/www/html/crdova_arh/pipeline_files';
+//if ( !file_exists($dir) ) {
+//   mkdir ($dir, 0744);
+// }
+      $diseaseNames = fopen('/ahallier/tmp/diseaseNames.txt', "w");
+      $file_handle = fopen("/var/www/html/cordova_arh/application/controllers/myvariants.final.txt", "r");
+      $diseaseArray = array();
+      $diseaseLocationArray = array();
+      while (!feof($file_handle)) {
+         $line = fgets($file_handle);
+         //$start = stripos($line, 'Pathogenic');
+         //$subString = strstr($line, 'Pathogenic');
+         // $end = stripos($subString, 
+        //$myArray = explode(" ", $line);
+        //$regex = "/[Pathogenic|Likely pathogenic].[A-Za-z][^0-9]+[0-9]/";
+        //if (preg_match($regex, $line, $match)) {
+            //$matchString = $match[0];
+            
+            $myArray = explode("\t", $line);
+       if(!empty($myArray[7] )){    
+            fwrite($diseaseNames, $myArray[7]);
+            fwrite($diseaseNames, "\t");
+            fwrite($diseaseNames, $myArray[0]);
+            //die($myArray[7]);
+            $string = $myArray[7] . "\t" . $myArray[0];
+            array_push($diseaseLocationArray, $string);
+            array_push($diseaseArray, $myArray[7]);
+            fwrite($diseaseNames, "\n");
+        }
+      }
+      //exec('sort /ahallier/tmp/diesaseNames.txt > /ahallier/tmp/sortedNames.txt' );
+      fclose($file_handle);
+      sort($diseaseLocationArray);
+      //die(print_r($diseaseArray));
+      $searchArray = array();
+      $stack = array();
+      $currentDisease = "";
+      foreach ($diseaseLocationArray as $entry){
+        $dSplit = explode("\t", $entry);
+        if (strcasecmp($dSplit[0], $currentDisease) == 0){
+          array_push($stack, $dSplit[1]);
+          $searchArray[$currentDisease] = $stack;
+        }
+        else{
+          $currentDisease = $dSplit[0];
+          unset($stack);
+          $stack = array();
+          array_push($stack, $dSplit[1]);
+          $searchArray[$currentDisease] = $stack;
+        }
+      }
+      $result = array_unique($diseaseArray);
+      sort($result);
       redirect('variations/norm_nomenclature');
     }
+
+    //$handle = popen("tail -f /etc/httpd/logs/access.log 2>&1", 'r');
+    //while(!feof($handle)) {
+    //  $buffer = fgets($handle);
+    //  echo "$buffer<br/>\n";
+    //  ob_flush();
+    //  flush();
+    //}
+    //pclose($handle);
+
+
+
     //exec("/asap/cordova_pipeline/pipeline.sh", $output, $return);
     //if(!$return){
     //  die("Search complete!");
