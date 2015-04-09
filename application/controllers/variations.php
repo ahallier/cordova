@@ -497,22 +497,32 @@ ini_set("allow_url_fopen", true);
       $this->upload->set_allowed_types('*');
       $expertFile = $_FILES["file"]["name"];
       #die($expertFile);
-      move_uploaded_file($_FILES["file"]["tmp_name"], "/asap/cordova_pipeline/expertFile.txt");
+      #$tmp_path = $_FILES["file"]["tmp_name"];
+      #if(is_uploaded_file($tmp_path))
+      #{
+      #  die('uploaded fine');
+      #}
+      #die($_FILES["file"]["tmp_name"]);
+      move_uploaded_file($_FILES["file"]["tmp_name"], "/ahallier/tmp/expertFile.txt");
       $expertFile = fopen('/ahallier/tmp/expertFile.txt', "r");
-      die($expertFile);
-      $expertFileLines = file('/ahallier/tmp/expertFile.txt', "w");
+      #die($expertFile);
+      #die('did not move');
+      $expertFileLines = file('/ahallier/tmp/expertFile.txt');
+      #die(print_r($expertFileLines));
       #Open master file, get all lines to array
-      $finalFileNorm = fopen('/ahallier/tmp/nameUpdates.txt', "w"); 
-      $fileLines = file('/ahallier/tmp/nameUpdates.txt', "w");
-      
-      $finalFile = fopen('ahallier/tmp/finalFile.txt', "w");
+      $finalFileNorm = fopen('/ahallier/tmp/nameUpdates.txt', "r"); 
+      $fileLines = file("/ahallier/tmp/nameUpdates.txt");
+      #die(print_r($fileLines)); 
+      $finalFile = fopen("/ahallier/tmp/finalFile.txt", "w");
       $newLinesArray = array();
       #explode all lines by \t
       foreach($expertFileLines as $expertLine){
         foreach($fileLines as $line){
           $lineArray = explode("\t", $line);
-          $expertLineArray = explode("\t", $expertLine);
+          $expertLineArray = explode(",", $expertLine);
+          #die(print_r($expertLineArray));
           $variation = $lineArray[1];
+          #die($variation);
           $expertVariation = $expertLineArray[1]; 
           #if correct line was found
           if(strcasecmp($variation, $expertVariation) == 0){
@@ -520,6 +530,7 @@ ini_set("allow_url_fopen", true);
             $expertPathogen = $expertLineArray[2];
             $disease = $lineArray[7];
             $pathogen = $lineArray[6];
+            #die($expertVariation . $variation);
             if(strcasecmp($expertDisease, $disease) != 0){
               $lineArray[7] = $expertDisease;
             }
@@ -528,6 +539,7 @@ ini_set("allow_url_fopen", true);
             }
             $newLine = implode("\t", $lineArray);
             array_push($newLinesArray, $newLine);
+            #die(print_r($newLinesArray));
             break;
           }
         }
@@ -536,6 +548,7 @@ ini_set("allow_url_fopen", true);
         #if line matches a new array line, write new line
         foreach($newLinesArray as $newLine){
           $newLineArray = explode("\t", $newLine);
+          #die(print_r($newLineArray));
           if(strpos($line, $newLineArray[1])){
             fwrite($finalFile, $newLine);
           }
