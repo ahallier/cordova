@@ -546,20 +546,24 @@ ini_set("allow_url_fopen", true);
       }
       foreach($fileLines as $line){
         #if line matches a new array line, write new line
+        $lineArray = explode("\t", $line);
         foreach($newLinesArray as $newLine){
           $newLineArray = explode("\t", $newLine);
           #die(print_r($newLineArray));
           if(strpos($line, $newLineArray[1])){
             fwrite($finalFile, $newLine);
+            $variation = $newLineArray[1];
+            $this->variations_model->create_new_variant($variation, TRUE);
           }
           else{
             fwrite($finalFile, $line);
+            $variation = $lineArray[1];
+            $this->variations_model->create_new_variant($variation, TRUE);
           }
         }
       }
     
       #upload file data into database!!!
-
       redirect("variations/unreleased");
     }
     $this->load->view($this->editor_layout,$data);
