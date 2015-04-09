@@ -69,6 +69,7 @@ $route['variations/add'] = 'variations/add';
 $route['variations/upload_genes'] = 'variations/upload_genes';
 $route['variations/query_public_database'] = 'variations/query_public_database';
 $route['variations/norm_nomenclature'] = 'variations/norm_nomenclature';
+$route['variations/expert_curration'] = 'variations/expert_curration';
 $route['variations/submit'] = 'variations/submit_changes';
 $route['variations/unreleased'] = 'variations/show_unreleased';
 $route['variations/unreleased/(:any)'] = 'variations/show_unreleased/$1';

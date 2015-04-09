@@ -394,6 +394,7 @@ ini_set("allow_url_fopen", true);
 
       $diseaseNames = fopen('/ahallier/tmp/diseaseNames.txt', "w");
       $file_handle = fopen("/var/www/html/cordova_arh/application/controllers/myvariants.final.txt", "r");
+      $cleanedFinal = fopen('/ahallier/tmp/myvariants.cleaned.txt', "w");
       //array of names of diseases from final file
       $diseaseArray = array();
       //array of names of diseases and thier associated id from final file
@@ -410,6 +411,7 @@ ini_set("allow_url_fopen", true);
             
             $myArray = explode("\t", $line);
        if(!empty($myArray[7] )){    
+            $myArray[7] = preg_replace("/[^A-Za-z0-9 ]/", '', $myArray[7]);
             fwrite($diseaseNames, $myArray[7]);
             fwrite($diseaseNames, "\t");
             fwrite($diseaseNames, $myArray[0]);
@@ -417,11 +419,14 @@ ini_set("allow_url_fopen", true);
             $string = $myArray[7] . "\t" . $myArray[0];
             array_push($diseaseLocationArray, $string);
             array_push($diseaseArray, $myArray[7]);
+            #array_push($diseaseArray,$myArray[7]);
             fwrite($diseaseNames, "\n");
         }
+        $cleanedLine = implode("\t", $myArray);
+        fwrite($cleanedFinal, $cleanedLine);
       }
       //exec('sort /ahallier/tmp/diesaseNames.txt > /ahallier/tmp/sortedNames.txt' );
-      fclose($file_handle);
+      #fclose($file_handle);
       sort($diseaseLocationArray);
       //die(print_r($diseaseArray));
       $searchArray = array();
@@ -441,16 +446,112 @@ ini_set("allow_url_fopen", true);
           $searchArray[$currentDisease] = $stack;
         }
       }
+      #die(print_r($searchArray));
       $uniqueDiseases = array_unique($diseaseArray);
       sort($uniqueDiseases);
-      
+
       $data['uniqueDiseases'] = $uniqueDiseases;
       
-
-
-
+      $fileLines = file("/ahallier/tmp/myvariants.cleaned.txt");
+      if($this->input->post('submit'))
+      {
+        foreach($uniqueDiseases as $disease)
+        {
+          if($this->input->post($disease))
+          {
+            $nameLinesArray = $searchArray[$disease];
+            #die(print_r($nameLinesArray));
+            foreach($nameLinesArray as $line)
+            {
+              $diseaseLine = $fileLines[$line];
+              #die(print_r($diseaseLine));
+              $newDiseaseName = $this->input->post($disease);
+              #die(print_r($newDiseaseName));
+              if(strcasecmp($newDiseaseName, $disease) != 0)
+              {
+                #die('here');
+                $newLine = str_replace($disease, $newDiseaseName, $diseaseLine);
+                #die(print_r($newLine));
+                $fileLines[$line] = $newLine;
+              }
+            }
+          }          
+        }
+       $finalFileUpdated = fopen('/ahallier/tmp/nameUpdates.txt', "w"); 
+        foreach($fileLines as $entry){
+           fwrite($finalFileUpdated, $entry);
+        }
+        redirect("/variations/expert_curration");
+      }
     $this->load->view($this->editor_layout, $data);
   }
+
+  public function expert_curration() {
+    //redirect_all_nonmembers();
+    $data['title'] = "Expert Curration";
+    $data['content'] = 'variations/expert_curration';
+  #on file submit
+    if($this->input->post('file-expert'))
+    {
+      $this->load->library('upload');
+      $this->upload->set_allowed_types('*');
+      $expertFile = $_FILES["file"]["name"];
+      #die($expertFile);
+      move_uploaded_file($_FILES["file"]["tmp_name"], "/asap/cordova_pipeline/expertFile.txt");
+      $expertFile = fopen('/ahallier/tmp/expertFile.txt', "r");
+      die($expertFile);
+      $expertFileLines = file('/ahallier/tmp/expertFile.txt', "w");
+      #Open master file, get all lines to array
+      $finalFileNorm = fopen('/ahallier/tmp/nameUpdates.txt', "w"); 
+      $fileLines = file('/ahallier/tmp/nameUpdates.txt', "w");
+      
+      $finalFile = fopen('ahallier/tmp/finalFile.txt', "w");
+      $newLinesArray = array();
+      #explode all lines by \t
+      foreach($expertFileLines as $expertLine){
+        foreach($fileLines as $line){
+          $lineArray = explode("\t", $line);
+          $expertLineArray = explode("\t", $expertLine);
+          $variation = $lineArray[1];
+          $expertVariation = $expertLineArray[1]; 
+          #if correct line was found
+          if(strcasecmp($variation, $expertVariation) == 0){
+            $expertDisease = $expertLineArray[3];
+            $expertPathogen = $expertLineArray[2];
+            $disease = $lineArray[7];
+            $pathogen = $lineArray[6];
+            if(strcasecmp($expertDisease, $disease) != 0){
+              $lineArray[7] = $expertDisease;
+            }
+            if(strcasecmp($expertPathogen, $pathogen) != 0){
+              $lineArray[6] = $expertPathogen;
+            }
+            $newLine = implode("\t", $lineArray);
+            array_push($newLinesArray, $newLine);
+            break;
+          }
+        }
+      }
+      foreach($fileLines as $line){
+        #if line matches a new array line, write new line
+        foreach($newLinesArray as $newLine){
+          $newLineArray = explode("\t", $newLine);
+          if(strpos($line, $newLineArray[1])){
+            fwrite($finalFile, $newLine);
+          }
+          else{
+            fwrite($finalFile, $line);
+          }
+        }
+      }
+    
+      #upload file data into database!!!
+
+      redirect("variations/unreleased");
+    }
+    $this->load->view($this->editor_layout,$data);
+  }
+
 
   /**
    * Show unreleased
@@ -517,7 +618,6 @@ ini_set("allow_url_fopen", true);
 
     $this->load->view($this->editor_layout, $data);
   }
-
   /**
    * Submit changes
    * 

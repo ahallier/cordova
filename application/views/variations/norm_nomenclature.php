@@ -13,13 +13,19 @@ $attributes = array('id'    => 'form_upload_genes',
 <div>
   <h3>Public Database Nomenclature</h3>
 <?php echo form_open('variations/norm_nomenclature', $attributes);?>
-  <table style="width:90%" class="table-striped">
+  
   <?php
   foreach ($uniqueDiseases as $disease){
-  echo"<tr><td>".$disease."</td><td><input type='text' name='".$disease."'></input></td></tr>";
+  echo
+  "<div class='control-group'>
+    <label class='control-label' for='".$disease."'>".$disease."</label>
+    <div class='controls'>
+      <input class='align-right' ype='text' name='".$disease."' id='".$disease."'></input>
+    </div>
+  </div>";
   }?>
 </div>
 <div>
-  <button class="btn btn-success pull-right">Submit</button>
+  <input type="submit" name="submit" id="submit" value="submit"></input>
 </div>
 </form>
