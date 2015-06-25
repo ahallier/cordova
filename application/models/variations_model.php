@@ -413,7 +413,7 @@ class Variations_model extends MY_Model {
    * @param   boolean  (optional) Bypass annotation to manually insert variant
    * @return  int      Variant ID (positive integer) on success; negative integer on error
    */
-  public function create_new_variant($variation, $manual_mode = FALSE)
+  public function create_new_variant($variation, $manual_mode = FALSE, $variant_cadi = FALSE, $variant_data = array())
   {
     // Variation database tables
     $vd_live  = $this->tables['vd_live'];
@@ -431,12 +431,15 @@ class Variations_model extends MY_Model {
     }
 
     // SUCCESS: Variant does NOT already exist in the database
-    if ($manual_mode === TRUE) {
+    if ($manual_mode === TRUE and $variant_cadi !== TRUE) {
       // Manually set the variation
       $annot_data = array('variation' => $variation,
                           'pathogenicity' => 'Unknown significance',
                           'comments' => 'Manual curation in progress.',
                          );
+    }
+    if ($variant_cadi === TRUE) {
+      $annot_data = $variant_data;
     }
     else {
       // Try running annotation query script...
@@ -1796,7 +1799,253 @@ EOF;
     $data = $this->input->post('gene_text_input');
     $this->db->insert('genes', $data);
   }
+
+  /**
+   * Run Collection Pipeline
+   *
+   * initiates pipeline to collect gene 
+   * annotations
+   *
+   * @author arhallier@gmail.com
+   * @param none
+   * @return none
+   */
+   public function run_annotation_pipeline() {
+      //exec('/asap/cordova_pipeline/pipeline.sh > /tmp/cordova_pipeline.txt');
+      //mygenes->myregions genes2regions is working
+      exec('/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/cordova_pipeline/genes2regions.rb /asap/cordova_pipeline/mygenes.txt > /asap/cordova_pipeline/myregions.txt');
+      //myregions->myvariants regions2variants is not working
+      exec('/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/cordova_pipeline/regions2variants.rb /asap/cordova_pipeline/myregions.txt > /asap/cordova_pipeline/myvariants.txt');
+      //myvariants->myvariants.map map is working
+      exec('/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/cordova_pipeline/map.rb /asap/cordova_pipeline/myvariants.txt > /asap/cordova_pipeline/myvariants.map.txt');
+      //.map->.list this cut is not working
+      exec('cut -f1 /asap/cordova_pipeline/myvariants.map.txt > /asap/cordova_pipeline/myvariants.list.txt');
+      //.list-> .kafeen Kaffeen not working
+      exec('/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/kafeen/kafeen.rb --progress --in /asap/cordova_pipeline/myvariants.list.txt --out /asap/cordova_pipeline/myvariants.kafeen.txt');
+      //annotate with hgmd/clinvar
+      exec('/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/cordova_pipeline/annotate_with_hgmd_clinvar.rb /asap/cordova_pipeline/myvariants.kafeen.txt /asap/cordova_pipeline/myvariants.map.txt > /asap/cordova_pipeline/myvariants.hgmd_clinvar.txt');
+      exec('cut -f-6  /asap/cordova_pipeline/myvariants.kafeen.txt > /asap/cordova_pipeline/myvariants.f1.txt');
+      exec('cut -f2-4 /asap/cordova_pipeline/myvariants.hgmd_clinvar.txt >  /asap/cordova_pipeline/myvariants.f2.txt');
+      exec('cut -f10- /asap/cordova_pipeline/myvariants.kafeen.txt >  /asap/cordova_pipeline/myvariants.f3.txt');
+      exec('paste /asap/cordova_pipeline/myvariants.f1.txt /asap/cordova_pipeline/myvariants.f2.txt > /asap/cordova_pipeline/myvariants.f4.txt');
+      exec('paste /asap/cordova_pipeline/myvariants.f4.txt /asap/cordova_pipeline/myvariants.f3.txt > /asap/cordova_pipeline/myvariants.final.txt');
+
+      ini_set("allow_url_fopen", true);
+   }
+   
+   
+  /**
+   * Get Disease Names
+   *
+   * gets a list of disease names 
+   * from the final output file of the 
+   * annotation pipeline
+   *
+   * @author arhallier@gmail.com
+   * @param none
+   * @return disease names
+   */
+   public function get_disease_names() {
+     $diseaseNames = fopen('/ahallier/tmp/diseaseNames.txt', "w");
+     $file_handle = fopen("/asap/cordova_pipeline/myvariants.final.txt", "r");
+     $cleanedFinal = fopen('/ahallier/tmp/myvariants.cleaned.txt', "w");
+     //array of names of diseases from final file
+     $diseaseArray = array();
+     //array of names of diseases and thier associated id from final file
+     $diseaseLocationArray = array();
+     while (!feof($file_handle)) {
+       $line = fgets($file_handle);
+       $myArray = explode("\t", $line);
+       if(!empty($myArray[7] )){
+         $myArray[7] = preg_replace("/[^A-Za-z0-9 ]/", '', $myArray[7]);
+         fwrite($diseaseNames, $myArray[7]);
+         fwrite($diseaseNames, "\t");
+         fwrite($diseaseNames, $myArray[0]);
+         //die($myArray[7]);
+         $string = $myArray[7] . "\t" . $myArray[0];
+         array_push($diseaseLocationArray, $string);
+         array_push($diseaseArray, $myArray[7]);
+         #array_push($diseaseArray,$myArray[7]);
+         fwrite($diseaseNames, "\n");
+       }
+       $cleanedLine = implode("\t", $myArray);
+       fwrite($cleanedFinal, $cleanedLine);
+     }
+     //exec('sort /ahallier/tmp/diesaseNames.txt > /ahallier/tmp/sortedNames.txt' );
+     #fclose($file_handle);
+     sort($diseaseLocationArray);
+     //die(print_r($diseaseArray));
+     $searchArray = array();
+     $stack = array();
+     $currentDisease = "";
+     foreach ($diseaseLocationArray as $entry){
+       $dSplit = explode("\t", $entry);
+       if (strcasecmp($dSplit[0], $currentDisease) == 0){
+         array_push($stack, $dSplit[1]);
+         $searchArray[$currentDisease] = $stack;
+       }
+       else{
+         $currentDisease = $dSplit[0];
+         unset($stack);
+         $stack = array();
+         array_push($stack, $dSplit[1]);
+         $searchArray[$currentDisease] = $stack;
+       }
+     }
+     #die(print_r($searchArray));
+     $uniqueDiseases = array();
+     $uniqueDiseases = array_unique($diseaseArray);
+     sort($uniqueDiseases);
+     return($uniqueDiseases);
+  }
+
+  /**
+   * Expert Curation and Upload
+   *
+   * From an uploaded expert curation file 
+   * this method updates our final annotation
+   * file and then upload each of the variants
+   * to the database.
+   *
+   * @author arhallier@gmail.com
+   * @param none
+   * @return none
+   */
+
+  public function expert_curation_and_upload(){
+    $returnArray = array();
+    $this->load->library('upload');
+    $this->upload->set_allowed_types('*');
+    $expertFile = $_FILES["file"]["name"];
+    move_uploaded_file($_FILES["file"]["tmp_name"], "/ahallier/tmp/expertFile.txt");
+    $expertFile = fopen('/ahallier/tmp/expertFile.txt', "r");
+    $expertFileLines = file('/ahallier/tmp/expertFile.txt');
+    #Open master file, get all lines to array
+    $finalFileNorm = fopen('/ahallier/tmp/nameUpdates.txt', "r"); 
+    $fileLines = file("/ahallier/tmp/nameUpdates.txt");
+    $finalFile = fopen("/ahallier/tmp/finalFile.txt", "w");
+    $newLinesArray = array();
+    #explode all lines by \t
+    foreach($expertFileLines as $expertLine){
+      foreach($fileLines as $line){
+        $lineArray = explode("\t", $line);
+        $expertLineArray = explode(",", $expertLine);
+        $variation = $lineArray[1];
+        $expertVariation = $expertLineArray[1]; 
+        #if correct line was found
+        if(strcasecmp($variation, $expertVariation) == 0){
+          $expertDisease = $expertLineArray[3];
+          $expertPathogen = $expertLineArray[2];
+          $disease = $lineArray[7];
+          $pathogen = $lineArray[6];
+          if(strcasecmp($expertDisease, $disease) != 0){
+            $lineArray[7] = $expertDisease;
+          }
+          if(strcasecmp($expertPathogen, $pathogen) != 0){
+            $lineArray[6] = $expertPathogen;
+          }
+          $newLine = implode("\t", $lineArray);
+          array_push($newLinesArray, $newLine);
+          break;
+        }
+      }
+    }
+    
+    foreach($fileLines as $line){
+      #if line matches a new array line, write new line
+      if($lineArray = explode("\t", $line)){
+        return $lineArray;
+      }
+      
+      foreach($newLinesArray as $newLine){
+        $newLineArray = explode("\t", $newLine);
+        #die(print_r($newLineArray));
+        if(strpos($line, $newLineArray[1])){
+          fwrite($finalFile, $newLine);
+          $variation = $newLineArray[1];
+          //$this->variations_model->create_new_variant($variation, TRUE);
+        }
+        else{
+          fwrite($finalFile, $line);
+          $variation = $lineArray[1];
+          //$this->variations_model->create_new_variant($variation, TRUE);
+        }
+        
+
+       $data = array( 
+        'variation' => $lineArray[1],
+        'gene' => $lineArray[2],
+        'hgvs_nucleotide_change' => $lineArray[3],
+        'hgvs_protein_change' => $lineArray[4],
+        'variantlocale' => $lineArray[5],
+        'pathogenicity' => $lineArray[6],
+        'disease' => $lineArray[7],
+        'pubmed_id' => $lineArray[8],
+        'dbsnp' => $lineArray[9],
+        'summary_insilico' => $lineArray[10],
+        'summary_frequency' => $lineArray[11],
+        'summary_published' => $lineArray[12],
+        'comments' => $lineArray[13],
+        'lrt_omega'=> $lineArray[14],
+        'sift_score' => $lineArray[15],
+        'sift_pred'=> $lineArray[16],
+        'polyphen2_score' => $lineArray[17],
+        'polyphen2_pred'=> $lineArray[18],
+        'mutationtaster_score' => $lineArray[19],
+        'mutationtaster_pred' => $lineArray[20],
+        'gerp_nr' => $lineArray[21],
+        'gerp_rs'=> $lineArray[22],
+        'gerp_pred' => $lineArray[23],
+        'phylop_score' => $lineArray[24],
+        'phylop_pred' => $lineArray[25],
+        'lrt_score' => $lineArray[26],
+        'lrt_pred' => $lineArray[27],
+        'evs_ea_ac' => $lineArray[28],
+        'evs_ea_af' => $lineArray[29],
+        'evs_aa_ac' => $lineArray[30],
+        'evs_aa_af' => $lineArray[31],
+        'evs_all_ac' => $lineArray[32],
+        'evs_all_af' => $lineArray[33],
+        'otoscope_aj_ac' => $lineArray[34],
+        'otoscope_aj_af' => $lineArray[35],
+        'otoscope_co_ac' => $lineArray[36],
+        'otoscope_co_af' => $lineArray[37],
+        'otoscope_us_ac' => $lineArray[38],
+        'otoscope_us_af' => $lineArray[39],
+        'otoscope_jp_ac' => $lineArray[40],
+        'otoscope_jp_af' => $lineArray[41],
+        'otoscope_es_ac' => $lineArray[42],
+        'otoscope_es_af' => $lineArray[43],
+        'otoscope_tr_ac' => $lineArray[44],
+        'otoscope_tr_af' => $lineArray[45],
+        'otoscope_all_ac' => $lineArray[46],
+        'otoscope_all_af' => $lineArray[47],
+        'tg_afr_ac'=> $lineArray[48],
+        'tg_afr_af'=> $lineArray[49],
+        'tg_eur_ac'=> $lineArray[50],
+        'tg_eur_af'=> $lineArray[51],
+        'tg_amr_ac'=> $lineArray[52],
+        'tg_amr_af'=> $lineArray[53],
+        'tg_asn_ac'=> $lineArray[54],
+        'tg_asn_af'=> $lineArray[55],
+        'tg_all_ac'=> $lineArray[56],
+        'tg_all_af' => $lineArray[57]
+        );
+
+        #array_push($returnArray, $data);
+        $id = $this->create_new_variant($variation, FALSE, TRUE, $data); 
+        #array_push($returnArray, $id);
+      }
+    }
+    return $data;
+  }
+  
+
+
+
 }
+
+ 
 
 /* End of file variations_model.php */
 /* Location: ./application/models/variations_model.php */

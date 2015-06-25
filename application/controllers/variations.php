@@ -229,48 +229,39 @@ class Variations extends MY_Controller {
     $this->load->view($this->editor_layout, $data);
   
 }
-  public function upload_genes_file() {
 
-    $data['title'] = "Uplaod Genes";
-    $data['content'] = 'variations/upload_genes';
-    $this->load->helper('file');
-    if($this->input->post('file'))
-    { 
-      $file = $this->input->post('file');
-      $this->session->set_flashdata('genes', $genes);
-      $file_path = '/asap/cordova_pipeline/mygenes.txt'; 
-      $this->session->set_flashdata('file_path', $file_path);
-      write_file($file_path, $file);
-      redirect('variations/select_database');
-    }
-    $this->load->view($this->editor_layout, $data);
 
-  }
-    
-  
+  /**
+   * Uplaod Genes
+   *
+   * First interface of variant-CADI. Allows the user to upload
+   * genes in file format as specified in the interface or to 
+   * enter genes in a text box.
+   *
+   * @author arhallier@gmail.com
+   * @access public
+   * @param none
+   */
+
   public function upload_genes() {
     //redirect_all_nonmembers();
     $data['title'] = "Uplaod Genes";
     $data['content'] = 'variations/upload_genes';
     $this->load->helper('file');
+    //if input is from the text box
     if($this->input->post('text-submit'))
     {
       $genesOrFile = $this->input->post('text');
       $this->session->set_flashdata('genes', $genesOrFile);
       $file_path = "/asap/cordova_pipeline/mygenes.txt";
       $this->session->set_flashdata('file_path', $file_path);
-      //if(!write_file('/asap/cordova_pipeline/andrea.txt', "andrea rules", 'r+'))
-      //{
-      //  die("cant write file");
-      //}
-      //write_file("$file_path/mygenes.txt", $genes);
-      $myFile = "testFile.txt";
       if($fh = fopen("/asap/cordova_pipeline/mygenes.txt", 'w+')){ 
-        fwrite($fh, $genes);
+        fwrite($fh, $genesOrFile);
         fclose($fh);
         redirect('variations/query_public_database');
       }
     }
+    //if the input is from the file submit
     if($this->input->post('file-submit'))
     {
       $this->load->library('upload');
@@ -282,207 +273,70 @@ class Variations extends MY_Controller {
       move_uploaded_file($_FILES["file"]["tmp_name"], "/asap/cordova_pipeline/mygenes.txt");
       redirect('variations/query_public_database');
     }
-
-    //$config['upload_path']='/var/www/html/cordova_arh/applications/uploads/';
-    //$this->load->library('upload', $config);
-    //if (!$this->upload->do_upload("file"))
-    //{
-    //  $data = array('error'=>$this->upload->display_errors());
-    //  $this->load->view($this->editor_layout, $data);
-      //$this->load->view('variations/select_databases', $data);
-    //}
-    //else
-    //{
-    //  $data = array('upload_data' => $this->variations->data());
-    //  $this->load->view('variations/select_databases',$data);
-    //}
-    //if($this->input->post('form_upload_genes')) {
-    //  $this->variations_model->uplad_genes();
-    //}
     $this->load->view($this->editor_layout, $data);
   }
-
+  
+  /**
+   * Query Public Database
+   *
+   * Annotation pipeline for submitted genes is run when
+   * the user selects submit.
+   *
+   * @author arhallier@gmail.com
+   * @access public
+   * @param none
+   */
   public function query_public_database() {
     //redirect_all_nonmembers();
-    //$this->load->helper('file');
     $data['title'] = "Query Public Databases";
     $data['content'] = 'variations/query_public_database';
     $genes = $this->session->flashdata('genes');
     $data['genes'] = $genes;
-    //$file_path = $this->session->flashdata('file_path');
-    
-    
-    //$input_file = $file_path;
-    //$output_file = '/asap/GenomeSnax/outputGenes.txt';
-    //$input_file = '/asap/GenomeSnax/tmp/inputGenes.txt';
-    //$output_file = '/asap/GenomeSnax/tmp/outputGenes.txt';
-
-    //exec("/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/GenomeSnax/genomesnax.rb --source hgmd,clinvar,dbsnp,dbnsfp,evs --type gene --in $input_file --out $output_file"); 
-    //if(isset($_POST['submit']))
     if($this->input->post('submit'))
     {
-      //die("/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/GenomeSnax/genomesnax.rb --source hgmd,clinvar,dbsnp,dbnsfp,evs --type gene --in /asap/GenomeSnax/tmp/inputGenes.txt --out /asap/GenomeSnax/tmp/outputGenes.txt --progress");
-      //exec('/asap/cordova_pipeline/pipeline.sh > /tmp/cordova_pipeline.txt');
-      //`/asap/cordova_pipeline/pipeline.sh > /tmp/cordova_pipeline.txt`;
-    //mygenes->myregions genes2regions is working
-    //$output = shell_exec('/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/cordova_pipeline/genes2regions.rb /asap/cordova_pipeline/mygenes.txt > /asap/cordova_pipeline/myregions.txt');
-    //myregions->myvariants regions2variants is not working
-    //shell_exec('/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/cordova_pipeline/regions2variants.rb /asap/cordova_pipeline/myregions.txt > /asap/cordova_pipeline/myvariants.txt');
-    //myvariants->myvariants.map map is working
-    //shell_exec('/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/cordova_pipeline/map.rb /asap/cordova_pipeline/myvariants.txt > /asap/cordova_pipeline/myvariants.map.txt');
-    //.map->.list this cut is not working
-    //shell_exec('-cut -f1 /asap/cordova_pipeline/myvariants.map.txt > /asap/cordova_pipeline/myvariants.list.txt');
-    //.list-> .kafeen Kaffeen not working
-    //shell_exec('/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/kafeen/kafeen.rb /asap/cordova_pipeline/myvariants.list.txt > /asap/cordova_pipeline/myvariants.kafeen.txt');
-    //annotate with hgmd/clinvar
-    //shell_exec('/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby annotate_with_hgmd_clinvar.rb /asap/cordova_pipeline/myvariants.kafeen.txt /asap/cordova_pipeline/myvariants.map.txt > asap/cordova_pipeline/myvariants.hgmd_clinvar.txt');
-    //overide kafeen 
-    //shell_exec('');
-//die(var_dump($output));
-ini_set("allow_url_fopen", true);
-//$dir = '/var/www/html/crdova_arh/pipeline_files';
-//if ( !file_exists($dir) ) {
-//   mkdir ($dir, 0744);
-// }
-
-
-
-
-
-//////////////////////////////////////////////////////////////////////
-
-//////MOVED EVERYTHING FROM HERE TO NORM_NOMENCLATURE////////////////////
-
-////////////////////////////////////////////////////////////////////////
-
-
-
-      //$this->session->set_flashdata('uniqueDiseases', $uniqueDiseases);
-      //$this->session->set_flashdata('diseaseLocationArray', $diseaseLocationArray);
+      $this->variations_model->run_annotation_pipeline();     
       redirect('variations/norm_nomenclature');
     }
-
-    //$handle = popen("tail -f /etc/httpd/logs/access.log 2>&1", 'r');
-    //while(!feof($handle)) {
-    //  $buffer = fgets($handle);
-    //  echo "$buffer<br/>\n";
-    //  ob_flush();
-    //  flush();
-    //}
-    //pclose($handle);
-
-
-
-    //exec("/asap/cordova_pipeline/pipeline.sh", $output, $return);
-    //if(!$return){
-    //  die("Search complete!");
-    //}
-    //else{
-    //  die("Failed to execute.");
-    //}
-    //redirect('variations/norm_nomenclature');
-    $this->load->view($this->editor_layout, $data);
+   $this->load->view($this->editor_layout, $data);
   }
 
   public function norm_nomenclature() {
     //redirect_all_nonmembers();
     $data['title'] = "Normalize Nomenclature";
     $data['content'] = 'variations/norm_nomenclature';
-   
-
-
-
-      $diseaseNames = fopen('/ahallier/tmp/diseaseNames.txt', "w");
-      $file_handle = fopen("/var/www/html/cordova_arh/application/controllers/myvariants.final.txt", "r");
-      $cleanedFinal = fopen('/ahallier/tmp/myvariants.cleaned.txt', "w");
-      //array of names of diseases from final file
-      $diseaseArray = array();
-      //array of names of diseases and thier associated id from final file
-      $diseaseLocationArray = array();
-      while (!feof($file_handle)) {
-         $line = fgets($file_handle);
-         //$start = stripos($line, 'Pathogenic');
-         //$subString = strstr($line, 'Pathogenic');
-         // $end = stripos($subString, 
-        //$myArray = explode(" ", $line);
-        //$regex = "/[Pathogenic|Likely pathogenic].[A-Za-z][^0-9]+[0-9]/";
-        //if (preg_match($regex, $line, $match)) {
-            //$matchString = $match[0];
-            
-            $myArray = explode("\t", $line);
-       if(!empty($myArray[7] )){    
-            $myArray[7] = preg_replace("/[^A-Za-z0-9 ]/", '', $myArray[7]);
-            fwrite($diseaseNames, $myArray[7]);
-            fwrite($diseaseNames, "\t");
-            fwrite($diseaseNames, $myArray[0]);
-            //die($myArray[7]);
-            $string = $myArray[7] . "\t" . $myArray[0];
-            array_push($diseaseLocationArray, $string);
-            array_push($diseaseArray, $myArray[7]);
-            #array_push($diseaseArray,$myArray[7]);
-            fwrite($diseaseNames, "\n");
-        }
-        $cleanedLine = implode("\t", $myArray);
-        fwrite($cleanedFinal, $cleanedLine);
-      }
-      //exec('sort /ahallier/tmp/diesaseNames.txt > /ahallier/tmp/sortedNames.txt' );
-      #fclose($file_handle);
-      sort($diseaseLocationArray);
-      //die(print_r($diseaseArray));
-      $searchArray = array();
-      $stack = array();
-      $currentDisease = "";
-      foreach ($diseaseLocationArray as $entry){
-        $dSplit = explode("\t", $entry);
-        if (strcasecmp($dSplit[0], $currentDisease) == 0){
-          array_push($stack, $dSplit[1]);
-          $searchArray[$currentDisease] = $stack;
-        }
-        else{
-          $currentDisease = $dSplit[0];
-          unset($stack);
-          $stack = array();
-          array_push($stack, $dSplit[1]);
-          $searchArray[$currentDisease] = $stack;
-        }
-      }
-      #die(print_r($searchArray));
-      $uniqueDiseases = array_unique($diseaseArray);
-      sort($uniqueDiseases);
-
-      $data['uniqueDiseases'] = $uniqueDiseases;
       
-      $fileLines = file("/ahallier/tmp/myvariants.cleaned.txt");
-      if($this->input->post('submit'))
+    $uniqueDiseases = $this->variations_model->get_disease_names();
+      
+    $data['uniqueDiseases'] = $uniqueDiseases;
+    
+    //die($data['uniqueDiseases']);
+
+    $fileLines = file("/ahallier/tmp/myvariants.cleaned.txt");
+    if($this->input->post('submit'))
+    {
+      foreach($uniqueDiseases as $disease)
       {
-        foreach($uniqueDiseases as $disease)
+        if($this->input->post($disease))
         {
-          if($this->input->post($disease))
+          $nameLinesArray = $searchArray[$disease];
+          foreach($nameLinesArray as $line)
           {
-            $nameLinesArray = $searchArray[$disease];
-            #die(print_r($nameLinesArray));
-            foreach($nameLinesArray as $line)
+            $diseaseLine = $fileLines[$line];
+            $newDiseaseName = $this->input->post($disease);
+            if(strcasecmp($newDiseaseName, $disease) != 0)
             {
-              $diseaseLine = $fileLines[$line];
-              #die(print_r($diseaseLine));
-              $newDiseaseName = $this->input->post($disease);
-              #die(print_r($newDiseaseName));
-              if(strcasecmp($newDiseaseName, $disease) != 0)
-              {
-                #die('here');
-                $newLine = str_replace($disease, $newDiseaseName, $diseaseLine);
-                #die(print_r($newLine));
-                $fileLines[$line] = $newLine;
-              }
+              $newLine = str_replace($disease, $newDiseaseName, $diseaseLine);
+              $fileLines[$line] = $newLine;
             }
-          }          
-        }
-       $finalFileUpdated = fopen('/ahallier/tmp/nameUpdates.txt', "w"); 
-        foreach($fileLines as $entry){
-           fwrite($finalFileUpdated, $entry);
-        }
-        redirect("/variations/expert_curration");
+          }
+        }          
       }
+      $finalFileUpdated = fopen('/ahallier/tmp/nameUpdates.txt', "w"); 
+      foreach($fileLines as $entry){
+        fwrite($finalFileUpdated, $entry);
+      }
+      redirect("/variations/expert_curration");
+    }
     $this->load->view($this->editor_layout, $data);
   }
 
@@ -493,76 +347,9 @@ ini_set("allow_url_fopen", true);
   #on file submit
     if($this->input->post('file-expert'))
     {
-      $this->load->library('upload');
-      $this->upload->set_allowed_types('*');
-      $expertFile = $_FILES["file"]["name"];
-      #die($expertFile);
-      #$tmp_path = $_FILES["file"]["tmp_name"];
-      #if(is_uploaded_file($tmp_path))
-      #{
-      #  die('uploaded fine');
-      #}
-      #die($_FILES["file"]["tmp_name"]);
-      move_uploaded_file($_FILES["file"]["tmp_name"], "/ahallier/tmp/expertFile.txt");
-      $expertFile = fopen('/ahallier/tmp/expertFile.txt', "r");
-      #die($expertFile);
-      #die('did not move');
-      $expertFileLines = file('/ahallier/tmp/expertFile.txt');
-      #die(print_r($expertFileLines));
-      #Open master file, get all lines to array
-      $finalFileNorm = fopen('/ahallier/tmp/nameUpdates.txt', "r"); 
-      $fileLines = file("/ahallier/tmp/nameUpdates.txt");
-      #die(print_r($fileLines)); 
-      $finalFile = fopen("/ahallier/tmp/finalFile.txt", "w");
-      $newLinesArray = array();
-      #explode all lines by \t
-      foreach($expertFileLines as $expertLine){
-        foreach($fileLines as $line){
-          $lineArray = explode("\t", $line);
-          $expertLineArray = explode(",", $expertLine);
-          #die(print_r($expertLineArray));
-          $variation = $lineArray[1];
-          #die($variation);
-          $expertVariation = $expertLineArray[1]; 
-          #if correct line was found
-          if(strcasecmp($variation, $expertVariation) == 0){
-            $expertDisease = $expertLineArray[3];
-            $expertPathogen = $expertLineArray[2];
-            $disease = $lineArray[7];
-            $pathogen = $lineArray[6];
-            #die($expertVariation . $variation);
-            if(strcasecmp($expertDisease, $disease) != 0){
-              $lineArray[7] = $expertDisease;
-            }
-            if(strcasecmp($expertPathogen, $pathogen) != 0){
-              $lineArray[6] = $expertPathogen;
-            }
-            $newLine = implode("\t", $lineArray);
-            array_push($newLinesArray, $newLine);
-            #die(print_r($newLinesArray));
-            break;
-          }
-        }
-      }
-      foreach($fileLines as $line){
-        #if line matches a new array line, write new line
-        $lineArray = explode("\t", $line);
-        foreach($newLinesArray as $newLine){
-          $newLineArray = explode("\t", $newLine);
-          #die(print_r($newLineArray));
-          if(strpos($line, $newLineArray[1])){
-            fwrite($finalFile, $newLine);
-            $variation = $newLineArray[1];
-            $this->variations_model->create_new_variant($variation, TRUE);
-          }
-          else{
-            fwrite($finalFile, $line);
-            $variation = $lineArray[1];
-            $this->variations_model->create_new_variant($variation, TRUE);
-          }
-        }
-      }
-    
+      $returnArray = $this->variations_model->expert_curation_and_upload();    
+      #array_push($retunArray, "HELLO!");
+      #die(print_r($returnArray));
       #upload file data into database!!!
       redirect("variations/unreleased");
     }
