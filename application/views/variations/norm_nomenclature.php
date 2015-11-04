@@ -88,7 +88,7 @@ $attributes = array('id'    => 'form_upload_genes',
      "<div class='control-group'>
        <label class='control-label' for='".$disease."'>".$disease."</label>
         <div class='controls'>
-          <input class='align-right' ype='text' name='".$disease."' id='".$disease."'></input>
+          <input class='align-right' type='text' name='".$disease."' id='".$disease."'></input>
         </div>
       </div>";
   }?>

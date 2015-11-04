@@ -304,14 +304,47 @@ class Variations extends MY_Controller {
     //redirect_all_nonmembers();
     $data['title'] = "Normalize Nomenclature";
     $data['content'] = 'variations/norm_nomenclature';
-      
-    $uniqueDiseases = $this->variations_model->get_disease_names();
-      
+    $mostReacentFile = "/asap/cordova_pipeline/myvariants.final.txt";
+    $cleanedFile = "/ahallier/tmp/cleanedDiseaseNames.txt";
+    $uniqueDiseases = $this->variations_model->get_disease_names($mostReacentFile, $cleanedFile);
+    //die(print_r($uniqueDiseases));  
     $data['uniqueDiseases'] = $uniqueDiseases;
-    
+    //$submitedDiseaseNameFile = fopen("/ahallier/tmp/submitedDiseaseNames.txt");
+    if($this->input->post('submit')){
+      $diseaseNameUpdatesFileLocation = "/ahallier/tmp/submittedDiseaseNames.txt";
+      $oldFileLocation = "/ahallier/tmp/cleanedDiseaseNames.txt";
+      $newFileLocation = "/ahallier/tmp/diseaseNameUpdates.txt";
+      //die(print_r($_POST));
+      $updatedDiseaseNamesFile = $this->variations_model->update_disease_names($_POST, $uniqueDiseases, $diseaseNameUpdatesFileLocation, $oldFileLocation, $newFileLocation);
+      die(print_r($updatedDiseaseNamesFile));
+      //die(print_r($updatedDiseaseNamesFile));
+      redirect("/variations/expert_curration");
+    }
+      
+    /**  
+      foreach($uniqueDiseases as $disease){
+        if($this->input->post($disease){
+          $newDiseaseName=$this->input->post($disease);
+        }
+        else{
+          $newDiseaseName=$disease;
+        }
+        $line = $disease."\t".$newDiseaseName;
+        fwrite($submittedDiseaseNameFile, $line);
+      } 
+      $diseaseNamesFile = "/ahallier/tmp/submitedDiseaseNames.txt";
+      $oldFileLocation = "/ahallier/tmp/";
+    = $this->variations_model->updateDiseaseNames("","","");  
+     
+     }
+    */
+
+
     //die($data['uniqueDiseases']);
 
+    /**
     $fileLines = file("/ahallier/tmp/myvariants.cleaned.txt");
+    
     if($this->input->post('submit'))
     {
       foreach($uniqueDiseases as $disease)
@@ -337,6 +370,8 @@ class Variations extends MY_Controller {
       }
       redirect("/variations/expert_curration");
     }
+    **/
+
     $this->load->view($this->editor_layout, $data);
   }
 

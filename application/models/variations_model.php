@@ -25,7 +25,7 @@ class Variations_model extends MY_Model {
    *
    * @author Sean Ephraim
    * @access public
-   * @param  string Filename prefix for all files to be removed
+   * @param  string $prefix Filename prefix for all files to be removed
    */
    public function remove_temp_files($prefix) {
      exec("rm $prefix*");
@@ -49,7 +49,8 @@ class Variations_model extends MY_Model {
    *
    * @author  Sean Ephraim
    * @access  public
-   * @param   string  Genomic position (Hg19) (unformatted)
+   * @param   string  $variation Genomic position (Hg19) (unformatted)
+   * @param   boolean $for_dbnsfp Format as input into dbNSFP search program
    * @return  string  Genomic position (Hg19) (formatted)
    */
    public function format_hg19_position($variation, $for_dbnsfp = FALSE) {
@@ -106,7 +107,7 @@ class Variations_model extends MY_Model {
    *
    * @author  Sean Ephraim
    * @access  public
-   * @param   string  Genomic Position (Hg19) (machine name: variation)
+   * @param   string  $variation Genomic Position (Hg19) (machine name: variation)
    * @return  mixed   dbSNP ID if only 1 is found; else NULL if more than 1 found
    */
   public function get_dbsnp_id($variation) {
@@ -176,7 +177,7 @@ class Variations_model extends MY_Model {
    *
    * @author Sean Ephraim
    * @access public
-   * @param  string Genomic Position (Hg19) (machine name: variation)
+   * @param  string $variation Genomic Position (Hg19) (machine name: variation)
    * @return mixed  Array of fields to be autofilled; negative number on error
    */
   public function get_annotation_data($variation) {
@@ -280,49 +281,33 @@ class Variations_model extends MY_Model {
         'gerp_pred'              => $annot_result['gerp_pred'],
         'lrt_omega'              => $annot_result['lrt_omega'],
         'evs_ea_ac'              => $annot_result['evs_ea_ac'],
-        'evs_ea_an'              => $annot_result['evs_ea_an'],
+        'evs_ea_af'              => $annot_result['evs_ea_af'],
         'evs_aa_ac'              => $annot_result['evs_aa_ac'],
-        'evs_aa_an'              => $annot_result['evs_aa_an'],
-        'otoscope_ac'            => $annot_result['otoscope_ac'],
-        'otoscope_an'            => $annot_result['otoscope_an'],
-        'tg_acb_ac'              => $annot_result['tg_acb_ac'],
-        'tg_acb_an'              => $annot_result['tg_acb_an'],
-        'tg_asw_ac'              => $annot_result['tg_asw_ac'],
-        'tg_asw_an'              => $annot_result['tg_asw_an'],
-        'tg_cdx_ac'              => $annot_result['tg_cdx_ac'],
-        'tg_cdx_an'              => $annot_result['tg_cdx_an'],
-        'tg_ceu_ac'              => $annot_result['tg_ceu_ac'],
-        'tg_ceu_an'              => $annot_result['tg_ceu_an'],
-        'tg_chb_ac'              => $annot_result['tg_chb_ac'],
-        'tg_chb_an'              => $annot_result['tg_chb_an'],
-        'tg_chs_ac'              => $annot_result['tg_chs_ac'],
-        'tg_chs_an'              => $annot_result['tg_chs_an'],
-        'tg_clm_ac'              => $annot_result['tg_clm_ac'],
-        'tg_clm_an'              => $annot_result['tg_clm_an'],
-        'tg_fin_ac'              => $annot_result['tg_fin_ac'],
-        'tg_fin_an'              => $annot_result['tg_fin_an'],
-        'tg_gbr_ac'              => $annot_result['tg_gbr_ac'],
-        'tg_gbr_an'              => $annot_result['tg_gbr_an'],
-        'tg_gih_ac'              => $annot_result['tg_gih_ac'],
-        'tg_gih_an'              => $annot_result['tg_gih_an'],
-        'tg_ibs_ac'              => $annot_result['tg_ibs_ac'],
-        'tg_ibs_an'              => $annot_result['tg_ibs_an'],
-        'tg_jpt_ac'              => $annot_result['tg_jpt_ac'],
-        'tg_jpt_an'              => $annot_result['tg_jpt_an'],
-        'tg_khv_ac'              => $annot_result['tg_khv_ac'],
-        'tg_khv_an'              => $annot_result['tg_khv_an'],
-        'tg_lwk_ac'              => $annot_result['tg_lwk_ac'],
-        'tg_lwk_an'              => $annot_result['tg_lwk_an'],
-        'tg_mxl_ac'              => $annot_result['tg_mxl_ac'],
-        'tg_mxl_an'              => $annot_result['tg_mxl_an'],
-        'tg_pel_ac'              => $annot_result['tg_pel_ac'],
-        'tg_pel_an'              => $annot_result['tg_pel_an'],
-        'tg_pur_ac'              => $annot_result['tg_pur_ac'],
-        'tg_pur_an'              => $annot_result['tg_pur_an'],
-        'tg_tsi_ac'              => $annot_result['tg_tsi_ac'],
-        'tg_tsi_an'              => $annot_result['tg_tsi_an'],
-        'tg_yri_ac'              => $annot_result['tg_yri_ac'],
-        'tg_yri_an'              => $annot_result['tg_yri_an'],
+        'evs_aa_af'              => $annot_result['evs_aa_af'],
+        'otoscope_aj_ac'         => $annot_result['otoscope_aj_ac'],
+        'otoscope_aj_af'         => $annot_result['otoscope_aj_af'],
+        'otoscope_co_ac'         => $annot_result['otoscope_co_ac'],
+        'otoscope_co_af'         => $annot_result['otoscope_co_af'],
+        'otoscope_us_ac'         => $annot_result['otoscope_us_ac'],
+        'otoscope_us_af'         => $annot_result['otoscope_us_af'],
+        'otoscope_jp_ac'         => $annot_result['otoscope_jp_ac'],
+        'otoscope_jp_af'         => $annot_result['otoscope_jp_af'],
+        'otoscope_es_ac'         => $annot_result['otoscope_es_ac'],
+        'otoscope_es_af'         => $annot_result['otoscope_es_af'],
+        'otoscope_tr_ac'         => $annot_result['otoscope_tr_ac'],
+        'otoscope_tr_af'         => $annot_result['otoscope_tr_af'],
+        'otoscope_all_ac'        => $annot_result['otoscope_all_ac'],
+        'otoscope_all_af'        => $annot_result['otoscope_all_af'],
+        'tg_afr_ac'              => $annot_result['tg_afr_ac'],
+        'tg_afr_af'              => $annot_result['tg_afr_af'],
+        'tg_eur_ac'              => $annot_result['tg_eur_ac'],
+        'tg_eur_af'              => $annot_result['tg_eur_af'],
+        'tg_amr_ac'              => $annot_result['tg_amr_ac'],
+        'tg_amr_af'              => $annot_result['tg_amr_af'],
+        'tg_asn_ac'              => $annot_result['tg_asn_ac'],
+        'tg_asn_af'              => $annot_result['tg_asn_af'],
+        'tg_all_ac'              => $annot_result['tg_all_ac'],
+        'tg_all_af'              => $annot_result['tg_all_af'],
     );
     
     // Credits for the comments
@@ -375,8 +360,8 @@ class Variations_model extends MY_Model {
    *
    * @author  Sean Ephraim
    * @access  public
-   * @param   string   Prefix to check for
-   * @param   array    Associate array of variant data
+   * @param   string  $prefix  Prefix to check for
+   * @param   array   $data  Associate array of variant data
    * @return  boolean  TRUE if credit should be given, else FALSE
    */
   public function give_credit_to($prefix, $data)
@@ -409,8 +394,8 @@ class Variations_model extends MY_Model {
    *
    * @author  Sean Ephraim
    * @access  public
-   * @param   string   Genomic Position (Hg19) (machine name: variation)
-   * @param   boolean  (optional) Bypass annotation to manually insert variant
+   * @param   string   $variation Genomic Position (Hg19) (machine name: variation)
+   * @param   boolean  $manual_mode (optional) Bypass annotation to manually insert variant
    * @return  int      Variant ID (positive integer) on success; negative integer on error
    */
   public function create_new_variant($variation, $manual_mode = FALSE, $variant_cadi = FALSE, $variant_data = array())
@@ -483,7 +468,7 @@ class Variations_model extends MY_Model {
    *
    * @author Sean Ephraim
    * @access public
-   * @param  int     Variant unique ID
+   * @param  int $id Variant unique ID
    */
   public function remove_all_changes($id)
   {
@@ -517,7 +502,7 @@ class Variations_model extends MY_Model {
    *
    * @author Sean Ephraim
    * @access public
-   * @param  int     Variant unique ID
+   * @param  int $id Variant unique ID
    */
   public function remove_from_queue_if_unchanged($id)
   {
@@ -544,11 +529,19 @@ class Variations_model extends MY_Model {
    *
    * @author Sean Ephraim
    * @access public
-   * @param string Gene name
+   * @param string $gene
+   *    Gene name
+   * @param string $columns
+   *    (optional) Columns to select from the database; defaults to all
    * @return object Gene variations
    */
-  public function get_variants_by_gene($gene)
+  public function get_variants_by_gene($gene, $columns=NULL)
   {
+    // Optionally select specific columns (otherwise select *)
+    if ($columns !== NULL && $columns !== '') {
+      $this->db->select($columns);
+    }
+
     $query = $this->db
                   ->where('gene', $gene)
                   ->order_by('variation', 'asc')
@@ -563,7 +556,7 @@ class Variations_model extends MY_Model {
    *
    * @author Sean Ephraim
    * @access public
-   * @param  char    Gene name's first letter
+   * @param  char    $letter Gene name's first letter
    * @return object  Gene variations
    */
   public function get_variants_by_gene_letter($letter)
@@ -587,8 +580,8 @@ class Variations_model extends MY_Model {
    *
    * @author Sean Ephraim
    * @access public
-   * @param  int      Variant unique ID
-   * @param  string   DB table to query
+   * @param  int      $id Variant unique ID
+   * @param  string   $table DB table to query
    * @return mixed    Variant data object or NULL
    */
   public function get_variant_by_id($id, $table = NULL)
@@ -632,9 +625,9 @@ class Variations_model extends MY_Model {
    *
    * @author  Sean Ephraim
    * @access  public
-   * @param   string   Genomic position w/o nucleotide change (i.e. chr13:20796839)
-   * @param   string   DB table to query
-   * @param   boolean  Use fuzzy search
+   * @param   string   $posisiton Genomic position w/o nucleotide change (i.e. chr13:20796839)
+   * @param   string   $table DB table to query
+   * @param   boolean  $fuzzy_search Use fuzzy search
    * @return  mixed    Variant data array or NULL
    */
   public function get_variants_by_position($position, $table = NULL, $fuzzy_search = FALSE)
@@ -670,7 +663,7 @@ class Variations_model extends MY_Model {
    *
    * @author Sean Ephraim
    * @access public
-   * @param  int    Variant unique ID
+   * @param  int    $variant_id Variant unique ID
    * @return object Variant data object or NULL
    */
   public function get_variant_review_info($variant_id)
@@ -716,8 +709,8 @@ class Variations_model extends MY_Model {
    *
    * @author Sean Ephraim
    * @access public
-   * @param  int Variant unique ID
-   * @param  string Table name
+   * @param  int $id Variant unique ID
+   * @param  string $table Table name
    * @return boolean
    */
   public function variant_exists_in_table($id, $table)
@@ -739,7 +732,7 @@ class Variations_model extends MY_Model {
    *
    * @author Sean Ephraim
    * @access public
-   * @param string Table name
+   * @param string $table Table name
    * @return array Fieldnames
    */
   public function get_variant_fields($table = NULL)
@@ -757,7 +750,7 @@ class Variations_model extends MY_Model {
    *
    * @author Sean Ephraim
    * @access public
-   * @param array Variant ID number
+   * @param array $id Variant ID number
    */
   public function copy_variant_into_queue($id)
   {
@@ -774,8 +767,8 @@ class Variations_model extends MY_Model {
    *
    * @author Sean Ephraim
    * @access public
-   * @param int Variant ID number
-   * @param array Assoc. array of variant fields
+   * @param int $id Variant ID number
+   * @param array $data Assoc. array of variant fields
    * @return boolean
    */
   public function update_variant_in_queue($id, $data)
@@ -851,7 +844,8 @@ class Variations_model extends MY_Model {
    *
    * @author  Sean Ephraim
    * @access  public
-   * @param   boolean   (optional) Only release confirmed variants?
+   * @param   boolean   $confirmed_only
+   *    (optional) Only release confirmed variants?
    * @return  boolean   TRUE on success, else FALSE
    */
   public function push_data_live($confirmed_only = TRUE)
@@ -859,10 +853,18 @@ class Variations_model extends MY_Model {
     // Set unlimited memory/time when retrieving all variants in the queue (queue could be quite large)
     ini_set('memory_limit', '-1');
     set_time_limit(0);
+
+    // Get all variants to update
     $new_records = $this->variations_model->get_all_variants($this->tables['vd_queue']);
 
-    // Remove unconfirmed variants
     if ($confirmed_only === TRUE) {
+      // Get only variants confirmed for deletion
+      $delete_records = $this->db->get_where($this->tables['reviews'],
+                                             array(
+                                               'scheduled_for_deletion' => 1,
+                                               'confirmed_for_release' => 1,
+                                             ))->result();
+      // Remove unconfirmed variants from update list
       foreach ($new_records as $key => $new_record) {
         $query = $this->db->get_where($this->tables['reviews'], array(
                                                                   'variant_id' => $new_record->id,
@@ -873,8 +875,15 @@ class Variations_model extends MY_Model {
         }
       }
     }
+    else {
+      // Get all variants scheduled for deletion (confirmed or not)
+      $delete_records = $this->db->get_where($this->tables['reviews'],
+                                             array(
+                                               'scheduled_for_deletion' => 1,
+                                             ))->result();
+    }
 
-    if (empty($new_records) && $this->version != 0) {
+    if (empty($new_records) && empty($delete_records) && $this->version != 0) {
       // ERROR: no new records to update
       // NOTE: an empty update is only allowed for Version 0
       return FALSE;
@@ -919,9 +928,10 @@ class Variations_model extends MY_Model {
     }
 
     // Remove variants from the *new* live table that were scheduled for deletion
-    $delete_records = $this->db->get_where($this->tables['reviews'], array('scheduled_for_deletion' => 1))->result();
     foreach ($delete_records as $delete_record) {
       $this->db->delete($new_live_table, array('id' => $delete_record->variant_id));
+      $this->db->delete($new_queue_table, array('id' => $delete_record->variant_id));
+      $this->db->delete($new_reviews_table, array('variant_id' => $delete_record->variant_id));
     }
 
     // Get genes and associated variant counts, insert into new variant count table
@@ -1003,8 +1013,8 @@ class Variations_model extends MY_Model {
    *
    * @author  Sean Ephraim
    * @access  public
-   * @param   int    Variant ID number
-   * @param   array  Assoc. array of variant fields/values
+   * @param   int    $variant_id Variant ID number
+   * @param   array  $data Assoc. array of variant fields/values
    * @return  void
    */
   public function update_variant_review_info($variant_id, $data = array())
@@ -1083,7 +1093,7 @@ class Variations_model extends MY_Model {
    *
    * @author Sean Ephraim
    * @access public
-   * @param  int Variant unique ID
+   * @param  int $variant_id Variant unique ID
    * @return mixed Array of unreleased changes; NULL if no changes exist
    */
   public function get_unreleased_changes($variant_id = NULL)
@@ -1212,7 +1222,7 @@ class Variations_model extends MY_Model {
    * Validate Variant ID
    *
    * @author Nikhil Anand
-   * @param string $id 
+   * @param string $id Variant unique ID
    * @return void
    */
   public function _validate_variant_id($id) {
@@ -1226,7 +1236,7 @@ class Variations_model extends MY_Model {
    * Load Variant
    *
    * @author Nikhil Anand
-   * @param  int   Variant unique ID
+   * @param  int $id  Variant unique ID
    * @return void
    */
   public function load_variant($id) {
@@ -1241,7 +1251,8 @@ class Variations_model extends MY_Model {
    * Any letter that doesn't have any genes associated (yet) will not have a hyperlink.
    * The links themselves are handled on the frontend (via AJAX).
    *
-   * @author   Nikhil Anand, Sean Ephraim
+   * @author   Nikhil Anand
+   * @author   Sean Ephraim
    * @return   string   HTML for gene letter table
    */
   public function get_letter_table($selected_letter = NULL) {
@@ -1329,9 +1340,11 @@ EOF;
   }
 
   /**
+<<<<<<< HEAD
    * Create a formatted table of variants for all genes starting with a given letter.
    *
-   * @author Nikhil Anand (modified by Zachary Ladlie)
+   * @author Nikhil Anand
+   * @author Zachary Ladlie
    * @access public
    * @param string $result 
    * 			An array of database results for a gene letter
@@ -1437,24 +1450,33 @@ EOF;
   /**
    * Load all information in the variants table for all genes starting with a given letter.
    *
-   * @param  string $letter 
+   * By default, all variants are displayed. If the second parameter ($show_unknown) is
+   * set to FALSE, then the variants labeled with "Unknown significance" will not be shown.
+   *
+   * @author Nikhil Anand
+   * @author Sean Ephraim
+   * @author Zachary Ladlie
+   * @param  string $letter First letter of gene
+   * @param  boolean $show_unknown Show/hide unknown variants
    * @return array  Variation data to be displayed genes page
-   * @author Nikhil Anand (modified by Zachary Ladlie)
    */
-  public function load_gene($letter) {
+  public function load_gene($letter, $show_unknown = TRUE) {
       
         $counter = 0;
         $result = '';
       
         // Sanitize in case the invoker doesn't
         $letter = $this->validate_gene_letter($letter);
-        $tables = $this->config->item('tables');
-  
+
         // Construct and run query
         if ($letter == '') {
             $query = "SELECT * FROM `" . $this->tables['vd_live'] . "` ORDER BY gene ASC;";
-        } else {
+        }
+        elseif ($show_unknown) {
             $query = sprintf('SELECT * FROM `%s` WHERE gene LIKE \'%s%%\' ORDER BY gene ASC', $this->tables['vd_live'], $letter);
+        }
+        else {
+            $query = sprintf('SELECT * FROM `%s` WHERE gene LIKE \'%s%%\' AND pathogenicity != "Unknown significance" ORDER BY gene ASC', $this->tables['vd_live'], $letter);
         }
         $query_result = mysql_query($query);
       
@@ -1482,10 +1504,25 @@ EOF;
   }
 
   /**
+   * Validate Gene Name
+   *
+   * @author Sean Ephraim
+   * @param  string $name Name of gene
+   * @return string Name of gene (sanitized)
+   */
+  public function validate_gene_name($name) {
+    if (!(preg_match('/[A-Z]{1}/', $name))) {
+      print "Invalid request for name ".$name;
+      exit(8);
+    }
+    return $name;
+  }
+
+  /**
    * Validate Gene Letter
    *
    * @author Nikhil Anand (modified by Zachary Ladlie)
-   * @param  string Letter of gene
+   * @param  string $letter Letter of gene
    * @return string Letter of gene (sanitized)
    */
   public function validate_gene_letter($letter) {
@@ -1506,7 +1543,8 @@ EOF;
    *
    * @author Nikhil Anand
    * @author Sean Ephraim
-   * @param  string Letter of gene
+   * @param  int $id Variant unique ID
+   * @param  string $table Table to query from
    * @return array  Data variables to load into the view
    */
   public function get_variant_display_variables($id, $table = NULL) {
@@ -1646,20 +1684,6 @@ EOF;
       $data['desc_mutationtaster'] = "Unknown";    
     }
 
-    // Variant Evidence Summary
-    if ($this->config->item('variant_evidence_summary') === TRUE) {
-      $data['disp_summary'] = 'block';
-      $data['summary_insilico']  = (int) $data['summary_insilico'];
-      $data['summary_frequency'] = (int) $data['summary_frequency'];
-      $data['summary_published'] = (int) $data['summary_published'];
-    }
-    else {
-      $data['disp_summary'] = 'none';
-      $data['summary_insilico'] = 0;
-      $data['summary_frequency'] = 0;
-      $data['summary_published'] = 0;
-    }
-
     // Which frequency data to show, if any?
     $data['disp_freqs'] = (count($freqs) > 0) ? 'block' : 'none';
     $data['disp_evs'] = in_array('evs', $freqs) ? 'block' : 'none';
@@ -1667,385 +1691,311 @@ EOF;
     $data['disp_otoscope'] = in_array('otoscope', $freqs) ? 'block' : 'none';
     
     // Frequency computations
+    $zero_label = 'Unseen (0.000)'; // What to display when 0 alleles are seen
     if (in_array('otoscope', $freqs)) {
       // Display OtoSCOPE
-      ($data['otoscope_an'] != 0) ? $data['freq_otoscope'] = number_format(($data['otoscope_ac']/$data['otoscope_an'])*100, 2) : $data['freq_otoscope'] = 0.00;
-      ($data['otoscope_an'] == 0) ? $data['label_otoscope'] = '(No data)'  :  $data['label_otoscope'] = $data['otoscope_ac'] . "/" . $data['otoscope_an'];
+      ($data['otoscope_aj_af'] == '')  ? $data['otoscope_aj_label']  = '(No data)' : ($data['otoscope_aj_af']  == 0) ? $data['otoscope_aj_label']  = $zero_label : $data['otoscope_aj_label']  = $data['otoscope_aj_ac']  . "/" . 400  . " (" . number_format((float) $data['otoscope_aj_af'],  3, '.', '') . ")";
+      ($data['otoscope_co_af'] == '')  ? $data['otoscope_co_label']  = '(No data)' : ($data['otoscope_co_af']  == 0) ? $data['otoscope_co_label']  = $zero_label : $data['otoscope_co_label']  = $data['otoscope_co_ac']  . "/" . 320  . " (" . number_format((float) $data['otoscope_co_af'],  3, '.', '') . ")";
+      ($data['otoscope_us_af'] == '')  ? $data['otoscope_us_label']  = '(No data)' : ($data['otoscope_us_af']  == 0) ? $data['otoscope_us_label']  = $zero_label : $data['otoscope_us_label']  = $data['otoscope_us_ac']  . "/" . 320  . " (" . number_format((float) $data['otoscope_us_af'],  3, '.', '') . ")";
+      ($data['otoscope_jp_af'] == '')  ? $data['otoscope_jp_label']  = '(No data)' : ($data['otoscope_jp_af']  == 0) ? $data['otoscope_jp_label']  = $zero_label : $data['otoscope_jp_label']  = $data['otoscope_jp_ac']  . "/" . 400  . " (" . number_format((float) $data['otoscope_jp_af'],  3, '.', '') . ")";
+      ($data['otoscope_es_af'] == '')  ? $data['otoscope_es_label']  = '(No data)' : ($data['otoscope_es_af']  == 0) ? $data['otoscope_es_label']  = $zero_label : $data['otoscope_es_label']  = $data['otoscope_es_ac']  . "/" . 360  . " (" . number_format((float) $data['otoscope_es_af'],  3, '.', '') . ")";
+      ($data['otoscope_tr_af'] == '')  ? $data['otoscope_tr_label']  = '(No data)' : ($data['otoscope_tr_af']  == 0) ? $data['otoscope_tr_label']  = $zero_label : $data['otoscope_tr_label']  = $data['otoscope_tr_ac']  . "/" . 200  . " (" . number_format((float) $data['otoscope_tr_af'],  3, '.', '') . ")";
+      ($data['otoscope_all_af'] == '') ? $data['otoscope_all_label'] = '(No data)' : ($data['otoscope_all_af'] == 0) ? $data['otoscope_all_label'] = $zero_label : $data['otoscope_all_label'] = $data['otoscope_all_ac'] . "/" . 2000 . " (" . number_format((float) $data['otoscope_all_af'], 3, '.', '') . ")";
     }
     else {
       // Don't display OtoSCOPE
-      $data['freq_otoscope']  = 0;
-      $data['label_otoscope'] = '(No data)';
+      $data['otoscope_aj_af']  = 0;
+      $data['otoscope_co_af']  = 0;
+      $data['otoscope_us_af']  = 0;
+      $data['otoscope_jp_af']  = 0;
+      $data['otoscope_es_af']  = 0;
+      $data['otoscope_tr_af']  = 0;
+      $data['otoscope_all_af'] = 0;
+      $data['otoscope_aj_label']  = '(No data)';
+      $data['otoscope_co_label']  = '(No data)';
+      $data['otoscope_us_label']  = '(No data)'; 
+      $data['otoscope_jp_label']  = '(No data)'; 
+      $data['otoscope_es_label']  = '(No data)'; 
+      $data['otoscope_tr_label']  = '(No data)'; 
+      $data['otoscope_all_label'] = '(No data)';
     }
     if (in_array('evs', $freqs)) {
       // Display EVS
-      ($data['evs_ea_an'] != 0)   ? $data['freq_evs_ea']   = number_format(($data['evs_ea_ac']/$data['evs_ea_an'])*100, 2)     : $data['freq_evs_ea'] = 0;
-      ($data['evs_aa_an'] != 0)   ? $data['freq_evs_aa']   = number_format(($data['evs_aa_ac']/$data['evs_aa_an'])*100, 2)     : $data['freq_evs_aa'] = 0;
-      ($data['evs_ea_an']   == 0) ? $data['label_evs_ea']   = '(No data)'  :  $data['label_evs_ea']   = $data['evs_ea_ac']   . "/" . $data['evs_ea_an'];
-      ($data['evs_aa_an']   == 0) ? $data['label_evs_aa']   = '(No data)'  :  $data['label_evs_aa']   = $data['evs_aa_ac']   . "/" . $data['evs_aa_an'];
+      ($data['evs_ea_af'] == '')  ? $data['evs_ea_label']  = '(No data)' : ($data['evs_ea_af']  == 0) ? $data['evs_ea_label']  = $zero_label : $data['evs_ea_label']  = $data['evs_ea_ac']  . "/" . intval($data['evs_ea_ac']/$data['evs_ea_af'])   . " (" . number_format((float) $data['evs_ea_af'],  3, '.', '') . ")";
+      ($data['evs_aa_af'] == '')  ? $data['evs_aa_label']  = '(No data)' : ($data['evs_aa_af']  == 0) ? $data['evs_aa_label']  = $zero_label : $data['evs_aa_label']  = $data['evs_aa_ac']  . "/" . intval($data['evs_aa_ac']/$data['evs_aa_af'])   . " (" . number_format((float) $data['evs_aa_af'],  3, '.', '') . ")";
+      ($data['evs_all_af'] == '') ? $data['evs_all_label'] = '(No data)' : ($data['evs_all_af'] == 0) ? $data['evs_all_label'] = $zero_label : $data['evs_all_label'] = $data['evs_all_ac'] . "/" . intval($data['evs_all_ac']/$data['evs_all_af']) . " (" . number_format((float) $data['evs_all_af'], 3, '.', '') . ")";
     }
     else {
       // Don't display EVS
-      $data['freq_evs_ea']  = 0;
-      $data['freq_evs_aa']  = 0;
-      $data['label_evs_ea'] = '(No data)';
-      $data['label_evs_aa'] = '(No data)';
+      $data['evs_ea_af']  = 0;
+      $data['evs_aa_af']  = 0;
+      $data['evs_all_af'] = 0;
+      $data['evs_ea_label']  = '(No data)';
+      $data['evs_aa_label']  = '(No data)';
+      $data['evs_all_label'] = '(No data)';
+
     }
     if (in_array('1000genomes', $freqs)) {
       // Display 1000 Genomes
-      ($data['tg_acb_an'] != 0)   ? $data['freq_tg_acb']   = number_format(($data['tg_acb_ac']/$data['tg_acb_an'])*100, 2)     : $data['freq_tg_acb'] = 0;
-      ($data['tg_asw_an'] != 0)   ? $data['freq_tg_asw']   = number_format(($data['tg_asw_ac']/$data['tg_asw_an'])*100, 2)     : $data['freq_tg_asw'] = 0;
-      ($data['tg_cdx_an'] != 0)   ? $data['freq_tg_cdx']   = number_format(($data['tg_cdx_ac']/$data['tg_cdx_an'])*100, 2)     : $data['freq_tg_cdx'] = 0;
-      ($data['tg_ceu_an'] != 0)   ? $data['freq_tg_ceu']   = number_format(($data['tg_ceu_ac']/$data['tg_ceu_an'])*100, 2)     : $data['freq_tg_ceu'] = 0;
-      ($data['tg_chb_an'] != 0)   ? $data['freq_tg_chb']   = number_format(($data['tg_chb_ac']/$data['tg_chb_an'])*100, 2)     : $data['freq_tg_chb'] = 0;
-      ($data['tg_chs_an'] != 0)   ? $data['freq_tg_chs']   = number_format(($data['tg_chs_ac']/$data['tg_chs_an'])*100, 2)     : $data['freq_tg_chs'] = 0;
-      ($data['tg_clm_an'] != 0)   ? $data['freq_tg_clm']   = number_format(($data['tg_clm_ac']/$data['tg_clm_an'])*100, 2)     : $data['freq_tg_clm'] = 0;
-      ($data['tg_fin_an'] != 0)   ? $data['freq_tg_fin']   = number_format(($data['tg_fin_ac']/$data['tg_fin_an'])*100, 2)     : $data['freq_tg_fin'] = 0;
-      ($data['tg_gbr_an'] != 0)   ? $data['freq_tg_gbr']   = number_format(($data['tg_gbr_ac']/$data['tg_gbr_an'])*100, 2)     : $data['freq_tg_gbr'] = 0;
-      ($data['tg_gih_an'] != 0)   ? $data['freq_tg_gih']   = number_format(($data['tg_gih_ac']/$data['tg_gih_an'])*100, 2)     : $data['freq_tg_gih'] = 0;
-      ($data['tg_ibs_an'] != 0)   ? $data['freq_tg_ibs']   = number_format(($data['tg_ibs_ac']/$data['tg_ibs_an'])*100, 2)     : $data['freq_tg_ibs'] = 0;
-      ($data['tg_jpt_an'] != 0)   ? $data['freq_tg_jpt']   = number_format(($data['tg_jpt_ac']/$data['tg_jpt_an'])*100, 2)     : $data['freq_tg_jpt'] = 0;
-      ($data['tg_khv_an'] != 0)   ? $data['freq_tg_khv']   = number_format(($data['tg_khv_ac']/$data['tg_khv_an'])*100, 2)     : $data['freq_tg_khv'] = 0;
-      ($data['tg_lwk_an'] != 0)   ? $data['freq_tg_lwk']   = number_format(($data['tg_lwk_ac']/$data['tg_lwk_an'])*100, 2)     : $data['freq_tg_lwk'] = 0;
-      ($data['tg_mxl_an'] != 0)   ? $data['freq_tg_mxl']   = number_format(($data['tg_mxl_ac']/$data['tg_mxl_an'])*100, 2)     : $data['freq_tg_mxl'] = 0;
-      ($data['tg_pel_an'] != 0)   ? $data['freq_tg_pel']   = number_format(($data['tg_pel_ac']/$data['tg_pel_an'])*100, 2)     : $data['freq_tg_pel'] = 0;
-      ($data['tg_pur_an'] != 0)   ? $data['freq_tg_pur']   = number_format(($data['tg_pur_ac']/$data['tg_pur_an'])*100, 2)     : $data['freq_tg_pur'] = 0;
-      ($data['tg_tsi_an'] != 0)   ? $data['freq_tg_tsi']   = number_format(($data['tg_tsi_ac']/$data['tg_tsi_an'])*100, 2)     : $data['freq_tg_tsi'] = 0;
-      ($data['tg_yri_an'] != 0)   ? $data['freq_tg_yri']   = number_format(($data['tg_yri_ac']/$data['tg_yri_an'])*100, 2)     : $data['freq_tg_yri'] = 0;
-      ($data['tg_acb_an']   == 0) ? $data['label_tg_acb']   = '(No data)'  :  $data['label_tg_acb']   = $data['tg_acb_ac']   . "/" . $data['tg_acb_an'];
-      ($data['tg_asw_an']   == 0) ? $data['label_tg_asw']   = '(No data)'  :  $data['label_tg_asw']   = $data['tg_asw_ac']   . "/" . $data['tg_asw_an'];
-      ($data['tg_cdx_an']   == 0) ? $data['label_tg_cdx']   = '(No data)'  :  $data['label_tg_cdx']   = $data['tg_cdx_ac']   . "/" . $data['tg_cdx_an'];
-      ($data['tg_ceu_an']   == 0) ? $data['label_tg_ceu']   = '(No data)'  :  $data['label_tg_ceu']   = $data['tg_ceu_ac']   . "/" . $data['tg_ceu_an'];
-      ($data['tg_chb_an']   == 0) ? $data['label_tg_chb']   = '(No data)'  :  $data['label_tg_chb']   = $data['tg_chb_ac']   . "/" . $data['tg_chb_an'];
-      ($data['tg_chs_an']   == 0) ? $data['label_tg_chs']   = '(No data)'  :  $data['label_tg_chs']   = $data['tg_chs_ac']   . "/" . $data['tg_chs_an'];
-      ($data['tg_clm_an']   == 0) ? $data['label_tg_clm']   = '(No data)'  :  $data['label_tg_clm']   = $data['tg_clm_ac']   . "/" . $data['tg_clm_an'];
-      ($data['tg_fin_an']   == 0) ? $data['label_tg_fin']   = '(No data)'  :  $data['label_tg_fin']   = $data['tg_fin_ac']   . "/" . $data['tg_fin_an'];
-      ($data['tg_gbr_an']   == 0) ? $data['label_tg_gbr']   = '(No data)'  :  $data['label_tg_gbr']   = $data['tg_gbr_ac']   . "/" . $data['tg_gbr_an'];
-      ($data['tg_gih_an']   == 0) ? $data['label_tg_gih']   = '(No data)'  :  $data['label_tg_gih']   = $data['tg_gih_ac']   . "/" . $data['tg_gih_an'];
-      ($data['tg_ibs_an']   == 0) ? $data['label_tg_ibs']   = '(No data)'  :  $data['label_tg_ibs']   = $data['tg_ibs_ac']   . "/" . $data['tg_ibs_an'];
-      ($data['tg_jpt_an']   == 0) ? $data['label_tg_jpt']   = '(No data)'  :  $data['label_tg_jpt']   = $data['tg_jpt_ac']   . "/" . $data['tg_jpt_an'];
-      ($data['tg_khv_an']   == 0) ? $data['label_tg_khv']   = '(No data)'  :  $data['label_tg_khv']   = $data['tg_khv_ac']   . "/" . $data['tg_khv_an'];
-      ($data['tg_lwk_an']   == 0) ? $data['label_tg_lwk']   = '(No data)'  :  $data['label_tg_lwk']   = $data['tg_lwk_ac']   . "/" . $data['tg_lwk_an'];
-      ($data['tg_mxl_an']   == 0) ? $data['label_tg_mxl']   = '(No data)'  :  $data['label_tg_mxl']   = $data['tg_mxl_ac']   . "/" . $data['tg_mxl_an'];
-      ($data['tg_pel_an']   == 0) ? $data['label_tg_pel']   = '(No data)'  :  $data['label_tg_pel']   = $data['tg_pel_ac']   . "/" . $data['tg_pel_an'];
-      ($data['tg_pur_an']   == 0) ? $data['label_tg_pur']   = '(No data)'  :  $data['label_tg_pur']   = $data['tg_pur_ac']   . "/" . $data['tg_pur_an'];
-      ($data['tg_tsi_an']   == 0) ? $data['label_tg_tsi']   = '(No data)'  :  $data['label_tg_tsi']   = $data['tg_tsi_ac']   . "/" . $data['tg_tsi_an'];
-      ($data['tg_yri_an']   == 0) ? $data['label_tg_yri']   = '(No data)'  :  $data['label_tg_yri']   = $data['tg_yri_ac']   . "/" . $data['tg_yri_an'];
+      ($data['tg_afr_af'] == '') ? $data['tg_afr_label'] = '(No data)' : ($data['tg_afr_af'] == 0) ? $data['tg_afr_label'] = $zero_label : $data['tg_afr_label'] = $data['tg_afr_ac'] . "/" . intval($data['tg_afr_ac']/$data['tg_afr_af']) . " (" . number_format((float) $data['tg_afr_af'], 3, '.', '') . ")";
+      ($data['tg_eur_af'] == '') ? $data['tg_eur_label'] = '(No data)' : ($data['tg_eur_af'] == 0) ? $data['tg_eur_label'] = $zero_label : $data['tg_eur_label'] = $data['tg_eur_ac'] . "/" . intval($data['tg_eur_ac']/$data['tg_eur_af']) . " (" . number_format((float) $data['tg_eur_af'], 3, '.', '') . ")";
+      ($data['tg_amr_af'] == '') ? $data['tg_amr_label'] = '(No data)' : ($data['tg_amr_af'] == 0) ? $data['tg_amr_label'] = $zero_label : $data['tg_amr_label'] = $data['tg_amr_ac'] . "/" . intval($data['tg_amr_ac']/$data['tg_amr_af']) . " (" . number_format((float) $data['tg_amr_af'], 3, '.', '') . ")";
+      ($data['tg_asn_af'] == '') ? $data['tg_asn_label'] = '(No data)' : ($data['tg_asn_af'] == 0) ? $data['tg_asn_label'] = $zero_label : $data['tg_asn_label'] = $data['tg_asn_ac'] . "/" . intval($data['tg_asn_ac']/$data['tg_asn_af']) . " (" . number_format((float) $data['tg_asn_af'], 3, '.', '') . ")";
+      ($data['tg_all_af'] == '') ? $data['tg_all_label'] = '(No data)' : ($data['tg_all_af'] == 0) ? $data['tg_all_label'] = $zero_label : $data['tg_all_label'] = $data['tg_all_ac'] . "/" . intval($data['tg_all_ac']/$data['tg_all_af']) . " (" . number_format((float) $data['tg_all_af'], 3, '.', '') . ")";
     }
     else {
       // Don't display 1000 Genomes
-      $data['freq_tg_acb']   = 0;
-      $data['freq_tg_asw']   = 0;
-      $data['freq_tg_cdx']   = 0;
-      $data['freq_tg_ceu']   = 0;
-      $data['freq_tg_chb']   = 0;
-      $data['freq_tg_chs']   = 0;
-      $data['freq_tg_clm']   = 0;
-      $data['freq_tg_fin']   = 0;
-      $data['freq_tg_gbr']   = 0;
-      $data['freq_tg_gih']   = 0;
-      $data['freq_tg_ibs']   = 0;
-      $data['freq_tg_jpt']   = 0;
-      $data['freq_tg_khv']   = 0;
-      $data['freq_tg_lwk']   = 0;
-      $data['freq_tg_mxl']   = 0;
-      $data['freq_tg_pel']   = 0;
-      $data['freq_tg_pur']   = 0;
-      $data['freq_tg_tsi']   = 0;
-      $data['freq_tg_yri']   = 0;
-      $data['label_tg_acb']  = '(No data)';
-      $data['label_tg_asw']  = '(No data)';
-      $data['label_tg_cdx']  = '(No data)';
-      $data['label_tg_ceu']  = '(No data)';
-      $data['label_tg_chb']  = '(No data)';
-      $data['label_tg_chs']  = '(No data)';
-      $data['label_tg_clm']  = '(No data)';
-      $data['label_tg_fin']  = '(No data)';
-      $data['label_tg_gbr']  = '(No data)';
-      $data['label_tg_gih']  = '(No data)';
-      $data['label_tg_ibs']  = '(No data)';
-      $data['label_tg_jpt']  = '(No data)';
-      $data['label_tg_khv']  = '(No data)';
-      $data['label_tg_lwk']  = '(No data)';
-      $data['label_tg_mxl']  = '(No data)';
-      $data['label_tg_pel']  = '(No data)';
-      $data['label_tg_pur']  = '(No data)';
-      $data['label_tg_tsi']  = '(No data)';
-      $data['label_tg_yri']  = '(No data)';
+      $data['tg_afr_af'] = 0;
+      $data['tg_eur_af'] = 0;
+      $data['tg_amr_af'] = 0;
+      $data['tg_asn_af'] = 0;
+      $data['tg_all_af'] = 0;
+      $data['tg_afr_label'] = '(No data)';
+      $data['tg_eur_label'] = '(No data)';
+      $data['tg_amr_label'] = '(No data)';
+      $data['tg_asn_label'] = '(No data)';
+      $data['tg_all_label'] = '(No data)';
     }
     
     return $data;
   }
 
   /**
-   * Num Variants In Queue
+   * Num Unreleased
    *
-   * Returns total number rows in the variant queue table.
+   * Returns total number of variants with unreleased changes.
    *
    * @author Sean Ephraim
-   * @return int Number of rows in the variant queue table
+   * @return int 
+   *    Number of unreleased changes
    */
-  public function num_variants_in_queue() {
-    return $this->db->count_all($this->tables['vd_queue']);
-  }
-  /**
-   * Upload gene list for database curation
-   *
-   * @author Andrea Hallier
-   */
-
-  public function upload_genes() {
-    //$this->load->database();
-    $data = $this->input->post('gene_text_input');
-    $this->db->insert('genes', $data);
+  public function num_unreleased() {
+    return $this->db->count_all($this->tables['reviews']);
   }
 
-  /**
-   * Run Collection Pipeline
-   *
-   * initiates pipeline to collect gene 
-   * annotations
-   *
-   * @author arhallier@gmail.com
-   * @param none
-   * @return none
-   */
-   public function run_annotation_pipeline() {
-      //exec('/asap/cordova_pipeline/pipeline.sh > /tmp/cordova_pipeline.txt');
-      //mygenes->myregions genes2regions is working
-      exec('/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/cordova_pipeline/genes2regions.rb /asap/cordova_pipeline/mygenes.txt > /asap/cordova_pipeline/myregions.txt');
-      //myregions->myvariants regions2variants is not working
-      exec('/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/cordova_pipeline/regions2variants.rb /asap/cordova_pipeline/myregions.txt > /asap/cordova_pipeline/myvariants.txt');
-      //myvariants->myvariants.map map is working
-      exec('/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/cordova_pipeline/map.rb /asap/cordova_pipeline/myvariants.txt > /asap/cordova_pipeline/myvariants.map.txt');
-      //.map->.list this cut is not working
-      exec('cut -f1 /asap/cordova_pipeline/myvariants.map.txt > /asap/cordova_pipeline/myvariants.list.txt');
-      //.list-> .kafeen Kaffeen not working
-      exec('/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/kafeen/kafeen.rb --progress --in /asap/cordova_pipeline/myvariants.list.txt --out /asap/cordova_pipeline/myvariants.kafeen.txt');
-      //annotate with hgmd/clinvar
-      exec('/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/cordova_pipeline/annotate_with_hgmd_clinvar.rb /asap/cordova_pipeline/myvariants.kafeen.txt /asap/cordova_pipeline/myvariants.map.txt > /asap/cordova_pipeline/myvariants.hgmd_clinvar.txt');
-      exec('cut -f-6  /asap/cordova_pipeline/myvariants.kafeen.txt > /asap/cordova_pipeline/myvariants.f1.txt');
-      exec('cut -f2-4 /asap/cordova_pipeline/myvariants.hgmd_clinvar.txt >  /asap/cordova_pipeline/myvariants.f2.txt');
-      exec('cut -f10- /asap/cordova_pipeline/myvariants.kafeen.txt >  /asap/cordova_pipeline/myvariants.f3.txt');
-      exec('paste /asap/cordova_pipeline/myvariants.f1.txt /asap/cordova_pipeline/myvariants.f2.txt > /asap/cordova_pipeline/myvariants.f4.txt');
-      exec('paste /asap/cordova_pipeline/myvariants.f4.txt /asap/cordova_pipeline/myvariants.f3.txt > /asap/cordova_pipeline/myvariants.final.txt');
 
-      ini_set("allow_url_fopen", true);
-   }
-   
-   
   /**
-   * Get Disease Names
-   *
-   * gets a list of disease names 
-   * from the final output file of the 
-   * annotation pipeline
-   *
-   * @author arhallier@gmail.com
-   * @param none
-   * @return disease names
-   */
-   public function get_disease_names() {
-     $diseaseNames = fopen('/ahallier/tmp/diseaseNames.txt', "w");
-     $file_handle = fopen("/asap/cordova_pipeline/myvariants.final.txt", "r");
-     $cleanedFinal = fopen('/ahallier/tmp/myvariants.cleaned.txt', "w");
-     //array of names of diseases from final file
-     $diseaseArray = array();
-     //array of names of diseases and thier associated id from final file
-     $diseaseLocationArray = array();
-     while (!feof($file_handle)) {
-       $line = fgets($file_handle);
-       $myArray = explode("\t", $line);
-       if(!empty($myArray[7] )){
-         $myArray[7] = preg_replace("/[^A-Za-z0-9 ]/", '', $myArray[7]);
-         fwrite($diseaseNames, $myArray[7]);
-         fwrite($diseaseNames, "\t");
-         fwrite($diseaseNames, $myArray[0]);
-         //die($myArray[7]);
-         $string = $myArray[7] . "\t" . $myArray[0];
-         array_push($diseaseLocationArray, $string);
-         array_push($diseaseArray, $myArray[7]);
-         #array_push($diseaseArray,$myArray[7]);
-         fwrite($diseaseNames, "\n");
-       }
-       $cleanedLine = implode("\t", $myArray);
-       fwrite($cleanedFinal, $cleanedLine);
-     }
-     //exec('sort /ahallier/tmp/diesaseNames.txt > /ahallier/tmp/sortedNames.txt' );
-     #fclose($file_handle);
-     sort($diseaseLocationArray);
-     //die(print_r($diseaseArray));
-     $searchArray = array();
-     $stack = array();
-     $currentDisease = "";
-     foreach ($diseaseLocationArray as $entry){
-       $dSplit = explode("\t", $entry);
-       if (strcasecmp($dSplit[0], $currentDisease) == 0){
-         array_push($stack, $dSplit[1]);
-         $searchArray[$currentDisease] = $stack;
-       }
-       else{
-         $currentDisease = $dSplit[0];
-         unset($stack);
-         $stack = array();
-         array_push($stack, $dSplit[1]);
-         $searchArray[$currentDisease] = $stack;
-       }
-     }
-     #die(print_r($searchArray));
-     $uniqueDiseases = array();
-     $uniqueDiseases = array_unique($diseaseArray);
-     sort($uniqueDiseases);
-     return($uniqueDiseases);
+  * variant-CADI functions
+  **/
+  public function run_annotation_pipeline(){
+    //exec('/asap/cordova_pipeline/pipeline.sh > /tmp/cordova_pipeline.txt');
+    //mygenes->myregions genes2regions is working
+    exec('/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/cordova_pipeline/genes2regions.rb /asap/cordova_pipeline/mygenes.txt > /asap/cordova_pipeline/myregions.txt');
+    //myregions->myvariants regions2variants is not working
+    exec('/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/cordova_pipeline/regions2variants.rb /asap/cordova_pipeline/myregions.txt > /asap/cordova_pipeline/myvariants.txt');
+    //myvariants->myvariants.map map is working
+    exec('/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/cordova_pipeline/map.rb /asap/cordova_pipeline/myvariants.txt > /asap/cordova_pipeline/myvariants.map.txt');
+    //.map->.list this cut is not working
+    exec('cut -f1 /asap/cordova_pipeline/myvariants.map.txt > /asap/cordova_pipeline/myvariants.list.txt');
+    //.list-> .kafeen Kaffeen not working
+    exec('/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/kafeen/kafeen.rb --progress --in /asap/cordova_pipeline/myvariants.list.txt --out /asap/cordova_pipeline/myvariants.kafeen.txt');
+    //annotate with hgmd/clinvar
+    exec('/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/cordova_pipeline/annotate_with_hgmd_clinvar.rb /asap/cordova_pipeline/myvariants.kafeen.txt /asap/cordova_pipeline/myvariants.map.txt > /asap/cordova_pipeline/myvariants.hgmd_clinvar.txt');
+    exec('cut -f-6  /asap/cordova_pipeline/myvariants.kafeen.txt > /asap/cordova_pipeline/myvariants.f1.txt');
+    exec('cut -f2-4 /asap/cordova_pipeline/myvariants.hgmd_clinvar.txt >  /asap/cordova_pipeline/myvariants.f2.txt');
+    exec('cut -f10- /asap/cordova_pipeline/myvariants.kafeen.txt >  /asap/cordova_pipeline/myvariants.f3.txt');
+    exec('paste /asap/cordova_pipeline/myvariants.f1.txt /asap/cordova_pipeline/myvariants.f2.txt > /asap/cordova_pipeline/myvariants.f4.txt');
+    exec('paste /asap/cordova_pipeline/myvariants.f4.txt /asap/cordova_pipeline/myvariants.f3.txt > /asap/cordova_pipeline/myvariants.final.txt');
+    ini_set("allow_url_fopen", true);
+    //exec('/asap/cordova_pipeline/pipeline2.sh > /ahallier/tmp/cordova_pipeline.txt');
+    //mygenes->myregions genes2regions is working
+    //$RUBY = "/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby";
+    //export path to tabix
+    //exec('/usr/local/rvm/rubies/ruby-2.2.1/bin/ruby /asap/cordova_pipeline/genes2regions.rb /asap/cordova_pipeline/mygenes.txt &> /asap/cordova_pipeline/myregions.txt');
+    //myregions->myvariants regions2variants is not working
+    //exec('/usr/local/rvm/rubies/ruby-2.2.1/bin/ruby /asap/cordova_pipeline/regions2variants.rb /asap/cordova_pipeline/myregions.txt &> /asap/cordova_pipeline/myvariants.txt');
+    //myvariants->myvariants.map map is working
+    //exec('/usr/local/rvm/rubies/ruby-2.2.1/bin/ruby /asap/cordova_pipeline/map.rb /asap/cordova_pipeline/myvariants.txt &> /asap/cordova_pipeline/myvariants.map.txt');
+    //.map->.list this cut is not working
+    //exec('cut -f1 /asap/cordova_pipeline/myvariants.map.txt &> /asap/cordova_pipeline/myvariants.list.txt');
+    //.list-> .kafeen Kaffeen not working
+    //exec('/usr/local/rvm/rubies/ruby-2.2.1/bin/ruby /opt/kafeen/kafeen.rb --progress --in /asap/cordova_pipeline/myvariants.list.txt --out /asap/cordova_pipeline/myvariants.kafeen.txt');
+    //annotate with hgmd/clinvar
+    //exec('/usr/local/rvm/rubies/ruby-2.2.1/bin/ruby /asap/cordova_pipeline/annotate_with_hgmd_clinvar.rb /asap/cordova_pipeline/myvariants.kafeen.txt /asap/cordova_pipeline/myvariants.map.txt &> /asap/cordova_pipeline/myvariants.hgmd_clinvar.txt');
+    //exec('cut -f-6  /asap/cordova_pipeline/myvariants.kafeen.txt &> /asap/cordova_pipeline/myvariants.f1.txt');
+    //exec('cut -f2-4 /asap/cordova_pipeline/myvariants.hgmd_clinvar.txt &>  /asap/cordova_pipeline/myvariants.f2.txt');
+    //exec('cut -f10- /asap/cordova_pipeline/myvariants.kafeen.txt &>  /asap/cordova_pipeline/myvariants.f3.txt');
+    //exec('paste /asap/cordova_pipeline/myvariants.f1.txt /asap/cordova_pipeline/myvariants.f2.txt &> /asap/cordova_pipeline/myvariants.f4.txt');
+    //exec('paste /asap/cordova_pipeline/myvariants.f4.txt /asap/cordova_pipeline/myvariants.f3.txt &> /asap/cordova_pipeline/myvariants.final.txt');
+    //ini_set("allow_url_fopen", true);
   }
-
-  /**
-   * Expert Curation and Upload
-   *
-   * From an uploaded expert curation file 
-   * this method updates our final annotation
-   * file and then upload each of the variants
-   * to the database.
-   *
-   * @author arhallier@gmail.com
-   * @param none
-   * @return none
-   */
-
-  public function expert_curation_and_upload(){
+  public function get_disease_names($oldFile, $newFile){
+    $file = fopen($oldFile, "r");
+    $cleanedFile = fopen($newFile, "w");
+    $diseaseNames = array();
+    while($line = fgets($file)){
+      $explodedOldLine = explode("\t", $line);
+      if(!empty($explodedOldLine[7])){
+        $diseaseName = $explodedOldLine[7];
+        $cleanedDiseaseName = preg_replace("/[^A-Za-z0-9 ]/", '', $diseaseName);
+        $explodedOldLine[7] = $cleanedDiseaseName;
+        //if($cleanedDiseaseName != "disease"){
+        array_push($diseaseNames, $cleanedDiseaseName);
+        //}
+      }
+      fwrite($cleanedFile, implode("\t", $explodedOldLine));
+    }
+    $uniqueDiseases = array_unique($diseaseNames);
+    return $uniqueDiseases;
+  }
+  public function update_disease_names($_POST, $uniqueDiseases, $nameUpdatesFile, $oldFileLocation,  $newFileLocation){
+    $submittedNameUpdates = fopen($nameUpdatesFile, "w");
+    foreach($uniqueDiseases as $disease){
+      $string = str_replace(" ", "_", $disease);
+      if($_POST[$string]){
+        $newName = $_POST[$string];
+        fwrite($submittedNameUpdates, $disease."\t".$newName."\n");
+      }
+      else{
+        fwrite($submittedNameUpdates, $disease."\t".$disease."\n");
+      }
+    }
+    $matchLocationUpdate = 0;
+    $matchLocationOld = 7;
+    $newDiseaseName = 1;
+    $oldDiseaseName = 7;
+    $updateFileLocation = $nameUpdatesFile;
+    $replacementPairs = array(array($newDiseaseName, $oldDiseaseName));
+    $returnVal = $this->update_variant($matchLocationUpdate, $matchLocationOld, $newFileLocation, $oldFileLocation, $updateFileLocation, $replacementPairs);
+    return $returnVal;
+    //return $submittedNameUpdates;
+  }
+  public function expert_curration(){
+    $updateDisease = 2;
+    $updatePathogenicity = 3;
+    $updateVariant = 1;
+    $oldDisease = 7;
+    $oldPathogenicity = 6;
+    $oldVariant = 2;
+    $replacementPairs = array( array($updateDisease, $oldDisease),
+                                                               array($updatePathogenicity, $oldPathogenicity));
+    $this->update_variant($oldVariant, $updateVariant, $replacementPairs, $oldFile, $updateFile, $newFile); 
+  }
+  public function update_variant($matchLocationUpdateFile, $matchLocationOldFile, $newFileLocation, $oldFileLocation, $updateFileLocation, $replacementPairs){
+    $oldFile = fopen($oldFileLocation, "r");
+    $updateFile = fopen($updateFileLocation, "r");
+    $newFile = fopen($newFileLocation, "w");
+    $updateFileLines = file($updateFileLocation);
     $returnArray = array();
-    $this->load->library('upload');
-    $this->upload->set_allowed_types('*');
-    $expertFile = $_FILES["file"]["name"];
-    move_uploaded_file($_FILES["file"]["tmp_name"], "/ahallier/tmp/expertFile.txt");
-    $expertFile = fopen('/ahallier/tmp/expertFile.txt', "r");
-    $expertFileLines = file('/ahallier/tmp/expertFile.txt');
-    #Open master file, get all lines to array
-    $finalFileNorm = fopen('/ahallier/tmp/nameUpdates.txt', "r"); 
-    $fileLines = file("/ahallier/tmp/nameUpdates.txt");
-    $finalFile = fopen("/ahallier/tmp/finalFile.txt", "w");
-    $newLinesArray = array();
-    #explode all lines by \t
-    foreach($expertFileLines as $expertLine){
+    $lineUpdated = false;
+    array_push($returnArray, array($oldFileLocation, $newFileLocation, $updateFileLocation));
+    while($oldFileLine = fgets($oldFile)){
+      //array_push($returnArray, $oldFileLine);  
+      $oldLineExploded = explode("\t", $oldFileLine);
+      foreach($updateFileLines as $updateFileLine){
+        $updateLineExploded = explode("\t", $updateFileLine);
+        //return strval($updateLineExploded[$matchLocationUpdateFile]);
+        if(sizeof($oldLineExploded) > $matchLocationOldFile and sizeof($updateLineExploded) > $matchLocationUpdateFile){
+          //array_push($returnArray,array($oldLineExploded[$matchLocationOldFile],$updateLineExploded[$matchLocationUpdateFile],(strtolower($oldLineExploded[$matchLocationOldFile]) == strtolower($updateLineExploded[$matchLocationUpdateFile]))));
+          if(strtolower($oldLineExploded[$matchLocationOldFile]) == strtolower($updateLineExploded[$matchLocationUpdateFile])) {
+            //return ($oldLineExploded[$matchLocationOldFile] == $updateLineExploded[$matchLocationUpdateFile]);
+            array_push($returnArray,array($oldLineExploded[$matchLocationOldFile],$updateLineExploded[$matchLocationUpdateFile],strcasecmp($oldLineExploded[$matchLocationOldFile],$updateLineExploded[$matchLocationUpdateFile])));
+                          
+            foreach($replacementPairs as $pair){
+              $updateLocation = $pair[0];
+              $oldLocation = $pair[1];
+              $oldLineExploded[$oldLocation]=$updateLineExploded[$updateLocation];
+            }
+            $updatedLine = implode("\t", $oldLineExploded);
+            $lineUpdated = true;
+          }
+        }  
+      }
+      if($lineUpdated){
+        fwrite($newFile, $updatedLine);
+      }
+      else{
+        fwrite($newFile, $oldFileLine);
+      }
+      $lineUpdated = false;
+
+    }
+    return $returnArray;
+  }
+  public function equals_ignore_case($s, $t) {
+    return strtolower($s) == strtolower($t); 
+  }
+  public function release_vairants(){
+
+  }
+
+  public function UploadCADIData(){
+      $finalFile = fopen("/ahallier/tmp/finalFile.txt", "r");
+      $fileLines = file("/ahallier/tmp/finalFile.txt");
       foreach($fileLines as $line){
         $lineArray = explode("\t", $line);
-        $expertLineArray = explode(",", $expertLine);
         $variation = $lineArray[1];
-        $expertVariation = $expertLineArray[1]; 
-        #if correct line was found
-        if(strcasecmp($variation, $expertVariation) == 0){
-          $expertDisease = $expertLineArray[3];
-          $expertPathogen = $expertLineArray[2];
-          $disease = $lineArray[7];
-          $pathogen = $lineArray[6];
-          if(strcasecmp($expertDisease, $disease) != 0){
-            $lineArray[7] = $expertDisease;
-          }
-          if(strcasecmp($expertPathogen, $pathogen) != 0){
-            $lineArray[6] = $expertPathogen;
-          }
-          $newLine = implode("\t", $lineArray);
-          array_push($newLinesArray, $newLine);
-          break;
-        }
-      }
-    }
-    
-    foreach($fileLines as $line){
-      #if line matches a new array line, write new line
-      if($lineArray = explode("\t", $line)){
-        return $lineArray;
-      }
-      
-      foreach($newLinesArray as $newLine){
-        $newLineArray = explode("\t", $newLine);
-        #die(print_r($newLineArray));
-        if(strpos($line, $newLineArray[1])){
-          fwrite($finalFile, $newLine);
-          $variation = $newLineArray[1];
-          //$this->variations_model->create_new_variant($variation, TRUE);
-        }
-        else{
-          fwrite($finalFile, $line);
-          $variation = $lineArray[1];
-          //$this->variations_model->create_new_variant($variation, TRUE);
-        }
-        
-
-       $data = array( 
-        'variation' => $lineArray[1],
-        'gene' => $lineArray[2],
-        'hgvs_nucleotide_change' => $lineArray[3],
-        'hgvs_protein_change' => $lineArray[4],
-        'variantlocale' => $lineArray[5],
-        'pathogenicity' => $lineArray[6],
-        'disease' => $lineArray[7],
-        'pubmed_id' => $lineArray[8],
-        'dbsnp' => $lineArray[9],
-        'summary_insilico' => $lineArray[10],
-        'summary_frequency' => $lineArray[11],
-        'summary_published' => $lineArray[12],
-        'comments' => $lineArray[13],
-        'lrt_omega'=> $lineArray[14],
-        'sift_score' => $lineArray[15],
-        'sift_pred'=> $lineArray[16],
-        'polyphen2_score' => $lineArray[17],
-        'polyphen2_pred'=> $lineArray[18],
-        'mutationtaster_score' => $lineArray[19],
-        'mutationtaster_pred' => $lineArray[20],
-        'gerp_nr' => $lineArray[21],
-        'gerp_rs'=> $lineArray[22],
-        'gerp_pred' => $lineArray[23],
-        'phylop_score' => $lineArray[24],
-        'phylop_pred' => $lineArray[25],
-        'lrt_score' => $lineArray[26],
-        'lrt_pred' => $lineArray[27],
-        'evs_ea_ac' => $lineArray[28],
-        'evs_ea_af' => $lineArray[29],
-        'evs_aa_ac' => $lineArray[30],
-        'evs_aa_af' => $lineArray[31],
-        'evs_all_ac' => $lineArray[32],
-        'evs_all_af' => $lineArray[33],
-        'otoscope_aj_ac' => $lineArray[34],
-        'otoscope_aj_af' => $lineArray[35],
-        'otoscope_co_ac' => $lineArray[36],
-        'otoscope_co_af' => $lineArray[37],
-        'otoscope_us_ac' => $lineArray[38],
-        'otoscope_us_af' => $lineArray[39],
-        'otoscope_jp_ac' => $lineArray[40],
-        'otoscope_jp_af' => $lineArray[41],
-        'otoscope_es_ac' => $lineArray[42],
-        'otoscope_es_af' => $lineArray[43],
-        'otoscope_tr_ac' => $lineArray[44],
-        'otoscope_tr_af' => $lineArray[45],
-        'otoscope_all_ac' => $lineArray[46],
-        'otoscope_all_af' => $lineArray[47],
-        'tg_afr_ac'=> $lineArray[48],
-        'tg_afr_af'=> $lineArray[49],
-        'tg_eur_ac'=> $lineArray[50],
-        'tg_eur_af'=> $lineArray[51],
-        'tg_amr_ac'=> $lineArray[52],
-        'tg_amr_af'=> $lineArray[53],
-        'tg_asn_ac'=> $lineArray[54],
-        'tg_asn_af'=> $lineArray[55],
-        'tg_all_ac'=> $lineArray[56],
-        'tg_all_af' => $lineArray[57]
-        );
-
+        $data = array('variation' => $lineArray[1],
+                      'gene' => $lineArray[2],
+                      'hgvs_nucleotide_change' => $lineArray[3],
+                      'hgvs_protein_change' => $lineArray[4],
+                      'variantlocale' => $lineArray[5],
+                      'pathogenicity' => $lineArray[6],
+                      'disease' => $lineArray[7],
+                      'pubmed_id' => $lineArray[8],
+                      'dbsnp' => $lineArray[9],
+                      'summary_insilico' => $lineArray[10],
+                      'summary_frequency' => $lineArray[11],
+                      'summary_published' => $lineArray[12],
+                      'comments' => $lineArray[13],
+                      'lrt_omega'=> $lineArray[14],
+                      'sift_score' => $lineArray[15],
+                      'sift_pred'=> $lineArray[16],
+                      'polyphen2_score' => $lineArray[17],
+                      'polyphen2_pred'=> $lineArray[18],
+                      'mutationtaster_score' => $lineArray[19],
+                      'mutationtaster_pred' => $lineArray[20],
+                      'gerp_nr' => $lineArray[21],
+                      'gerp_rs'=> $lineArray[22],
+                      'gerp_pred' => $lineArray[23],
+                      'phylop_score' => $lineArray[24],
+                      'phylop_pred' => $lineArray[25],
+                      'lrt_score' => $lineArray[26],
+                      'lrt_pred' => $lineArray[27],
+                      'evs_ea_ac' => $lineArray[28],
+                      'evs_ea_af' => $lineArray[29],
+                      'evs_aa_ac' => $lineArray[30],
+                      'evs_aa_af' => $lineArray[31],
+                      'evs_all_ac' => $lineArray[32],
+                      'evs_all_af' => $lineArray[33],
+                      'otoscope_aj_ac' => $lineArray[34],
+                      'otoscope_aj_af' => $lineArray[35],
+                      'otoscope_co_ac' => $lineArray[36],
+                      'otoscope_co_af' => $lineArray[37],
+                      'otoscope_us_ac' => $lineArray[38],
+                      'otoscope_us_af' => $lineArray[39],
+                      'otoscope_jp_ac' => $lineArray[40],
+                      'otoscope_jp_af' => $lineArray[41],
+                      'otoscope_es_ac' => $lineArray[42],
+                      'otoscope_es_af' => $lineArray[43],
+                      'otoscope_tr_ac' => $lineArray[44],
+                      'otoscope_tr_af' => $lineArray[45],
+                      'otoscope_all_ac' => $lineArray[46],
+                      'otoscope_all_af' => $lineArray[47],
+                      'tg_afr_ac'=> $lineArray[48],
+                      'tg_afr_af'=> $lineArray[49],
+                      'tg_eur_ac'=> $lineArray[50],
+                      'tg_eur_af'=> $lineArray[51],
+                      'tg_amr_ac'=> $lineArray[52],
+                      'tg_amr_af'=> $lineArray[53],
+                      'tg_asn_ac'=> $lineArray[54],
+                      'tg_asn_af'=> $lineArray[55],
+                      'tg_all_ac'=> $lineArray[56],
+                      'tg_all_af' => $lineArray[57] );
         #array_push($returnArray, $data);
-        $id = $this->create_new_variant($variation, FALSE, TRUE, $data); 
+        $id = $this->create_new_variant($variation, FALSE, TRUE, $data);
         #array_push($returnArray, $id);
       }
-    }
-    return $data;
   }
-  
+
+
+
+
+
 
 
 
 }
-
- 
 
 /* End of file variations_model.php */
 /* Location: ./application/models/variations_model.php */

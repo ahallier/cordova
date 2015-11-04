@@ -64,11 +64,12 @@ echo form_open('variations/submit', $attributes);
         <!-- "Release changes" button (hide if no variant changes exist) -->
         <div id="release-changes-wrapper" class="span3 rounded <?php echo hidden(($this->version == 0) || (empty($variants))); ?>">
             <h4>Ready to release these changes?</h4> 
-            <form action="" method="">
+            <!--<form action="" method="">
               <input type="radio" name="versioning" value="minorVersion">Minor Version<br>
-              <input type="radio" name="versioning" value="majorVersion">Major Version
-              <button id="release-variant-changes" type="submit" class="btn btn-primary btn-medium" data-toggle="modal" data-target="#modal-release-confirm">Release changes</button>
-            </form>
+              #<input type="radio" name="versioning" value="majorVersion">Major Version
+              -->
+            <button id="release-variant-changes" type="submit" class="btn btn-primary btn-medium" data-toggle="modal" data-target="#modal-release-confirm">Release changes</button>
+            <!--</form>--!>
         </div>
 
         <!-- "Initial release" button (display for Version 0 only) -->
