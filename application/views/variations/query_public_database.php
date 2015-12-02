@@ -63,12 +63,12 @@
                                                                                                                                                                                                                                                                                                                                                 </style>
 
 <ol class="progtrckr" data-progtrckr-steps="5">
-    <li class="progtrckr-done">Upload Genes</li>
-        <li class="progtrckr-done">Gather Variants</li>
-            <li class="progtrckr-todo">Normalize</li>
-                <li class="progtrckr-todo">Expert Curation</li>
-                    <li class="progtrckr-todo">Expert Curation</li>
-                    </ol> 
+ <li class="progtrckr-done">Upload Genes</li>
+ <li class="progtrckr-done">Gather Variants</li>
+ <li class="progtrckr-todo">Normalize</li>
+ <li class="progtrckr-todo">Expert Curation</li>
+ <li class="progtrckr-todo">Expert Curation</li>
+</ol> 
 
 <?php
   $attributes = array('class' => 'query_public_database',
@@ -79,6 +79,6 @@
 <p>You have chosen to submit: </p>
 <?php echo $genes; ?>
 <br/>
-<?php echo form_open('variations/query_public_database', $attributes)?>
+<?php echo form_open("variations/query_public_database/$id", $attributes)?>
 <input type="submit" value="submit" id="submit" name="submit" class="btn btn-success"></input>
 </form>
