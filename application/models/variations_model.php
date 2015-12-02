@@ -1773,30 +1773,111 @@ EOF;
     return $this->db->count_all($this->tables['reviews']);
   }
 
+  /**
+  * Num Variants In Queue
+  *
+  * Returns total number rows in the variant queue table.
+  *
+  * @author Sean Ephraim
+  * @return int Number of rows in the variant queue table
+  */
+  public function num_variants_in_queue() {
+    return $this->db->count_all($this->tables['vd_queue']);
+  }
 
   /**
   * variant-CADI functions
   **/
-  public function run_annotation_pipeline(){
+  public function run_annotation_pipeline($timeStamp, $genesFile){
     //exec('/asap/cordova_pipeline/pipeline.sh > /tmp/cordova_pipeline.txt');
+    //$timeStamp = date("m-d-Y_", microtime(True)).microtime(True);
+    
+    $regionsFile = "/asap/cordova_pipeline/myregions".$timeStamp.".txt";
+    $variantsFile = "/asap/cordova_pipeline/myvariants".$timeStamp.".txt";
+    $mapFile = "/asap/cordova_pipeline/myvariants.map".$timeStamp.".txt";
+    $listFile = "/asap/cordova_pipeline/myvariants.list".$timeStamp.".txt";
+    $kafeenFile = "/asap/cordova_pipeline/myvariants.kafeen".$timeStamp.".txt";
+    $hgmd_clinvarFile = "/asap/cordova_pipeline/myvariants.hgmd_clinvar".$timeStamp.".txt";
+    $f1File = "/asap/cordova_pipeline/myvariants.f1".$timeStamp.".txt";
+    //chmod($f1File, 0777);
+    $f2File = "/asap/cordova_pipeline/myvariants.f2".$timeStamp.".txt";
+    //chmod($f2File, 0777);
+    $f3File = "/asap/cordova_pipeline/myvariants.f3".$timeStamp.".txt";
+    //chmod($f3File, 0777);
+    $f4File = "/asap/cordova_pipeline/myvariants.f4".$timeStamp.".txt";
+    //chmod($f4File, 0777);
+    $finalFile = "/asap/cordova_pipeline/myvariants.final".$timeStamp.".txt";
+    //chmod($final1File, 0777);
+   
+
+#!bin/bash
+    $CWD='/asap/cordova_pipeline';
+    $KAFEEN='/asap/kafeen';
+    $RUBY="/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby";
+    ##export path to tabix
+    //exec("$RUBY /asap/cordova_pipeline/genes2regions.rb /asap/cordova_pipeline/mygenes.txt &> /asap/cordova_pipeline/myregions.txt");
+    
+    exec("$RUBY /asap/cordova_pipeline/genes2regions.rb $genesFile &> $regionsFile");
+    ##myregions->myvariants regions2variants is not working
+    //exec("$RUBY /asap/cordova_pipeline/regions2variants.rb /asap/cordova_pipeline/myregions.txt &> /asap/cordova_pipeline/myvariants.txt");
+    
+    exec("$RUBY /asap/cordova_pipeline/regions2variants.rb $regionsFile &> $variantsFile");
+    ##myvariants->myvariants.map map is working
+    //exec("$RUBY /asap/cordova_pipeline/map.rb /asap/cordova_pipeline/myvariants.txt &> /asap/cordova_pipeline/myvariants.map.txt");
+    exec("$RUBY /asap/cordova_pipeline/map.rb $variantsFile &> $mapFile");
+    ##.map->.list this cut is not working
+    //exec("cut -f1 /asap/cordova_pipeline/myvariants.map.txt &> /asap/cordova_pipeline/myvariants.list.txt");
+    exec("cut -f1 $mapFile &> $listFile");
+    ##.list-> .kafeen Kaffeen not working
+    exec("$RUBY /asap/kafeen/kafeen.rb --progress -i $listFile -o $kafeenFile");
+    ##annotate with hgmd/clinvar
+    exec("$RUBY /asap/cordova_pipeline/annotate_with_hgmd_clinvar.rb $kafeenFile $mapFile &> $hgmd_clinvarFile");
+    exec("cut -f-6  $kafeenFile &> $f1File");
+    exec("cut -f2-4 $hgmd_clinvarFile &>  $f2File");
+    exec("cut -f10- $kafeenFile &> $f3File");
+    exec("paste $f1File $f2File &> $f4File");
+    exec("paste $f4File $f3File &> $finalFile");
+
+
+    /*exec("$RUBY /asap/cordova_pipeline/annotate_with_hgmd_clinvar.rb /asap/cordova_pipeline/myvariants.kafeen.txt /asap/cordova_pipeline/myvariants.map.txt &> /asap/cordova_pipeline/myvariants.hgmd_clinvar.txt");
+    exec("cut -f-6  /asap/cordova_pipeline/myvariants.kafeen.txt &> /asap/cordova_pipeline/myvariants.f1.txt");
+    exec("cut -f2-4 /asap/cordova_pipeline/myvariants.hgmd_clinvar.txt &>  /asap/cordova_pipeline/myvariants.f2.txt");
+    exec("cut -f10- /asap/cordova_pipeline/myvariants.kafeen.txt &>  /asap/cordova_pipeline/myvariants.f3.txt");
+    exec("paste /asap/cordova_pipeline/myvariants.f1.txt /asap/cordova_pipeline/myvariants.f2.txt &> /asap/cordova_pipeline/myvariants.f4.txt");
+    exec("paste /asap/cordova_pipeline/myvariants.f4.txt /asap/cordova_pipeline/myvariants.f3.txt &> /asap/cordova_pipeline/myvariants.final.txt");
+*/
+
+   
+   
+   /*
     //mygenes->myregions genes2regions is working
-    exec('/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/cordova_pipeline/genes2regions.rb /asap/cordova_pipeline/mygenes.txt > /asap/cordova_pipeline/myregions.txt');
+    exec('/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/cordova_pipeline/genes2regions.rb '.$genesFile.' &> '.$regionsFile);
+    chmod($regionsFile, 0777); 
     //myregions->myvariants regions2variants is not working
-    exec('/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/cordova_pipeline/regions2variants.rb /asap/cordova_pipeline/myregions.txt > /asap/cordova_pipeline/myvariants.txt');
+    exec('/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/cordova_pipeline/regions2variants.rb '.$regionsFile.' &> '.$variantsFile);
+    chmod($variantsFile, 0777);
     //myvariants->myvariants.map map is working
-    exec('/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/cordova_pipeline/map.rb /asap/cordova_pipeline/myvariants.txt > /asap/cordova_pipeline/myvariants.map.txt');
+    exec('/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/cordova_pipeline/map.rb '.$variantsFile.' &> '.$mapFile);
+    chmod($mapFile, 0777);
     //.map->.list this cut is not working
-    exec('cut -f1 /asap/cordova_pipeline/myvariants.map.txt > /asap/cordova_pipeline/myvariants.list.txt');
+    exec('cut -f1 '.$mapFile.' > '.$listFile);
+    chmod($listFile, 0777);
     //.list-> .kafeen Kaffeen not working
-    exec('/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/kafeen/kafeen.rb --progress --in /asap/cordova_pipeline/myvariants.list.txt --out /asap/cordova_pipeline/myvariants.kafeen.txt');
+    exec('/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/kafeen/kafeen.rb --progress --in '.$listFile.' --out '.$kafeenFile);
+    chmod($kafeenFile, 0777);
     //annotate with hgmd/clinvar
-    exec('/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/cordova_pipeline/annotate_with_hgmd_clinvar.rb /asap/cordova_pipeline/myvariants.kafeen.txt /asap/cordova_pipeline/myvariants.map.txt > /asap/cordova_pipeline/myvariants.hgmd_clinvar.txt');
-    exec('cut -f-6  /asap/cordova_pipeline/myvariants.kafeen.txt > /asap/cordova_pipeline/myvariants.f1.txt');
-    exec('cut -f2-4 /asap/cordova_pipeline/myvariants.hgmd_clinvar.txt >  /asap/cordova_pipeline/myvariants.f2.txt');
-    exec('cut -f10- /asap/cordova_pipeline/myvariants.kafeen.txt >  /asap/cordova_pipeline/myvariants.f3.txt');
-    exec('paste /asap/cordova_pipeline/myvariants.f1.txt /asap/cordova_pipeline/myvariants.f2.txt > /asap/cordova_pipeline/myvariants.f4.txt');
-    exec('paste /asap/cordova_pipeline/myvariants.f4.txt /asap/cordova_pipeline/myvariants.f3.txt > /asap/cordova_pipeline/myvariants.final.txt');
+    exec('/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby /asap/cordova_pipeline/annotate_with_hgmd_clinvar.rb '.$kafeenFile.' '.$mapFile.' &> '.$hgmd_clinvarFile);
+    chmod($hgmdclinvarFile, 0777);
+    exec('cut -f-6  '.$kafeenFile.' &> '.$f1File);
+    exec('cut -f2-4 '.$hgmd_clinvarFile.' &> '.$f2File);
+    exec('cut -f10- '.$kafeenFile.' &> '.$f3File);    
+    exec('paste '.$f1File.' '.$f2File.' &> '.$f4File);
+    exec('paste '.$f4File.' '.$f3File.' &> '.$finalFile);
     ini_set("allow_url_fopen", true);
+    return array($timeStamp, $finalFile);
+    */
+    
+    
     //exec('/asap/cordova_pipeline/pipeline2.sh > /ahallier/tmp/cordova_pipeline.txt');
     //mygenes->myregions genes2regions is working
     //$RUBY = "/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby";
@@ -1818,6 +1899,7 @@ EOF;
     //exec('paste /asap/cordova_pipeline/myvariants.f1.txt /asap/cordova_pipeline/myvariants.f2.txt &> /asap/cordova_pipeline/myvariants.f4.txt');
     //exec('paste /asap/cordova_pipeline/myvariants.f4.txt /asap/cordova_pipeline/myvariants.f3.txt &> /asap/cordova_pipeline/myvariants.final.txt');
     //ini_set("allow_url_fopen", true);
+    return $timeStamp;
   }
   public function get_disease_names($oldFile, $newFile){
     $file = fopen($oldFile, "r");
@@ -1860,21 +1942,28 @@ EOF;
     return $returnVal;
     //return $submittedNameUpdates;
   }
-  public function expert_curration(){
-    $updateDisease = 2;
-    $updatePathogenicity = 3;
+  public function expert_curation($newFileLocation, $oldFileLocation, $updateFileLocation){
+    $updateDisease = 3;
+    $updatePathogenicity = 2;
     $updateVariant = 1;
+    $updatePubmedId = 4;
     $oldDisease = 7;
     $oldPathogenicity = 6;
     $oldVariant = 2;
+    $oldPubmedId = 8;
     $replacementPairs = array( array($updateDisease, $oldDisease),
-                                                               array($updatePathogenicity, $oldPathogenicity));
-    $this->update_variant($oldVariant, $updateVariant, $replacementPairs, $oldFile, $updateFile, $newFile); 
+                               array($updatePathogenicity, $oldPathogenicity),
+                               array($updatePubmedId, $oldPubmedId));
+    //$this->update_variant($oldVariant, $updateVariant, $replacementPairs, $oldFile, $updateFile, $newFile);
+
+    $returnArray = $this->update_variant($updateVariant, $oldVariant, $newFileLocation, $oldFileLocation, $updateFileLocation, $repacementPairs);
+    return $returnArray;
   }
   public function update_variant($matchLocationUpdateFile, $matchLocationOldFile, $newFileLocation, $oldFileLocation, $updateFileLocation, $replacementPairs){
     $oldFile = fopen($oldFileLocation, "r");
     $updateFile = fopen($updateFileLocation, "r");
     $newFile = fopen($newFileLocation, "w");
+    return $newFileLocation;
     $updateFileLines = file($updateFileLocation);
     $returnArray = array();
     $lineUpdated = false;
