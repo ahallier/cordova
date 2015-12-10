@@ -80,7 +80,7 @@ $attributes = array('id'    => 'form_upload_genes',
 <p>Below is a list of gathered phenotypes from the public databases that were queried. Please enter your team's preferred nomenclature for each phenotype to normalize the nomenclature throughout your database.</p>
 <div>
   <h3>Public Database Nomenclature</h3>
-<?php echo form_open('variations/norm_nomenclature', $attributes);?>
+<?php echo form_open("variations/norm_nomenclature/$time_stamp", $attributes);?>
   
   <?php
    foreach ($uniqueDiseases as $disease){

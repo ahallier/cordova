@@ -78,7 +78,7 @@ $attributes = array('id'    => 'form_upload_genes',
                     'class' => 'rounded',
                    );
 //echo $error;
-echo form_open_multipart('variations/upload_genes', $attributes);
+echo form_open_multipart('variations/upload_genes/$time_stamp', $attributes);
 ?>
     <div class="span4">
       <p>To begin the process of initializing your variation database please upload a gene file</p>

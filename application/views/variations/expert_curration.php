@@ -81,7 +81,7 @@
                        'class' => 'rounded',
                       );
    //echo $error;
-  echo form_open_multipart('variations/expert_curration', $attributes);
+  echo form_open_multipart("variations/expert_curration/$time_stamp", $attributes);
 ?>
   <div class="span6">
     <p>If you wish to over ride any information gathered through this pipeline please upload a .txt file with the information you wish to change. The variation must match the existing file variation name exactly. </p>

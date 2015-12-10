@@ -251,27 +251,31 @@ class Variations extends MY_Controller {
     //if input is from the text box
     if($this->input->post('text-submit'))
     {
+      $time_stamp = date("YmdHis");
+      $data['time_stamp'] = $time_stamp;
       $genesOrFile = $this->input->post('text');
       $this->session->set_flashdata('genes', $genesOrFile);
-      $file_path = "/asap/cordova_pipeline/mygenes.txt";
+      $file_path = "/asap/cordova_pipeline/mygenes$time_stamp.txt";
       $this->session->set_flashdata('file_path', $file_path);
-      if($fh = fopen("/asap/cordova_pipeline/mygenes.txt", 'w+')){ 
+      if($fh = fopen("/asap/cordova_pipeline/mygenes$time_stamp.txt", 'w+')){ 
         fwrite($fh, $genesOrFile);
         fclose($fh);
-        redirect('variations/query_public_database');
+        redirect('variations/query_public_database/'.$time_stamp);
       }
     }
     //if the input is from the file submit
     if($this->input->post('file-submit'))
     {
+      $time_stamp = date("YmdHis");
+      $data['time_stamp'] = $time_stamp;
       $this->load->library('upload');
       $this->upload->set_allowed_types('*');
       $genesOrFile = $_FILES["file"]["name"];
       $this->session->set_flashdata('genes', $genesOrFile);
-      $file_path = '/asap/cordova_pipeline/mygenes.txt'; 
+      $file_path = "/asap/cordova_pipeline/mygenes$time_stamp.txt"; 
       $this->session->set_flashdata('file_path', $file_path);
-      move_uploaded_file($_FILES["file"]["tmp_name"], "/asap/cordova_pipeline/mygenes.txt");
-      redirect('variations/query_public_database');
+      move_uploaded_file($_FILES["file"]["tmp_name"], "/asap/cordova_pipeline/mygenes$time_stamp.txt");
+      redirect('variations/query_public_database/'.$time_stamp);
     }
     $this->load->view($this->editor_layout, $data);
   }
@@ -286,39 +290,55 @@ class Variations extends MY_Controller {
    * @access public
    * @param none
    */
-  public function query_public_database() {
+  public function query_public_database($time_stamp) {
     //redirect_all_nonmembers();
     $data['title'] = "Query Public Databases";
     $data['content'] = 'variations/query_public_database';
     $genes = $this->session->flashdata('genes');
     $data['genes'] = $genes;
+    $genesFile = "/asap/cordova_pipeline/mygenes$time_stamp.txt";
+    $data['time_stamp'] = $time_stamp;
+    $this->load->library('email');
+    $this->email->clear();
+    $config['mailtype'] = 'text';
+    $config['wordwrap'] = TRUE;
+    $config['newline'] = "\r\n";
+    $config['crlf'] = "\r\n";
+    $this->email->initialize($config);
+    $this->email->from($this->config->item('contact_email'));
+    $this->email->to($this->config->item('contact_email')); 
+    $this->email->subject('Cordova variant-CADI Variant Collection Update');
+    $this->email->message("The variant collection has completed, please follow this link to continue initializing your database. ".$this->config->base_url()."variations/norm_nomenclature/".$time_stamp);  
+
     if($this->input->post('submit'))
     {
-      $this->variations_model->run_annotation_pipeline();     
-      redirect('variations/norm_nomenclature');
+      $this->variations_model->run_annotation_pipeline($time_stamp, $genesFile);     
+      $this->email->send();
+      redirect("variations/norm_nomenclature/$time_stamp");
     }
    $this->load->view($this->editor_layout, $data);
   }
 
-  public function norm_nomenclature() {
+  public function norm_nomenclature($time_stamp) {
     //redirect_all_nonmembers();
     $data['title'] = "Normalize Nomenclature";
     $data['content'] = 'variations/norm_nomenclature';
-    $mostReacentFile = "/asap/cordova_pipeline/myvariants.final.txt";
-    $cleanedFile = "/ahallier/tmp/cleanedDiseaseNames.txt";
+    $mostReacentFile = "/asap/cordova_pipeline/myvariants.final$time_stamp.txt";
+    $cleanedFile = "/ahallier/tmp/cleanedDiseaseNames$time_stamp.txt";
     $uniqueDiseases = $this->variations_model->get_disease_names($mostReacentFile, $cleanedFile);
     //die(print_r($uniqueDiseases));  
     $data['uniqueDiseases'] = $uniqueDiseases;
+    $data['time_stamp'] = $time_stamp;
     //$submitedDiseaseNameFile = fopen("/ahallier/tmp/submitedDiseaseNames.txt");
     if($this->input->post('submit')){
-      $diseaseNameUpdatesFileLocation = "/ahallier/tmp/submittedDiseaseNames.txt";
-      $oldFileLocation = "/ahallier/tmp/cleanedDiseaseNames.txt";
-      $newFileLocation = "/ahallier/tmp/diseaseNameUpdates.txt";
+      $diseaseNameUpdatesFileLocation = "/ahallier/tmp/submittedDiseaseNames$time_stamp.txt";
+      $oldFileLocation = "/ahallier/tmp/cleanedDiseaseNames$time_stamp.txt";
+      $newFileLocation = "/ahallier/tmp/diseaseNameUpdates$time_stamp.txt";
       //die(print_r($_POST));
       $updatedDiseaseNamesFile = $this->variations_model->update_disease_names($_POST, $uniqueDiseases, $diseaseNameUpdatesFileLocation, $oldFileLocation, $newFileLocation);
-      die(print_r($updatedDiseaseNamesFile));
       //die(print_r($updatedDiseaseNamesFile));
-      redirect("/variations/expert_curration");
+      //die(print_r($updatedDiseaseNamesFile));
+      redirect("/variations/expert_curration/$time_stamp");
     }
       
     /**  
@@ -375,14 +395,22 @@ class Variations extends MY_Controller {
     $this->load->view($this->editor_layout, $data);
   }
 
-  public function expert_curration() {
+  public function expert_curration($time_stamp) {
     //redirect_all_nonmembers();
     $data['title'] = "Expert Curration";
     $data['content'] = 'variations/expert_curration';
+    $data['time_stamp'] = $time_stamp;
   #on file submit
     if($this->input->post('file-expert'))
     {
-      $returnArray = $this->variations_model->expert_curation_and_upload();    
+      $this->load->library('upload');
+      $this->upload->set_allowed_types('*');
+      move_uploaded_file($_FILES["file"]["tmp_name"], "/ahallier/tmp/expertFile$time_stamp.txt");
+      $finalFileLocation = "/ahallier/tmp/expertCurrated.final$time_stamp.txt";
+      $oldFileLocation = "/ahallier/tmp/diseaseNameUpdates$time_stamp.txt";
+      $updateFileLocation = "/ahallier/tmp/expertFile$time_stamp.txt";
+      $returnArray = $this->variations_model->expert_curation($finalFileLocation, $oldFileLocation, $updateFileLocation);    
+      $this->variations_model->UploadCADIData($finalFile);
       #array_push($retunArray, "HELLO!");
       #die(print_r($returnArray));
       #upload file data into database!!!

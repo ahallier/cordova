@@ -1957,13 +1957,14 @@ EOF;
     //$this->update_variant($oldVariant, $updateVariant, $replacementPairs, $oldFile, $updateFile, $newFile);
 
     $returnArray = $this->update_variant($updateVariant, $oldVariant, $newFileLocation, $oldFileLocation, $updateFileLocation, $repacementPairs);
+    
     return $returnArray;
   }
   public function update_variant($matchLocationUpdateFile, $matchLocationOldFile, $newFileLocation, $oldFileLocation, $updateFileLocation, $replacementPairs){
     $oldFile = fopen($oldFileLocation, "r");
     $updateFile = fopen($updateFileLocation, "r");
     $newFile = fopen($newFileLocation, "w");
-    return $newFileLocation;
+    //return $newFileLocation;
     $updateFileLines = file($updateFileLocation);
     $returnArray = array();
     $lineUpdated = false;
@@ -2008,9 +2009,9 @@ EOF;
 
   }
 
-  public function UploadCADIData(){
-      $finalFile = fopen("/ahallier/tmp/finalFile.txt", "r");
-      $fileLines = file("/ahallier/tmp/finalFile.txt");
+  public function UploadCADIData($finalFile){
+      $finalFile = fopen($finalFile, "r");
+      $fileLines = file($finalFile);
       foreach($fileLines as $line){
         $lineArray = explode("\t", $line);
         $variation = $lineArray[1];
