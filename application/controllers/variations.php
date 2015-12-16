@@ -324,16 +324,16 @@ class Variations extends MY_Controller {
     $data['title'] = "Normalize Nomenclature";
     $data['content'] = 'variations/norm_nomenclature';
     $mostReacentFile = "/asap/cordova_pipeline/myvariants.final$time_stamp.txt";
-    $cleanedFile = "/ahallier/tmp/cleanedDiseaseNames$time_stamp.txt";
+    $cleanedFile = "/asap/variant-CADI/tmp/cleanedDiseaseNames$time_stamp.txt";
     $uniqueDiseases = $this->variations_model->get_disease_names($mostReacentFile, $cleanedFile);
     //die(print_r($uniqueDiseases));  
     $data['uniqueDiseases'] = $uniqueDiseases;
     $data['time_stamp'] = $time_stamp;
     //$submitedDiseaseNameFile = fopen("/ahallier/tmp/submitedDiseaseNames.txt");
     if($this->input->post('submit')){
-      $diseaseNameUpdatesFileLocation = "/ahallier/tmp/submittedDiseaseNames$time_stamp.txt";
-      $oldFileLocation = "/ahallier/tmp/cleanedDiseaseNames$time_stamp.txt";
-      $newFileLocation = "/ahallier/tmp/diseaseNameUpdates$time_stamp.txt";
+      $diseaseNameUpdatesFileLocation = "/asap/variant-CADI/tmp/submittedDiseaseNames$time_stamp.txt";
+      $oldFileLocation = "/asap/variant-CADI/tmp/cleanedDiseaseNames$time_stamp.txt";
+      $newFileLocation = "/asap/variant-CADI/tmp/diseaseNameUpdates$time_stamp.txt";
       //die(print_r($_POST));
       $updatedDiseaseNamesFile = $this->variations_model->update_disease_names($_POST, $uniqueDiseases, $diseaseNameUpdatesFileLocation, $oldFileLocation, $newFileLocation);
       //die(print_r($updatedDiseaseNamesFile));
@@ -405,12 +405,14 @@ class Variations extends MY_Controller {
     {
       $this->load->library('upload');
       $this->upload->set_allowed_types('*');
-      move_uploaded_file($_FILES["file"]["tmp_name"], "/ahallier/tmp/expertFile$time_stamp.txt");
-      $finalFileLocation = "/ahallier/tmp/expertCurrated.final$time_stamp.txt";
-      $oldFileLocation = "/ahallier/tmp/diseaseNameUpdates$time_stamp.txt";
-      $updateFileLocation = "/ahallier/tmp/expertFile$time_stamp.txt";
-      $returnArray = $this->variations_model->expert_curation($finalFileLocation, $oldFileLocation, $updateFileLocation);    
-      $this->variations_model->UploadCADIData($finalFile);
+      move_uploaded_file($_FILES["file"]["tmp_name"], "/asap/variant-CADI/tmp/expertFile$time_stamp.txt");
+      $finalFileLocation = "/asap/variant-CADI/tmp/expertCurrated.final$time_stamp.txt";
+      $oldFileLocation = "/asap/variant-CADI/tmp/diseaseNameUpdates$time_stamp.txt";
+      $updateFileLocation = "/asap/variant-CADI/tmp/expertFile$time_stamp.txt";
+      $this->variations_model->expert_curation($finalFileLocation, $oldFileLocation, $updateFileLocation);    
+      
+      $returned = $this->variations_model->UploadCADIData($finalFileLocation);
+      //die(print_r($returned));
       #array_push($retunArray, "HELLO!");
       #die(print_r($returnArray));
       #upload file data into database!!!

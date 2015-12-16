@@ -1956,9 +1956,9 @@ EOF;
                                array($updatePubmedId, $oldPubmedId));
     //$this->update_variant($oldVariant, $updateVariant, $replacementPairs, $oldFile, $updateFile, $newFile);
 
-    $returnArray = $this->update_variant($updateVariant, $oldVariant, $newFileLocation, $oldFileLocation, $updateFileLocation, $repacementPairs);
+    $this->update_variant($updateVariant, $oldVariant, $newFileLocation, $oldFileLocation, $updateFileLocation, $replacementPairs);
     
-    return $returnArray;
+    return $newFileLocation;
   }
   public function update_variant($matchLocationUpdateFile, $matchLocationOldFile, $newFileLocation, $oldFileLocation, $updateFileLocation, $replacementPairs){
     $oldFile = fopen($oldFileLocation, "r");
@@ -2009,12 +2009,20 @@ EOF;
 
   }
 
-  public function UploadCADIData($finalFile){
-      $finalFile = fopen($finalFile, "r");
-      $fileLines = file($finalFile);
+  public function UploadCADIData($finalFileLocation){
+      $finalFile = fopen($finalFileLocation, "r");
+      $fileLines = file($finalFileLocation);
+      
       foreach($fileLines as $line){
         $lineArray = explode("\t", $line);
         $variation = $lineArray[1];
+        //if there are missing values, add space holder to array
+        if(count($lineArray)<58){
+          for($i = count($lineArray); $i <= 57; $i++){
+            array_push($lineArray, " ");
+          }
+        }
+        //assign everything to data array to be put into database
         $data = array('variation' => $lineArray[1],
                       'gene' => $lineArray[2],
                       'hgvs_nucleotide_change' => $lineArray[3],
