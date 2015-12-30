@@ -67,7 +67,7 @@
          <li class="progtrckr-done">Gather Variants</li>
              <li class="progtrckr-done">Normalize</li>
                  <li class="progtrckr-todo">Expert Curation</li>
-                     <li class="progtrckr-todo">Expert Curation</li>
+                     <li class="progtrckr-todo">Release Changes</li>
                      </ol>
        
 

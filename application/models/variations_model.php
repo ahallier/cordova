@@ -887,6 +887,7 @@ class Variations_model extends MY_Model {
       // ERROR: no new records to update
       // NOTE: an empty update is only allowed for Version 0
       return FALSE;
+
     }
 
     // Create new variation table
@@ -1808,7 +1809,18 @@ EOF;
     //chmod($f4File, 0777);
     $finalFile = "/asap/cordova_pipeline/myvariants.final".$timeStamp.".txt";
     //chmod($final1File, 0777);
-   
+    $CWD='/asap/cordova_pipeline';
+    $KAFEEN='/asap/kafeen';
+    $RUBY="/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby";
+
+    exec("$RUBY /asap/cordova_pipeline/genes2regions.rb $genesFile &> $regionsFile && $RUBY /asap/cordova_pipeline/regions2variants.rb $regionsFile &> $variantsFile && $RUBY /asap/cordova_pipeline/map.rb $variantsFile &> $mapFile");
+    exec("cut -f1 $mapFile > $listFile");
+    exec("$RUBY /asap/kafeen/kafeen.rb --progress -i $listFile -o $kafeenFile && $RUBY /asap/cordova_pipeline/annotate_with_hgmd_clinvar.rb $kafeenFile $mapFile &> $hgmd_clinvarFile");
+    exec("cut -f-6  $kafeenFile > $f1File && cut -f2-4 $hgmd_clinvarFile > $f2File && cut -f10- $kafeenFile > $f3File && paste $f1File $f2File > $f4File && paste $f4File $f3File > $finalFile");
+
+/* this section is working! coppied to above to play with running in background
+
+
 
 #!bin/bash
     $CWD='/asap/cordova_pipeline';
@@ -1837,6 +1849,10 @@ EOF;
     exec("cut -f10- $kafeenFile &> $f3File");
     exec("paste $f1File $f2File &> $f4File");
     exec("paste $f4File $f3File &> $finalFile");
+
+*************************************************/
+
+
 
 
     /*exec("$RUBY /asap/cordova_pipeline/annotate_with_hgmd_clinvar.rb /asap/cordova_pipeline/myvariants.kafeen.txt /asap/cordova_pipeline/myvariants.map.txt &> /asap/cordova_pipeline/myvariants.hgmd_clinvar.txt");

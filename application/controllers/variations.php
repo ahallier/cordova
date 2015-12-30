@@ -313,6 +313,54 @@ class Variations extends MY_Controller {
     if($this->input->post('submit'))
     {
       $this->variations_model->run_annotation_pipeline($time_stamp, $genesFile);     
+      /*$regionsFile = "/asap/cordova_pipeline/myregions".$timeStamp.".txt";
+      $variantsFile = "/asap/cordova_pipeline/myvariants".$timeStamp.".txt";
+      $mapFile = "/asap/cordova_pipeline/myvariants.map".$timeStamp.".txt";
+      $listFile = "/asap/cordova_pipeline/myvariants.list".$timeStamp.".txt";
+      $kafeenFile = "/asap/cordova_pipeline/myvariants.kafeen".$timeStamp.".txt";
+      $hgmd_clinvarFile = "/asap/cordova_pipeline/myvariants.hgmd_clinvar".$timeStamp.".txt";
+      $f1File = "/asap/cordova_pipeline/myvariants.f1".$timeStamp.".txt";
+      //chmod($f1File, 0777);
+      $f2File = "/asap/cordova_pipeline/myvariants.f2".$timeStamp.".txt";
+      //chmod($f2File, 0777);
+      $f3File = "/asap/cordova_pipeline/myvariants.f3".$timeStamp.".txt";
+      //chmod($f3File, 0777);
+      $f4File = "/asap/cordova_pipeline/myvariants.f4".$timeStamp.".txt";
+      //chmod($f4File, 0777);
+      $finalFile = "/asap/cordova_pipeline/myvariants.final".$timeStamp.".txt";
+      //chmod($final1File, 0777);
+   
+
+      #!bin/bash
+      $CWD='/asap/cordova_pipeline';
+      $KAFEEN='/asap/kafeen';
+      $RUBY="/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby";
+      ##export path to tabix
+      //exec("$RUBY /asap/cordova_pipeline/genes2regions.rb /asap/cordova_pipeline/mygenes.txt &> /asap/cordova_pipeline/myregions.txt");
+    
+      exec("$RUBY /asap/cordova_pipeline/genes2regions.rb $genesFile &> $regionsFile");
+      ##myregions->myvariants regions2variants is not working
+      //exec("$RUBY /asap/cordova_pipeline/regions2variants.rb /asap/cordova_pipeline/myregions.txt &> /asap/cordova_pipeline/myvariants.txt");
+    
+      exec("$RUBY /asap/cordova_pipeline/regions2variants.rb $regionsFile &> $variantsFile");
+      ##myvariants->myvariants.map map is working
+      //exec("$RUBY /asap/cordova_pipeline/map.rb /asap/cordova_pipeline/myvariants.txt &> /asap/cordova_pipeline/myvariants.map.txt");
+      exec("$RUBY /asap/cordova_pipeline/map.rb $variantsFile &> $mapFile");
+      ##.map->.list this cut is not working
+      //exec("cut -f1 /asap/cordova_pipeline/myvariants.map.txt &> /asap/cordova_pipeline/myvariants.list.txt");
+      exec("cut -f1 $mapFile &> $listFile");
+      ##.list-> .kafeen Kaffeen not working
+      exec("$RUBY /asap/kafeen/kafeen.rb --progress -i $listFile -o $kafeenFile");
+      ##annotate with hgmd/clinvar
+      exec("$RUBY /asap/cordova_pipeline/annotate_with_hgmd_clinvar.rb $kafeenFile $mapFile &> $hgmd_clinvarFile");
+      exec("cut -f-6  $kafeenFile &> $f1File &&
+        cut -f2-4 $hgmd_clinvarFile &>  $f2File &&
+        cut -f10- $kafeenFile &> $f3File &&
+        paste $f1File $f2File &> $f4File &&
+        paste $f4File $f3File &> $finalFile");
+*/
+ 
+      
       $this->email->send();
       redirect("variations/norm_nomenclature/$time_stamp");
     }
@@ -400,6 +448,7 @@ class Variations extends MY_Controller {
     $data['title'] = "Expert Curration";
     $data['content'] = 'variations/expert_curration';
     $data['time_stamp'] = $time_stamp;
+    $data['variant_file'] = "/asap/variant-CADI/tmp/diseaseNameUpdates$time_stamp.txt";
   #on file submit
     if($this->input->post('file-expert'))
     {
@@ -586,7 +635,6 @@ class Variations extends MY_Controller {
         // Only release the confirmed variants
         $success = $this->variations_model->push_data_live();
       }
-
       if ($success === TRUE) {
         // Successful release
         $confirmed = '';
