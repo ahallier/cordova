@@ -313,56 +313,8 @@ class Variations extends MY_Controller {
     if($this->input->post('submit'))
     {
       $this->variations_model->run_annotation_pipeline($time_stamp, $genesFile);     
-      /*$regionsFile = "/asap/cordova_pipeline/myregions".$timeStamp.".txt";
-      $variantsFile = "/asap/cordova_pipeline/myvariants".$timeStamp.".txt";
-      $mapFile = "/asap/cordova_pipeline/myvariants.map".$timeStamp.".txt";
-      $listFile = "/asap/cordova_pipeline/myvariants.list".$timeStamp.".txt";
-      $kafeenFile = "/asap/cordova_pipeline/myvariants.kafeen".$timeStamp.".txt";
-      $hgmd_clinvarFile = "/asap/cordova_pipeline/myvariants.hgmd_clinvar".$timeStamp.".txt";
-      $f1File = "/asap/cordova_pipeline/myvariants.f1".$timeStamp.".txt";
-      //chmod($f1File, 0777);
-      $f2File = "/asap/cordova_pipeline/myvariants.f2".$timeStamp.".txt";
-      //chmod($f2File, 0777);
-      $f3File = "/asap/cordova_pipeline/myvariants.f3".$timeStamp.".txt";
-      //chmod($f3File, 0777);
-      $f4File = "/asap/cordova_pipeline/myvariants.f4".$timeStamp.".txt";
-      //chmod($f4File, 0777);
-      $finalFile = "/asap/cordova_pipeline/myvariants.final".$timeStamp.".txt";
-      //chmod($final1File, 0777);
-   
-
-      #!bin/bash
-      $CWD='/asap/cordova_pipeline';
-      $KAFEEN='/asap/kafeen';
-      $RUBY="/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby";
-      ##export path to tabix
-      //exec("$RUBY /asap/cordova_pipeline/genes2regions.rb /asap/cordova_pipeline/mygenes.txt &> /asap/cordova_pipeline/myregions.txt");
-    
-      exec("$RUBY /asap/cordova_pipeline/genes2regions.rb $genesFile &> $regionsFile");
-      ##myregions->myvariants regions2variants is not working
-      //exec("$RUBY /asap/cordova_pipeline/regions2variants.rb /asap/cordova_pipeline/myregions.txt &> /asap/cordova_pipeline/myvariants.txt");
-    
-      exec("$RUBY /asap/cordova_pipeline/regions2variants.rb $regionsFile &> $variantsFile");
-      ##myvariants->myvariants.map map is working
-      //exec("$RUBY /asap/cordova_pipeline/map.rb /asap/cordova_pipeline/myvariants.txt &> /asap/cordova_pipeline/myvariants.map.txt");
-      exec("$RUBY /asap/cordova_pipeline/map.rb $variantsFile &> $mapFile");
-      ##.map->.list this cut is not working
-      //exec("cut -f1 /asap/cordova_pipeline/myvariants.map.txt &> /asap/cordova_pipeline/myvariants.list.txt");
-      exec("cut -f1 $mapFile &> $listFile");
-      ##.list-> .kafeen Kaffeen not working
-      exec("$RUBY /asap/kafeen/kafeen.rb --progress -i $listFile -o $kafeenFile");
-      ##annotate with hgmd/clinvar
-      exec("$RUBY /asap/cordova_pipeline/annotate_with_hgmd_clinvar.rb $kafeenFile $mapFile &> $hgmd_clinvarFile");
-      exec("cut -f-6  $kafeenFile &> $f1File &&
-        cut -f2-4 $hgmd_clinvarFile &>  $f2File &&
-        cut -f10- $kafeenFile &> $f3File &&
-        paste $f1File $f2File &> $f4File &&
-        paste $f4File $f3File &> $finalFile");
-*/
- 
-      
       $this->email->send();
-      redirect("variations/norm_nomenclature/$time_stamp");
+      /*ADD SUCCESS OR INFO MESSAGE HERE*/
     }
    $this->load->view($this->editor_layout, $data);
   }
@@ -374,7 +326,6 @@ class Variations extends MY_Controller {
     $mostReacentFile = "/asap/cordova_pipeline/myvariants.final$time_stamp.txt";
     $cleanedFile = "/asap/variant-CADI/tmp/cleanedDiseaseNames$time_stamp.txt";
     $uniqueDiseases = $this->variations_model->get_disease_names($mostReacentFile, $cleanedFile);
-    //die(print_r($uniqueDiseases));  
     $data['uniqueDiseases'] = $uniqueDiseases;
     $data['time_stamp'] = $time_stamp;
     //$submitedDiseaseNameFile = fopen("/ahallier/tmp/submitedDiseaseNames.txt");
@@ -382,64 +333,10 @@ class Variations extends MY_Controller {
       $diseaseNameUpdatesFileLocation = "/asap/variant-CADI/tmp/submittedDiseaseNames$time_stamp.txt";
       $oldFileLocation = "/asap/variant-CADI/tmp/cleanedDiseaseNames$time_stamp.txt";
       $newFileLocation = "/asap/variant-CADI/tmp/diseaseNameUpdates$time_stamp.txt";
-      //die(print_r($_POST));
       $updatedDiseaseNamesFile = $this->variations_model->update_disease_names($_POST, $uniqueDiseases, $diseaseNameUpdatesFileLocation, $oldFileLocation, $newFileLocation);
-      //die(print_r($updatedDiseaseNamesFile));
-      //die(print_r($updatedDiseaseNamesFile));
       redirect("/variations/expert_curration/$time_stamp");
     }
       
-    /**  
-      foreach($uniqueDiseases as $disease){
-        if($this->input->post($disease){
-          $newDiseaseName=$this->input->post($disease);
-        }
-        else{
-          $newDiseaseName=$disease;
-        }
-        $line = $disease."\t".$newDiseaseName;
-        fwrite($submittedDiseaseNameFile, $line);
-      } 
-      $diseaseNamesFile = "/ahallier/tmp/submitedDiseaseNames.txt";
-      $oldFileLocation = "/ahallier/tmp/";
-    = $this->variations_model->updateDiseaseNames("","","");  
-     
-     }
-    */
-
-
-    //die($data['uniqueDiseases']);
-
-    /**
-    $fileLines = file("/ahallier/tmp/myvariants.cleaned.txt");
-    
-    if($this->input->post('submit'))
-    {
-      foreach($uniqueDiseases as $disease)
-      {
-        if($this->input->post($disease))
-        {
-          $nameLinesArray = $searchArray[$disease];
-          foreach($nameLinesArray as $line)
-          {
-            $diseaseLine = $fileLines[$line];
-            $newDiseaseName = $this->input->post($disease);
-            if(strcasecmp($newDiseaseName, $disease) != 0)
-            {
-              $newLine = str_replace($disease, $newDiseaseName, $diseaseLine);
-              $fileLines[$line] = $newLine;
-            }
-          }
-        }          
-      }
-      $finalFileUpdated = fopen('/ahallier/tmp/nameUpdates.txt', "w"); 
-      foreach($fileLines as $entry){
-        fwrite($finalFileUpdated, $entry);
-      }
-      redirect("/variations/expert_curration");
-    }
-    **/
-
     $this->load->view($this->editor_layout, $data);
   }
 
@@ -449,7 +346,7 @@ class Variations extends MY_Controller {
     $data['content'] = 'variations/expert_curration';
     $data['time_stamp'] = $time_stamp;
     $data['variant_file'] = "/asap/variant-CADI/tmp/diseaseNameUpdates$time_stamp.txt";
-  #on file submit
+    #on file submit
     if($this->input->post('file-expert'))
     {
       $this->load->library('upload');
@@ -459,12 +356,9 @@ class Variations extends MY_Controller {
       $oldFileLocation = "/asap/variant-CADI/tmp/diseaseNameUpdates$time_stamp.txt";
       $updateFileLocation = "/asap/variant-CADI/tmp/expertFile$time_stamp.txt";
       $this->variations_model->expert_curation($finalFileLocation, $oldFileLocation, $updateFileLocation);    
-      
-      $returned = $this->variations_model->UploadCADIData($finalFileLocation);
-      //die(print_r($returned));
-      #array_push($retunArray, "HELLO!");
-      #die(print_r($returnArray));
       #upload file data into database!!!
+      $this->variations_model->UploadCADIData($finalFileLocation);
+      $this->variations_model->remove_variantCADI_files($time_stamp);
       redirect("variations/unreleased");
     }
     $this->load->view($this->editor_layout,$data);
