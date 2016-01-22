@@ -1789,6 +1789,16 @@ EOF;
   /**
   * variant-CADI functions
   **/
+  /**
+  * Run Annotation Pipeline
+  *
+  * Takes the timestamp associated with this submit and the list
+  * of genes submitted and runs a series of scripts to collect
+  * and annotate variants associated with the genes submitted.
+  *
+  * @author Andrea Hallier
+  * @input timeStamp, genesFile
+  */
   public function run_annotation_pipeline($timeStamp, $genesFile){
     $regionsFile = "/asap/cordova_pipeline/myregions".$timeStamp.".txt";
     $variantsFile = "/asap/cordova_pipeline/myvariants".$timeStamp.".txt";
@@ -1809,6 +1819,16 @@ EOF;
 
     return $timeStamp;
   }
+  /**
+  * Get Disease Names
+  *
+  * Generates a new file from the pipeline output that removes
+  * unaccepted characters in gene names. It returns a list of 
+  * unique gene names found in the cleaned file.
+  *
+  * @author Andrea Hallier
+  * @input oldFile, newFile
+  */
   public function get_disease_names($oldFile, $newFile){
     $file = fopen($oldFile, "r");
     $cleanedFile = fopen($newFile, "w");
@@ -1826,6 +1846,17 @@ EOF;
     $uniqueDiseases = array_unique($diseaseNames);
     return $uniqueDiseases;
   }
+  /**
+  * Update Disease Names
+  *
+  * Takes the user input from the normralize nomenclature form, the list of 
+  * unique diseases determeined prviously and file paths to create new files
+  * and read from old files.The old file informations and the submitted names
+  * are used to create a new updated file with new disease names.
+  *
+  * @author Andrea Hallier
+  * @input POST, uniqueDiseases, nameUpdatesFile, oldFileLocation, newFileLocation
+  */
   public function update_disease_names($_POST, $uniqueDiseases, $nameUpdatesFile, $oldFileLocation,  $newFileLocation){
     $submittedNameUpdates = fopen($nameUpdatesFile, "w");
     foreach($uniqueDiseases as $disease){
@@ -1847,6 +1878,16 @@ EOF;
     $returnVal = $this->update_variant($matchLocationUpdate, $matchLocationOld, $newFileLocation, $oldFileLocation, $updateFileLocation, $replacementPairs);
     return $returnVal;
   }
+  /**
+  * Expert Curation
+  *
+  * Takes three file locations. The old file, the file containing changes to be applied and
+  * a location for the new file. The old and update file are read and a new file is produced
+  * with the changes applied.
+  *
+  * @author Andrea Hallier
+  * @input newFileLocation, oldFileLocation, updateFileLocation
+  */
   public function expert_curation($newFileLocation, $oldFileLocation, $updateFileLocation){
     $updateDisease = 3;
     $updatePathogenicity = 2;
@@ -1864,6 +1905,30 @@ EOF;
     
     return $newFileLocation;
   }
+  /**
+  * Update Variant
+  *
+  * This function is very simmilar to a database update. It finds the corresponding entry
+  * the user wants to update and updates the list of entrys to that reccord the user specifies.
+  *
+  * matchLocationUpdateFile:The index of the vcf to look for an entry match,
+  *                         in most cases this is variant name or id.
+  * matchLocationOldFile:Same as above but the corresponding index in the old file.
+  * newFileLocation: Location to write updated file information to.
+  * oldFileLocation: Location to find old file at.
+  * updateFileLocation: Location to find data used to update the old file.
+  * replacementPairs: An array of pairs of numbers corresponding to the index of
+  *                     an element of interest in the old entry and the update entry.
+  *     For example: If we wanted to update disease name. The index
+  *                   of the disease name in the old file line is 7
+  *                   and the index where disease name can be found in
+  *                   the update file is 3, the pair would be (3,7). Many
+  *                   of these relationships may be passed.
+  *
+  * 
+  * @author Andrea Hallier
+  * @input $matchLocationUpdateFile, $matchLocationOldFile, $newFileLocation, $oldFileLocation, $updateFileLocation, $replacementPairs
+  */
   public function update_variant($matchLocationUpdateFile, $matchLocationOldFile, $newFileLocation, $oldFileLocation, $updateFileLocation, $replacementPairs){
     $oldFile = fopen($oldFileLocation, "r");
     $updateFile = fopen($updateFileLocation, "r");
@@ -1905,6 +1970,7 @@ EOF;
     }
     return $returnArray;
   }
+  
   public function equals_ignore_case($s, $t) {
     return strtolower($s) == strtolower($t); 
   }
