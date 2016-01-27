@@ -195,50 +195,6 @@ border-bottom:1px solid #DDD;
 padding:1px 3px;
 }
 
-/* Evidence summary */
-#evidence {
-float:right;
-border-radius: 5px; 
--moz-border-radius: 5px;
--webkit-border-radius: 5px;
-padding:5px;
-}
-#evidence table {
-font-size:0.7em;
-width:100%;
-border-top:1px solid #DDD;
-border-right:1px solid #DDD;
-}
-#evidence table th {
-width:140px;
-background:#e6e6e6;
-border-bottom:1px solid #DDD;
-text-align:left;
-padding:1px 3px;
-}
-#evidence table td {
-background:#FFF;
-border-bottom:1px solid #DDD;
-padding:1px 3px;
-}
-#evidence table td img {
-margin:0 0 0 20px;
-}
-.evidence-least {
-float:left;
-display:block;
-width:20px;
-color:#CCC;
-}
-.evidence-most {
-float:right;
-display:block;
-width:20px;
-color:#CCC;
-padding:0 3px 0 0;
-}
-
-
 /* Variant scores */
 #scores table {
 font-size:0.7em;
@@ -292,13 +248,12 @@ display:none;
 font-weight:bold;
 display:block;
 float:left;
-width:45px;
-height:20px;
+width:60px;
+height:35px;
 margin:0 5px 0 0;
 }
 #frequency table tbody td span {
 display:block;
-width:200px;
 color:#999;
 font-size:0.95em;
 }
@@ -335,7 +290,7 @@ margin:0 0 3px 0;
 font-weight:bold;
 display:block;
 float:left;
-height:10px;
+height:25px;
 margin:0 5px 0 0;
 }
 #frequency-small div strong {display:none;}

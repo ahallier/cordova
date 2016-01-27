@@ -6,7 +6,7 @@
  *
  * @package		CodeIgniter
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2008 - 2011, EllisLab, Inc.
+ * @copyright	Copyright (c) 2008 - 2014, EllisLab, Inc.
  * @license		http://codeigniter.com/user_guide/license.html
  * @link		http://codeigniter.com
  * @since		Version 1.0
@@ -726,9 +726,7 @@ class CI_Input {
 	*/
 	function _clean_input_keys($str)
 	{
-    //added the % and + to the regex to allow 
-    //for submit from norm_nomenclature
-		if ( ! preg_match("/^[a-z0-9%+:_\/-]+$/i", $str))
+		if ( ! preg_match("/^[a-z0-9:_\/-]+$/i", $str))
 		{
 			exit('Disallowed Key Characters.');
 		}

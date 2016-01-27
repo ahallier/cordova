@@ -142,15 +142,15 @@ $config['tables']['versions'] = 'versions'; // i.e. 'versions'
 |--------------------------------------------------------------------------
 |
 | Specify the available pathogenicity options such as 'Pathogenic',
-| 'Non-pathogenic', 'Unknown significance', etc.
+| 'Benign', 'Unknown significance', etc.
 |
 */
 $config['pathogenicities'] = array(
    'Unknown significance',
-   'Possibly pathogenic',
-   'Predicted non-pathogenic',
-   'Non-pathogenic',
-   'Probable non-pathogenic',
+   'Benign',
+   'Probable benign',
+   'Predicted benign',
+   'Predicted pathogenic',
    'Probable pathogenic',
    'Pathogenic',
 );
@@ -170,19 +170,6 @@ $config['frequencies'] = array(
    '1000genomes', // 1000 Genomes
 //   'otoscope',    // OtoSCOPE
 );
-
-/*
-|--------------------------------------------------------------------------
-| Variant Evidence Summary
-|--------------------------------------------------------------------------
-|
-| Display/hide the variant evidence summary box on the variant page.
-|
-| display = TRUE
-| hide = FALSE
-|
-*/
-$config['variant_evidence_summary'] = FALSE;
 
 /*
 |--------------------------------------------------------------------------
@@ -283,12 +270,36 @@ $config['api']['variantlist'] = array( // type=variantlist
     'gerp_nr',
     'gerp_rs',
     'gerp_pred',
-    'otoscope_ac',
-    'otoscope_an',
+    'otoscope_aj_ac',
+    'otoscope_aj_af',
+    'otoscope_co_ac',
+    'otoscope_co_af',
+    'otoscope_us_ac',
+    'otoscope_us_af',
+    'otoscope_jp_ac',
+    'otoscope_jp_af',
+    'otoscope_es_ac',
+    'otoscope_es_af',
+    'otoscope_tr_ac',
+    'otoscope_tr_af',
+    'otoscope_all_ac',
+    'otoscope_all_af',
     'evs_ea_ac',
-    'evs_ea_an',
+    'evs_ea_af',
     'evs_aa_ac', 
-    'evs_aa_an',
+    'evs_aa_af',
+    'evs_all_ac', 
+    'evs_all_af',
+    'tg_afr_ac',
+    'tg_afr_af',
+    'tg_eur_ac',
+    'tg_eur_af',
+    'tg_amr_ac',
+    'tg_amr_af',
+    'tg_asn_ac',
+    'tg_asn_af',
+    'tg_all_ac',
+    'tg_all_af',
     'id',
 );
 

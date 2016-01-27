@@ -25,21 +25,22 @@ class Genes_model extends MY_Model {
    *
    * @author Sean Ephraim
    * @access public
-   * @param char First letter of the gene
+   * @param string $f_letter
+   *    First letter of the gene
+   * @param boolean $include_queue_genes
+   *    Include/exclude the genes that are only in the queue
+   * @param string $table
+   *    Table from which to retrieve genes
    * @return array Gene names
    */
-  public function get_genes($f_letter = NULL, $table = NULL) {
+  public function get_genes($f_letter = NULL, $include_queue_genes = TRUE, $table = NULL) {
     // Only get genes of a certain letter
     if ($f_letter) {
       $this->db->like('gene', $f_letter, 'after');
     }
 
     if ($table === NULL) {
-      $table = $this->tables['vd_live'];
-      $include_queue_genes = TRUE;
-    }
-    else {
-      $include_queue_genes = FALSE;
+      $table = $this->tables['variant_count'];
     }
 
     $query = $this->db->distinct()
@@ -74,6 +75,7 @@ class Genes_model extends MY_Model {
     sort($genes);
     return $genes;
   }
+
 }
 
 /* End of file genes_model.php */

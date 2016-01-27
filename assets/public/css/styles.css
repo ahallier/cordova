@@ -281,8 +281,31 @@ list-style-type:none;
 margin:0 0 0 10px;
 }
 
-
 /* M U T A T I O N   T A B L E S */
+#show-unknown {
+position: relative;
+width: 100%;
+height: 40px;
+margin-top: 8px;
+}
+#show-unknown a:link,
+#show-unknown a:visited {
+position: absolute;
+right: 0px;
+border: 2px solid rgb(221,221,221);
+color: rgb(0,0,0);
+background: rgb(230,230,230);
+text-decoration: none;
+padding: 5px 10px;
+-webkit-border-radius: 5px;
+   -moz-border-radius: 5px;
+        border-radius: 5px;
+}
+#show-unknown a:hover {
+background: #C0C0C0;
+color: white;
+border-color: #C0C0C0;
+}
 #mutation-tables {
 margin-left:1px;
 padding:10px 0 10px 0;
@@ -328,6 +351,10 @@ border: 0px;
 }
 #mutation-tables fieldset legend span a:hover {
 color:#000;
+}
+
+.variant-list-container {
+  display: none;
 }
 
 /* A single table */
@@ -440,6 +467,19 @@ color:#666;
 }
 #mutation-tables small.download-gene a:hover {
 color:#000;
+}
+/* Loading modal */
+#loading-modal {
+  text-align: center;
+}
+#loading-modal div {
+  padding: 8px;
+  display: inline-block;
+  color: #000000;
+  background: rgba(0,0,0,0.2);
+  -webkit-border-radius: 5px;
+     -moz-border-radius: 5px;
+          border-radius: 5px;
 }
 
 /* P A G E  C O N T E N T */
@@ -563,7 +603,6 @@ padding:0;
 }
 #content ul li {
 margin:3px 0;
-list-style-image:url(../img/sort-bullet-add.png);
 }
 #content table {
 width:100%;
@@ -694,9 +733,9 @@ padding:0 0 10px 0;
 padding:5px;
 background:#EEE;
 border:1px solid #CCC;
-border-radius: 10px;
--moz-border-radius: 10px;
 -webkit-border-radius: 10px;
+   -moz-border-radius: 10px;
+        border-radius: 10px;
 }
 #content-help .float-left {
 float:left;
@@ -850,17 +889,17 @@ font-weight:bold;
 
 /* Rotated box */
 .jquery-shadow-rotated :first-child:before {
-    content:"";
-    position:absolute;
-    z-index:-1;
-    top:0;
-    bottom:0;
-    left:0;
-    right:0;
-    background:#fff;
-    -webkit-box-shadow:0 1px 4px rgba(0, 0, 0, 0.3), 0 0 60px rgba(0, 0, 0, 0.1) inset;
-       -moz-box-shadow:0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;
-            box-shadow:0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;
+  content:"";
+  position:absolute;
+  z-index:-1;
+  top:0;
+  bottom:0;
+  left:0;
+  right:0;
+  background:#fff;
+  -webkit-box-shadow:0 1px 4px rgba(0, 0, 0, 0.3), 0 0 60px rgba(0, 0, 0, 0.1) inset;
+     -moz-box-shadow:0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;
+          box-shadow:0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;
 }
 
 p.label-radio-pair,

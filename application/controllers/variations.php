@@ -16,6 +16,9 @@ class Variations extends MY_Controller {
 	 */
   public $tables = array();
 
+  /**
+   * Constructor
+   */
   public function __construct() {
     parent::__construct();
 
@@ -42,7 +45,9 @@ class Variations extends MY_Controller {
    *
    * @author Sean Ephraim
    * @access public
-   * @param  string  Name of gene
+   * @param  string $gene
+   *    Name of gene
+   * @return void
    */
   public function show_variants($gene) {
     redirect_all_nonmembers();
@@ -51,7 +56,9 @@ class Variations extends MY_Controller {
     $data['content'] = 'variations/index';
 
     $data['gene'] = $gene;
-    $data['rows'] = $this->variations_model->get_variants_by_gene($gene);
+    // Columns to select for this page
+    $columns = 'id,hgvs_protein_change,hgvs_nucleotide_change,variantlocale,variation,pathogenicity,disease';
+    $data['rows'] = $this->variations_model->get_variants_by_gene($gene, $columns);
 
     $this->load->view($this->editor_layout, $data);
   }
@@ -63,7 +70,8 @@ class Variations extends MY_Controller {
    *
    * @author Sean Ephraim
    * @access public
-   * @param int ID number of variant
+   * @param int $id ID number of variant
+   * @return void
    */
   public function edit($id) {
     redirect_all_nonmembers();
@@ -150,6 +158,7 @@ class Variations extends MY_Controller {
    *
    * @author Sean Ephraim
    * @access public
+   * @return void
    */
   public function add() {
     redirect_all_nonmembers();
@@ -372,8 +381,9 @@ class Variations extends MY_Controller {
    *
    * @author Sean Ephraim
    * @access public
-   * @param string Display mode: 'page' (for multiple variations) or 'variation' (for single)
-   * @param int Either the page number or the variation's unique ID (depending on the mode)
+   * @param string $mode Display mode: 'page' (for multiple variations) or 'variation' (for single)
+   * @param int $id Either the page number or the variation's unique ID (depending on the mode)
+   * @return void
    */
   public function show_unreleased($mode = 'page', $id = 1) {
     redirect_all_nonmembers();
@@ -391,17 +401,17 @@ class Variations extends MY_Controller {
       $page_num = $id;
       $this->load->library('pagination');
       $config['base_url'] = site_url('variations/unreleased/page');
-      $config['total_rows'] = $this->variations_model->num_variants_in_queue();
+      $config['total_rows'] = $this->variations_model->num_unreleased();
       $config['per_page'] = 100; 
       $this->pagination->initialize($config); 
       $data['page_links'] = $this->pagination->create_links();
       // Get variant IDs within specified range
       $start_pos = ($page_num - 1)*$config['per_page'];
-      $variant_ids = $this->variations_model->get_ids_within_range($this->tables['vd_queue'], $start_pos, $config['per_page']);
+      $reviews = $this->variations_model->get_ids_within_range($this->tables['reviews'], $start_pos, $config['per_page'], TRUE);
       // Query variant changes individually, then push them onto array
       $data['variants'] = array();
-      foreach ($variant_ids as $variant_id) {
-        $changes = $this->variations_model->get_unreleased_changes($variant_id);
+      foreach ($reviews as $review) {
+        $changes = $this->variations_model->get_unreleased_changes($review->variant_id);
         array_push($data['variants'], array_shift($changes)); // Take first (and only) result, push onto array
       }
     }
@@ -419,8 +429,8 @@ class Variations extends MY_Controller {
       else {
         // Header for multiple variations
         $range_limit_1 = $start_pos + 1;
-        $range_limit_2 = $start_pos + count($variant_ids);
-        $num_unreleased = $this->variations_model->num_variants_in_queue();
+        $range_limit_2 = $start_pos + count($reviews);
+        $num_unreleased = $this->variations_model->num_unreleased();
         $data['header'] = "$num_unreleased Unreleased changes | Showing $range_limit_1 - $range_limit_2";
       }
     }
@@ -446,6 +456,7 @@ class Variations extends MY_Controller {
    *
    * @author Sean Ephraim
    * @access public
+   * @return void
    */
   public function submit_changes() {
     redirect_all_nonmembers();
@@ -563,20 +574,45 @@ class Variations extends MY_Controller {
   /** 
    * Letter
    *
-   * Create the table of variants for the selected letter.
+   * Display all genes start with a certain letter
    *
-   * @author Zach Ladlie, Sean Ephraim
+   * @author Sean Ephraim
    * @access public
-   * @param  char  The gene's starting letter
+   * @param  string $letter
+   *    The gene's starting letter
+   * @return void
    */
   public function letter($letter) {
     $data['title'] = $letter;
     $data['content'] = 'variations/letter';
 
-    $gene = $this->variations_model->load_gene($letter, $this->variations_model->version);
-    $data['result_table'] = $this->variations_model->format_variants_table($gene);
+    $this->load->model('genes_model');
+    $this->load->helper('genes');
+    $data['genes'] = $this->genes_model->get_genes($letter, FALSE);
 
     $this->load->view($this->public_layout, $data);
+  }
+
+  /** 
+   * Variations_table
+   *
+   * Load all variations for a specific gene.
+   *
+   * @author Sean Ephraim
+   * @access public
+   * @param  string $gene Gene name
+   * @return void
+   */
+  public function variations_table($gene) {
+    $data['title'] = $gene;
+    $data['content'] = 'variations/gene';
+
+    $data['gene'] = $gene;
+    // Columns to select for this page
+    $columns = 'id,hgvs_protein_change,hgvs_nucleotide_change,variantlocale,variation,pathogenicity,disease';
+    $data['variations'] = $this->variations_model->get_variants_by_gene($gene, $columns);
+
+    $this->load->view('variations/gene', $data);
   }
 
   /** 
@@ -586,10 +622,11 @@ class Variations extends MY_Controller {
    * pChart is required to load the frequencies.
    * For more info, refer to the frequency() function.
    *
-   * @author   Sean Ephraim
-   * @access   public
-   * @param    int     Variant's unique ID
-   * @return   void
+   * @author Sean Ephraim
+   * @access public
+   * @param  int $id
+   *    Variant's unique ID
+   * @return void
    */
   public function show_variant($id) {
     // Install pChart (if it's missing)
@@ -630,7 +667,7 @@ class Variations extends MY_Controller {
    *
    * @author Sean Ephraim, Nikhil Anand
    * @access public
-   * @param  int   Variant's unique ID
+   * @param  int $id Variant's unique ID
    * @return void
    */
   public function download_variant_pdf($id) {
@@ -689,10 +726,10 @@ class Variations extends MY_Controller {
   * The pChart library that can be found in application/third_party/pChart/
   * More info on pChart at http://www.pchart.net/
   *
-  * @author   Nikhil Anand
-  * @author   Sean Ephraim
-  * @access   public
-  * @return   img     An image of a bar graph.
+  * @author Nikhil Anand
+  * @author Sean Ephraim
+  * @access public
+  * @return void
   */
   public function frequency() {
     // this is needed to allow stroke() to modify headers
