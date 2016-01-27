@@ -86,12 +86,13 @@ $attributes = array('id'    => 'form_upload_genes',
    foreach ($uniqueDiseases as $disease){
      echo
      "<div class='control-group'>
-       <label class='control-label' for='".$disease."'>".$disease."</label>
+       <label class='control-label' for='".$disease."'>".urldecode($disease)."</label>
         <div class='controls'>
           <input class='align-right' type='text' name='".$disease."' id='".$disease."'></input>
         </div>
-      </div>";
-  }?>
+      </div>";   
+   }
+  ?>
 </div>
 <div>
   <input type="submit" name="submit" id="submit" value="submit"></input>

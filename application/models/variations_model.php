@@ -1837,9 +1837,10 @@ EOF;
       $explodedOldLine = explode("\t", $line);
       if(!empty($explodedOldLine[7])){
         $diseaseName = $explodedOldLine[7];
-        $cleanedDiseaseName = preg_replace("/[^A-Za-z0-9 ]/", '', $diseaseName);
-        $explodedOldLine[7] = $cleanedDiseaseName;
-        array_push($diseaseNames, $cleanedDiseaseName);
+        //$cleanedDiseaseName = preg_replace("/[^A-Za-z0-9 ]/", '', $diseaseName);
+        $encodedDiseaseName = urlencode($diseaseName);
+        $explodedOldLine[7] = $encodedDiseaseName;
+        array_push($diseaseNames, $encodedDiseaseName);
       }
       fwrite($cleanedFile, implode("\t", $explodedOldLine));
     }
