@@ -1823,7 +1823,8 @@ EOF;
     $diseaseNames = array();
     while($line = fgets($file)){
       $explodedOldLine = explode("\t", $line);
-      if(!empty($explodedOldLine[7])){
+      //grab all uniqe disease names, minus the header line
+      if(!empty($explodedOldLine[7]) && (strcmp($explodedOldLine[0], "id") !== 0)){
         $diseaseName = $explodedOldLine[7];
         //$cleanedDiseaseName = preg_replace("/[^A-Za-z0-9 ]/", '', $diseaseName);
         $encodedDiseaseName = urlencode($diseaseName);
@@ -1977,8 +1978,9 @@ EOF;
             array_push($lineArray, " ");
           }
         }
-        //assign everything to data array to be put into database
-        $data = array('variation' => $lineArray[1],
+        if(strcmp($lineArray[0], "id") !== 0){
+          //assign everything to data array to be put into database
+          $data = array('variation' => $lineArray[1],
                       'gene' => $lineArray[2],
                       'hgvs_nucleotide_change' => $lineArray[3],
                       'hgvs_protein_change' => $lineArray[4],
@@ -2035,8 +2037,9 @@ EOF;
                       'tg_asn_af'=> $lineArray[55],
                       'tg_all_ac'=> $lineArray[56],
                       'tg_all_af' => $lineArray[57] );
-        $id = $this->create_new_variant($variation, FALSE, TRUE, $data);
+          $id = $this->create_new_variant($variation, FALSE, TRUE, $data);
       }
+    }
   }
   public function remove_variantCADI_files($time_stamp){
     exec("rm /asap/cordova_pipeline/*$time_stamp*.txt");
