@@ -266,7 +266,7 @@ class Variations extends MY_Controller {
       $this->session->set_flashdata('genes', $genesOrFile);
       $file_path = "/asap/cordova_pipeline/mygenes$time_stamp.txt";
       $this->session->set_flashdata('file_path', $file_path);
-      if($fh = fopen("/asap/cordova_pipeline/mygenes$time_stamp.txt", 'w+')){ 
+      if($fh = fopen("/Shared/utilities/cordova_pipeline_v2/mygenes$time_stamp.txt", 'w+')){ 
         fwrite($fh, $genesOrFile);
         fclose($fh);
         redirect('variations/query_public_database/'.$time_stamp);
@@ -283,7 +283,7 @@ class Variations extends MY_Controller {
       $this->session->set_flashdata('genes', $genesOrFile);
       $file_path = "/asap/cordova_pipeline/mygenes$time_stamp.txt"; 
       $this->session->set_flashdata('file_path', $file_path);
-      move_uploaded_file($_FILES["file"]["tmp_name"], "/asap/cordova_pipeline/mygenes$time_stamp.txt");
+      move_uploaded_file($_FILES["file"]["tmp_name"], "/Shared/utilities/cordova_pipeline_v2/mygenes$time_stamp.txt");
       redirect('variations/query_public_database/'.$time_stamp);
     }
     $this->load->view($this->editor_layout, $data);
@@ -305,7 +305,7 @@ class Variations extends MY_Controller {
     $data['content'] = 'variations/query_public_database';
     $genes = $this->session->flashdata('genes');
     $data['genes'] = $genes;
-    $genesFile = "/asap/cordova_pipeline/mygenes$time_stamp.txt";
+    $genesFile = "/Shared/utilities/cordova_pipeline_v2/mygenes$time_stamp.txt";
     $data['time_stamp'] = $time_stamp;
     $this->load->library('email');
     $this->email->clear();
@@ -321,7 +321,8 @@ class Variations extends MY_Controller {
 
     if($this->input->post('submit'))
     {
-      $this->variations_model->run_annotation_pipeline($time_stamp, $genesFile);     
+      $errors = $this->variations_model->run_annotation_pipeline($time_stamp, $genesFile);     
+      //die(print_r($errors));
       $this->email->send();
       /*ADD SUCCESS OR INFO MESSAGE HERE*/
     }

@@ -1801,11 +1801,17 @@ EOF;
     $finalFile = "/asap/cordova_pipeline/myvariants.final".$timeStamp.".txt";
     $CWD='/asap/cordova_pipeline';
     $KAFEEN='/asap/kafeen';
-    $RUBY="/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby";
-
-    exec("nohup sh -c '$RUBY /asap/cordova_pipeline/genes2regions.rb $genesFile &> $regionsFile && $RUBY /asap/cordova_pipeline/regions2variants.rb $regionsFile &> $variantsFile && $RUBY /asap/cordova_pipeline/map.rb $variantsFile &> $mapFile ; cut -f1 $mapFile>$listFile && $RUBY /asap/kafeen/kafeen.rb --progress -i $listFile -o $kafeenFile && $RUBY /asap/cordova_pipeline/annotate_with_hgmd_clinvar.rb $kafeenFile $mapFile &> $hgmd_clinvarFile && cut -f-6  $kafeenFile > $f1File && cut -f2-4 $hgmd_clinvarFile > $f2File && cut -f10- $kafeenFile > $f3File && paste $f1File $f2File > $f4File && paste $f4File $f3File > $finalFile' &");
-
+    //$RUBY="/usr/local/rvm/rubies/ruby-2.1.5/bin/ruby";
+    $RUBY = $this->config->item('ruby_path');
+    $annotation_path = $this->config->item('annotation_path');
+    $PATH = getenv('PATH');
+    //exec("nohup sh -c '$RUBY /asap/cordova_pipeline/genes2regions.rb $genesFile &> $regionsFile && $RUBY /asap/cordova_pipeline/regions2variants.rb $regionsFile &> $variantsFile && $RUBY /asap/cordova_pipeline/map.rb $variantsFile &> $mapFile ; cut -f1 $mapFile>$listFile && $RUBY /asap/kafeen/kafeen.rb --progress -i $listFile -o $kafeenFile && $RUBY /asap/cordova_pipeline/annotate_with_hgmd_clinvar.rb $kafeenFile $mapFile &> $hgmd_clinvarFile && cut -f-6  $kafeenFile > $f1File && cut -f2-4 $hgmd_clinvarFile > $f2File && cut -f10- $kafeenFile > $f3File && paste $f1File $f2File > $f4File && paste $f4File $f3File > $finalFile' &");
+    //exec("nohup sh -c '$RUBY /Shared/utilities/cordova_pipeline_v2/pipeline.rb $genesFile' &");
+    //$op = system("$RUBY /Shared/utilities/cordova_pipeline_v2/pipeline.rb $genesFile &> outPutLog.txt",$returns);
+    //exec("export PATH=$PATH:/Shared/utilities/vcftools_0.1.13/bin/");
+    exec("cd $annotation_path && export PATH=$PATH:/Shared/utilities/vcftools_0.1.13/bin/:/Shared/utilities/bin/ && $RUBY pipeline.rb $genesFile &> outPutLog$timeStamp.txt && gunzip /Shared/utilities/cordova_pipeline_v2/mygenes$timeStamp.vcf.gz && vcf-to-tab < /Shared/utilities/cordova_pipeline_v2/mygenes$timeStamp.vcf &> /Shared/utilities/cordova_pipeline_v2/mygenes$timeStamp.tab");
     return $timeStamp;
+    //return $returns;
   }
   /**
   * Get Disease Names
