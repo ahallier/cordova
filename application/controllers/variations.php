@@ -264,7 +264,7 @@ class Variations extends MY_Controller {
       $data['time_stamp'] = $time_stamp;
       $genesOrFile = $this->input->post('text');
       $this->session->set_flashdata('genes', $genesOrFile);
-      $file_path = "/asap/cordova_pipeline/mygenes$time_stamp.txt";
+      $file_path = "$annotation_path/mygenes$time_stamp.txt";
       $this->session->set_flashdata('file_path', $file_path);
       if($fh = fopen("/Shared/utilities/cordova_pipeline_v2/mygenes$time_stamp.txt", 'w+')){ 
         fwrite($fh, $genesOrFile);
@@ -281,7 +281,7 @@ class Variations extends MY_Controller {
       $this->upload->set_allowed_types('*');
       $genesOrFile = $_FILES["file"]["name"];
       $this->session->set_flashdata('genes', $genesOrFile);
-      $file_path = "/asap/cordova_pipeline/mygenes$time_stamp.txt"; 
+      $file_path = "$annotation_path/mygenes$time_stamp.txt"; 
       $this->session->set_flashdata('file_path', $file_path);
       move_uploaded_file($_FILES["file"]["tmp_name"], "/Shared/utilities/cordova_pipeline_v2/mygenes$time_stamp.txt");
       redirect('variations/query_public_database/'.$time_stamp);
@@ -303,6 +303,7 @@ class Variations extends MY_Controller {
     //redirect_all_nonmembers();
     $data['title'] = "Query Public Databases";
     $data['content'] = 'variations/query_public_database';
+    $annotation_path = $this->config->item('annotation_path');
     $genes = $this->session->flashdata('genes');
     $data['genes'] = $genes;
     $genesFile = "/Shared/utilities/cordova_pipeline_v2/mygenes$time_stamp.txt";
@@ -333,16 +334,17 @@ class Variations extends MY_Controller {
     //redirect_all_nonmembers();
     $data['title'] = "Normalize Nomenclature";
     $data['content'] = 'variations/norm_nomenclature';
-    $mostReacentFile = "/asap/cordova_pipeline/myvariants.final$time_stamp.txt";
-    $cleanedFile = "/asap/variant-CADI/tmp/cleanedDiseaseNames$time_stamp.txt";
+    $annotation_path = $this->config->item('annotation_path');
+    $mostReacentFile = "$annotation_path/mygenes$time_stamp.final";
+    $cleanedFile = "$annotation_path/cleanedDiseaseNames$time_stamp.txt";
     $uniqueDiseases = $this->variations_model->get_disease_names($mostReacentFile, $cleanedFile);
     $data['uniqueDiseases'] = $uniqueDiseases;
     $data['time_stamp'] = $time_stamp;
     //$submitedDiseaseNameFile = fopen("/ahallier/tmp/submitedDiseaseNames.txt");
     if($this->input->post('submit')){
-      $diseaseNameUpdatesFileLocation = "/asap/variant-CADI/tmp/submittedDiseaseNames$time_stamp.txt";
-      $oldFileLocation = "/asap/variant-CADI/tmp/cleanedDiseaseNames$time_stamp.txt";
-      $newFileLocation = "/asap/variant-CADI/tmp/diseaseNameUpdates$time_stamp.txt";
+      $diseaseNameUpdatesFileLocation = "$annotation_path/submittedDiseaseNames$time_stamp.txt";
+      $oldFileLocation = "$annotation_path/cleanedDiseaseNames$time_stamp.txt";
+      $newFileLocation = "$annotation_path/diseaseNameUpdates$time_stamp.txt";
       $updatedDiseaseNamesFile = $this->variations_model->update_disease_names($_POST, $uniqueDiseases, $diseaseNameUpdatesFileLocation, $oldFileLocation, $newFileLocation);
       redirect("/variations/expert_curration/$time_stamp");
     }
@@ -355,19 +357,21 @@ class Variations extends MY_Controller {
     $data['title'] = "Expert Curration";
     $data['content'] = 'variations/expert_curration';
     $data['time_stamp'] = $time_stamp;
-    $data['variant_file'] = "/asap/variant-CADI/tmp/diseaseNameUpdates$time_stamp.txt";
+    $annotation_path = $this->config->item('annotation_path');
+    $data['variant_file'] = "$annotation_path/diseaseNameUpdates$time_stamp.txt";
     #on file submit
     if($this->input->post('file-expert'))
     {
       $this->load->library('upload');
       $this->upload->set_allowed_types('*');
-      move_uploaded_file($_FILES["file"]["tmp_name"], "/asap/variant-CADI/tmp/expertFile$time_stamp.txt");
-      $finalFileLocation = "/asap/variant-CADI/tmp/expertCurrated.final$time_stamp.txt";
-      $oldFileLocation = "/asap/variant-CADI/tmp/diseaseNameUpdates$time_stamp.txt";
-      $updateFileLocation = "/asap/variant-CADI/tmp/expertFile$time_stamp.txt";
+      move_uploaded_file($_FILES["file"]["tmp_name"], "$annotation_path/expertFile$time_stamp.txt");
+      $finalFileLocation = "$annotation_path/expertCurrated.final$time_stamp.txt";
+      $oldFileLocation = "$annotation_path/diseaseNameUpdates$time_stamp.txt";
+      $updateFileLocation = "$annotation_path/expertFile$time_stamp.txt";
       $this->variations_model->expert_curation($finalFileLocation, $oldFileLocation, $updateFileLocation);    
       #upload file data into database!!!
-      $this->variations_model->UploadCADIData($finalFileLocation);
+      $returned = $this->variations_model->UploadCADIData($finalFileLocation);
+      //die($returned);
       $this->variations_model->remove_variantCADI_files($time_stamp);
       redirect("variations/unreleased");
     }

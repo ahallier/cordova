@@ -1788,6 +1788,7 @@ EOF;
   * @input timeStamp, genesFile
   */
   public function run_annotation_pipeline($timeStamp, $genesFile){
+    $this->load->database();
     $regionsFile = "/asap/cordova_pipeline/myregions".$timeStamp.".txt";
     $variantsFile = "/asap/cordova_pipeline/myvariants".$timeStamp.".txt";
     $mapFile = "/asap/cordova_pipeline/myvariants.map".$timeStamp.".txt";
@@ -1805,11 +1806,63 @@ EOF;
     $RUBY = $this->config->item('ruby_path');
     $annotation_path = $this->config->item('annotation_path');
     $PATH = getenv('PATH');
+    $vd_queue = $this->tables['vd_queue'];
     //exec("nohup sh -c '$RUBY /asap/cordova_pipeline/genes2regions.rb $genesFile &> $regionsFile && $RUBY /asap/cordova_pipeline/regions2variants.rb $regionsFile &> $variantsFile && $RUBY /asap/cordova_pipeline/map.rb $variantsFile &> $mapFile ; cut -f1 $mapFile>$listFile && $RUBY /asap/kafeen/kafeen.rb --progress -i $listFile -o $kafeenFile && $RUBY /asap/cordova_pipeline/annotate_with_hgmd_clinvar.rb $kafeenFile $mapFile &> $hgmd_clinvarFile && cut -f-6  $kafeenFile > $f1File && cut -f2-4 $hgmd_clinvarFile > $f2File && cut -f10- $kafeenFile > $f3File && paste $f1File $f2File > $f4File && paste $f4File $f3File > $finalFile' &");
     //exec("nohup sh -c '$RUBY /Shared/utilities/cordova_pipeline_v2/pipeline.rb $genesFile' &");
     //$op = system("$RUBY /Shared/utilities/cordova_pipeline_v2/pipeline.rb $genesFile &> outPutLog.txt",$returns);
     //exec("export PATH=$PATH:/Shared/utilities/vcftools_0.1.13/bin/");
-    exec("cd $annotation_path && export PATH=$PATH:/Shared/utilities/vcftools_0.1.13/bin/:/Shared/utilities/bin/ && $RUBY pipeline.rb $genesFile &> outPutLog$timeStamp.txt && gunzip /Shared/utilities/cordova_pipeline_v2/mygenes$timeStamp.vcf.gz && vcf-to-tab < /Shared/utilities/cordova_pipeline_v2/mygenes$timeStamp.vcf &> /Shared/utilities/cordova_pipeline_v2/mygenes$timeStamp.tab");
+    
+    //exec("cd $annotation_path && export PATH=$PATH:/Shared/utilities/vcftools_0.1.13/bin/:/Shared/utilities/bin/ && $RUBY pipeline.rb $genesFile &> outPutLog$timeStamp.txt && gunzip /Shared/utilities/cordova_pipeline_v2/mygenes$timeStamp.vcf.gz && vcf-to-tab < /Shared/utilities/cordova_pipeline_v2/mygenes$timeStamp.vcf &> /Shared/utilities/cordova_pipeline_v2/mygenes$timeStamp.tab");
+
+    //exec("cd $annotation_path && export PATH=$PATH:/Shared/utilities/vcftools_0.1.13/bin/:/Shared/utilities/bin/ && $RUBY pipeline.rb $genesFile &> outPutLog$timeStamp.txt && gunzip /Shared/utilities/cordova_pipeline_v2/mygenes$timeStamp.vcf.gz && vcftools --vcf mygenes$timeStamp.vcf --get-INFO ASAP_VARIANT --get-INFO GENE --get-INFO ASAP_HGVS_C --get-INFO ASAP_HGVS_P --get-INFO ASAP_LOCALE --get-INFO FINAL_PATHOGENICITY --get-INFO FINAL_DISEASE --out mygenes$timeStamp.tab &> vcftoolOUTPUT.txt && cut -f1,5- mygenes$timeStamp.tab.INFO -d'	' &> mygenes$timeStamp.final");
+    
+    $mysqlPassword = $this->db->password;
+    $mysqlUser = $this->db->username;
+    $queueTable = $this->tables['vd_queue'];
+    $resultsTable = $this->tables['reviews'];
+    $TSVfile = "$queueTable.tsv";
+    $database = $this->db->database;
+    $date = date("Y-m-d H:i:s"); 
+    
+    //$COLUMNS=("dbsnp","evs_all_ac","evs_all_an","evs_all_af","evs_ea_ac","evs_ea_an","evs_ea_af","evs_aa_ac","evs_aa_an","evs_aa_af","tg_all_ac","tg_all_an","tg_all_af","tg_afr_ac","tg_afr_an","tg_afr_af","tg_amr_ac","tg_amr_an","tg_amr_af","tg_eas_ac","tg_eas_an","tg_eas_af","tg_eur_ac","tg_eur_an","tg_eur_af","tg_sas_ac","tg_sas_an","tg_sas_af","otoscope_all_ac","otoscope_all_an","otoscope_all_af","otoscope_aj_ac","otoscope_aj_an","otoscope_aj_af","otoscope_co_ac","otoscope_co_an","otoscope_co_af","otoscope_us_ac","otoscope_us_an","otoscope_us_af","otoscope_jp_ac","otoscope_jp_an","otoscope_jp_af","otoscope_es_ac","otoscope_es_an","otoscope_es_af","otoscope_tr_ac","otoscope_tr_an","otoscope_tr_af","gene","sift_score","sift_pred","polyphen2_score","polyphen2_pred","lrt_score","lrt_pred,mutationtaster_score,mutationtaster_pred,gerp_rs,phylop_score,gerp_pred,phylop_pred,variation,hgvs_nucleotide_change,hgvs_protein_change,variantlocale,pathogenicity,disease,pubmed_id,comments,exac_afr_ac,exac_afr_an,exac_afr_af,exac_amr_ac,exac_amr_an,exac_amr_af,exac_eas_ac,exac_eas_an,exac_eas_af,exac_fin_ac,exac_fin_an,exac_fin_af,exac_nfe_ac,exac_nfe_an,exac_nfe_af,exac_oth_ac,exac_oth_an,exac_oth_af,exac_sas_ac,exac_sas_an,exac_sas_af,exac_all_ac,exac_all_an,exac_all_af");
+    $COLUMNS = "(id,gene,sift_score,sift_pred,polyphen2_score,polyphen2_pred,lrt_score,lrt_pred,mutationtaster_score,mutationtaster_pred,gerp_rs,phylop_score,gerp_pred,phylop_pred,variation,hgvs_nucleotide_change,hgvs_protein_change,variantlocale,pathogenicity,disease,pubmed_id,comments)";
+    exec("cd $annotation_path && export PATH=$PATH:/Shared/utilities/vcftools_0.1.13/bin/:/Shared/utilities/bin/ && $RUBY pipeline.rb $genesFile &> outPutLog$timeStamp.txt && gunzip mygenes$timeStamp.vcf.gz && bash convert_Cordova_VCF_to_mysqlimport_TSV.sh mygenes$timeStamp.vcf &> mygenes$timeStamp.final && cp mygenes$timeStamp.final $queueTable.tsv && cut -f 50-70 $queueTable.tsv > $queueTable.tsvcleaned");
+    
+    /*
+    $file = fopen("$annotation_path/$queueTable.tsvcleaned", "r");
+    //$numLines = count(file("$annotation_path/$queueTable.tsvcleaned"));
+    while($line = fgets($file)){
+      $data = explode("\t", $line);
+      $maxid = 0;
+      $row = $this->db->query("SELECT MAX(id) AS `maxid` FROM $queueTable")->row();
+      if ($row) {
+        $maxid = $row->maxid; 
+      }
+      $maxid = $maxid+1;
+      //$maxid = $numLines-$maxid;
+      if(sizeof($data)>10){
+        $entries = "'$maxid',";
+        foreach($data as $entry){
+          $entries = $entries."'".$entry."',"; 
+        }
+        $trimmedEntries = rtrim($entries, ",");
+        $sql = "INSERT INTO $queueTable $COLUMNS VALUES ($trimmedEntries)";
+        $this->db->query($sql);
+      }
+    }
+    $this->db->select('id');
+    $query = $this->db->get("$queueTable");
+    foreach ($query->result_array() as $row){
+      $sql = "INSERT INTO $resultsTable (variant_id, created) VALUES ('$row[id]','$date')";
+      $this->db->query($sql);
+    }
+    
+    //$db['development']['password'] = 'bUb78Nf7';
+    //$db['development']['database'] = 'rdvd_test2';
+    */
+    
+    
+    //exec("mysqlimport -u root -p -L rdvd_test2 variations_1.tsv");
     return $timeStamp;
     //return $returns;
   }
@@ -1833,11 +1886,12 @@ EOF;
       if(!empty($explodedOldLine[7]) && (strcmp($explodedOldLine[0], "id") !== 0)){
         $diseaseName = $explodedOldLine[7];
         //$cleanedDiseaseName = preg_replace("/[^A-Za-z0-9 ]/", '', $diseaseName);
-        $encodedDiseaseName = urlencode($diseaseName);
+        $encodedDiseaseName = urlencode(urldecode($diseaseName));
+        //$encodedDiseaseName = $diseaseName;
         $explodedOldLine[7] = $encodedDiseaseName;
         array_push($diseaseNames, $encodedDiseaseName);
       }
-      fwrite($cleanedFile, implode("\t", $explodedOldLine));
+      fwrite($cleanedFile, implode("\t", $explodedOldLine)."\n");
     }
     $uniqueDiseases = array_unique($diseaseNames);
     return $uniqueDiseases;
@@ -1859,10 +1913,10 @@ EOF;
       $string = str_replace(" ", "_", $disease);
       if($_POST[$string]){
         $newName = $_POST[$string];
-        fwrite($submittedNameUpdates, $disease."\t".$newName."\n");
+        fwrite($submittedNameUpdates, $disease."\t".$newName);
       }
       else{
-        fwrite($submittedNameUpdates, $disease."\t".$disease."\n");
+        fwrite($submittedNameUpdates, $disease."\t".$disease);
       }
     }
     $matchLocationUpdate = 0;
@@ -1974,19 +2028,103 @@ EOF;
   public function UploadCADIData($finalFileLocation){
       $finalFile = fopen($finalFileLocation, "r");
       $fileLines = file($finalFileLocation);
-      
+      $pattern="/\\N/";
       foreach($fileLines as $line){
         $lineArray = explode("\t", $line);
-        $variation = $lineArray[1];
-        //if there are missing values, add space holder to array
-        if(count($lineArray)<58){
-          for($i = count($lineArray); $i <= 57; $i++){
-            array_push($lineArray, " ");
+        
+        foreach($lineArray as $entry){
+          preg_replace ($pattern," ",$entry);
+          str_replace("\\N", " ", $entry);
+          if(strcmp('\\N', $entry) == 0){
+            $entry = " ";
           }
         }
-        if(strcmp($lineArray[0], "id") !== 0){
-          //assign everything to data array to be put into database
-          $data = array('variation' => $lineArray[1],
+        //if there is a variant in this line
+        if(isset($lineArray[1])){
+          $variation = $lineArray[1];
+          //return($lineArray[1]);
+          //if there are missing values, add space holder to array
+          if(count($lineArray)<71){
+            for($i = count($lineArray); $i <= 70; $i++){
+              array_push($lineArray, " ");
+            }
+          }
+          //if(strcmp($lineArray[0], "id") !== 0){
+            //assign everything to data array to be put into database
+            
+            
+            
+                      //'summary_insilico' => $lineArray[10],
+            
+                      //'summary_frequency' => $lineArray[11],
+                      //'summary_published' => $lineArray[12],
+                      //'lrt_omega'=> $lineArray[14],
+                      //'gerp_nr' => $lineArray[17],
+                      //'evs_all_an' => $lineArray[24],
+                      //'evs_ea_an' => $lineArray[27],
+                      //'evs_aa_an' => $lineArray[30],
+                      //'tg_all_an'=> $lineArray[33],
+                      //'tg_afr_an'=> $lineArray[36],
+                      //'tg_amr_an'=> $lineArray[39],
+        $data = array('variation' => $lineArray[1],
+                      'gene' => $lineArray[2],
+                      'hgvs_nucleotide_change' => $lineArray[3],
+                      'hgvs_protein_change' => $lineArray[4],
+                      'variantlocale' => $lineArray[5],
+                      'pathogenicity' => $lineArray[6],
+                      'disease' => urldecode($lineArray[7]),
+                      'pubmed_id' => $lineArray[8],
+                      'dbsnp' => $lineArray[9],
+                      'summary_insilico' => ".",
+                      'summary_frequency' => ".",
+                      'summary_published' => ".",
+                      'comments' => $lineArray[10],
+                      'lrt_omega'=> ".",
+                      'sift_score' => $lineArray[11],
+                      'sift_pred'=> $lineArray[12],
+                      'polyphen2_score' => $lineArray[13],
+                      'polyphen2_pred'=> $lineArray[14],
+                      'mutationtaster_score' => $lineArray[15],
+                      'mutationtaster_pred' => $lineArray[16],
+                      'gerp_nr' => ".",
+                      'gerp_rs'=> $lineArray[17],
+                      'gerp_pred' => $lineArray[18],
+                      'phylop_score' => $lineArray[19],
+                      'phylop_pred' => $lineArray[20],
+                      'lrt_score' => $lineArray[21],
+                      'lrt_pred' => $lineArray[22],
+                      'evs_ea_ac' => $lineArray[26],
+                      'evs_ea_af' => $lineArray[28],
+                      'evs_aa_ac' => $lineArray[29],
+                      'evs_aa_af' => $lineArray[31],
+                      'evs_all_ac' => $lineArray[23],
+                      'evs_all_af' => $lineArray[25],
+                      'otoscope_aj_ac' => $lineArray[53],
+                      'otoscope_aj_af' => $lineArray[55],
+                      'otoscope_co_ac' => $lineArray[56],
+                      'otoscope_co_af' => $lineArray[58],
+                      'otoscope_us_ac' => $lineArray[59],
+                      'otoscope_us_af' => $lineArray[61],
+                      'otoscope_jp_ac' => $lineArray[62],
+                      'otoscope_jp_af' => $lineArray[64],
+                      'otoscope_es_ac' => $lineArray[65],
+                      'otoscope_es_af' => $lineArray[67],
+                      'otoscope_tr_ac' => $lineArray[68],
+                      'otoscope_tr_af' => $lineArray[70],
+                      'otoscope_all_ac' => $lineArray[50],
+                      'otoscope_all_af' => $lineArray[52],
+                      'tg_afr_ac'=> $lineArray[35],
+                      'tg_afr_af'=> $lineArray[37],
+                      'tg_eur_ac'=> $lineArray[44],
+                      'tg_eur_af'=> $lineArray[46],
+                      'tg_amr_ac'=> $lineArray[38],
+                      'tg_amr_af'=> $lineArray[40],
+                      'tg_asn_ac'=> ".",
+                      'tg_asn_af'=> ".",
+                      'tg_all_ac'=> $lineArray[32],
+                      'tg_all_af' => $lineArray[34] );
+   /* 
+            $data = array('variation' => $lineArray[1],
                       'gene' => $lineArray[2],
                       'hgvs_nucleotide_change' => $lineArray[3],
                       'hgvs_protein_change' => $lineArray[4],
@@ -1995,55 +2133,65 @@ EOF;
                       'disease' => $lineArray[7],
                       'pubmed_id' => $lineArray[8],
                       'dbsnp' => $lineArray[9],
-                      'summary_insilico' => $lineArray[10],
-                      'summary_frequency' => $lineArray[11],
-                      'summary_published' => $lineArray[12],
-                      'comments' => $lineArray[13],
-                      'lrt_omega'=> $lineArray[14],
-                      'sift_score' => $lineArray[15],
-                      'sift_pred'=> $lineArray[16],
-                      'polyphen2_score' => $lineArray[17],
-                      'polyphen2_pred'=> $lineArray[18],
-                      'mutationtaster_score' => $lineArray[19],
-                      'mutationtaster_pred' => $lineArray[20],
-                      'gerp_nr' => $lineArray[21],
-                      'gerp_rs'=> $lineArray[22],
-                      'gerp_pred' => $lineArray[23],
-                      'phylop_score' => $lineArray[24],
-                      'phylop_pred' => $lineArray[25],
-                      'lrt_score' => $lineArray[26],
-                      'lrt_pred' => $lineArray[27],
-                      'evs_ea_ac' => $lineArray[28],
-                      'evs_ea_af' => $lineArray[29],
-                      'evs_aa_ac' => $lineArray[30],
+                      'comments' => $lineArray[10],
+                      'sift_score' => $lineArray[11],
+                      'sift_pred'=> $lineArray[12],
+                      'polyphen2_score' => $lineArray[13],
+                      'polyphen2_pred'=> $lineArray[14],
+                      'mutationtaster_score' => $lineArray[15],
+                      'mutationtaster_pred' => $lineArray[16],
+                      'gerp_rs'=> $lineArray[17],
+                      'gerp_pred' => $lineArray[18],
+                      'phylop_score' => $lineArray[19],
+                      'phylop_pred' => $lineArray[20],
+                      'lrt_score' => $lineArray[21],
+                      'lrt_pred' => $lineArray[22],
+                      'evs_all_ac' => $lineArray[23],
+                      'evs_all_af' => $lineArray[25],
+                      'evs_ea_ac' => $lineArray[26],
+                      'evs_ea_af' => $lineArray[28],
+                      'evs_aa_ac' => $lineArray[29],
                       'evs_aa_af' => $lineArray[31],
-                      'evs_all_ac' => $lineArray[32],
-                      'evs_all_af' => $lineArray[33],
-                      'otoscope_aj_ac' => $lineArray[34],
-                      'otoscope_aj_af' => $lineArray[35],
-                      'otoscope_co_ac' => $lineArray[36],
-                      'otoscope_co_af' => $lineArray[37],
-                      'otoscope_us_ac' => $lineArray[38],
-                      'otoscope_us_af' => $lineArray[39],
-                      'otoscope_jp_ac' => $lineArray[40],
-                      'otoscope_jp_af' => $lineArray[41],
-                      'otoscope_es_ac' => $lineArray[42],
-                      'otoscope_es_af' => $lineArray[43],
-                      'otoscope_tr_ac' => $lineArray[44],
-                      'otoscope_tr_af' => $lineArray[45],
-                      'otoscope_all_ac' => $lineArray[46],
-                      'otoscope_all_af' => $lineArray[47],
-                      'tg_afr_ac'=> $lineArray[48],
-                      'tg_afr_af'=> $lineArray[49],
-                      'tg_eur_ac'=> $lineArray[50],
-                      'tg_eur_af'=> $lineArray[51],
-                      'tg_amr_ac'=> $lineArray[52],
-                      'tg_amr_af'=> $lineArray[53],
-                      'tg_asn_ac'=> $lineArray[54],
-                      'tg_asn_af'=> $lineArray[55],
-                      'tg_all_ac'=> $lineArray[56],
-                      'tg_all_af' => $lineArray[57] );
-          $id = $this->create_new_variant($variation, FALSE, TRUE, $data);
+                      'tg_all_ac'=> $lineArray[32],
+                      'tg_all_af'=> $lineArray[34],
+                      'tg_afr_ac'=> $lineArray[35],
+                      'tg_afr_af'=> $lineArray[37],
+                      'tg_amr_ac'=> $lineArray[38],
+                      'tg_amr_af'=> $lineArray[40],
+                      'tg_eas_ac'=> $lineArray[41],
+                      'tg_eas_af'=> $lineArray[43],
+                      'tg_eur_ac'=> $lineArray[44],
+                      'tg_eur_af'=> $lineArray[46],
+                      'otoscope_all_ac' => $lineArray[50],
+                      'otoscope_all_af' => $lineArray[52],
+                      'otoscope_aj_ac' => $lineArray[53],
+                      'otoscope_aj_af' => $lineArray[55],
+                      'otoscope_co_ac' => $lineArray[56],
+                      'otoscope_co_af' => $lineArray[58],
+                      'otoscope_us_ac' => $lineArray[59],
+                      'otoscope_us_af' => $lineArray[61],
+                      'otoscope_jp_ac' => $lineArray[62],
+                      'otoscope_jp_af' => $lineArray[64],
+                      'otoscope_es_ac' => $lineArray[65],
+                      'otoscope_es_af' => $lineArray[67],
+                      'otoscope_tr_ac' => $lineArray[68],
+                      'otoscope_tr_af' => $lineArray[70] );
+     */     
+                      //'tg_sas_ac'=> $lineArray[47],
+                      //'tg_sas_af'=> $lineArray[49],
+                      //'otoscope_tr_an' => $lineArray[69],
+                      //'tg_eas_an'=> $lineArray[42],
+                      //'tg_eur_an'=> $lineArray[45],
+                      //'tg_sas_an'=> $lineArray[48],
+                      //'otoscope_all_an' => $lineArray[51],
+                      //'otoscope_aj_an' => $lineArray[54],
+                      //'otoscope_co_an' => $lineArray[57],
+                     //'otoscope_us_an' => $lineArray[60],
+                      //'otoscope_jp_an' => $lineArray[63],
+                      //'otoscope_es_an' => $lineArray[66],
+            $id = $this->create_new_variant($variation, FALSE, TRUE, $data);
+        //}
+            //return($id);
       }
     }
   }
