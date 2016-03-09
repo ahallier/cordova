@@ -453,12 +453,27 @@ class Migration_Init extends CI_Migration {
           'constraint' => 11,
           'null' => TRUE,
       ),
+      'evs_ea_af' => array(
+          'type' => 'INT',
+          'constraint' => 11,
+          'null' => TRUE,
+      ),
       'evs_aa_ac' => array(
           'type' => 'INT',
           'constraint' => 11,
           'null' => TRUE,
       ),
       'evs_aa_an' => array(
+          'type' => 'INT',
+          'constraint' => 11,
+          'null' => TRUE,
+      ),
+      'evs_aa_af' => array(
+          'type' => 'INT',
+          'constraint' => 11,
+          'null' => TRUE,
+      ),
+      'evs_all_af' => array(
           'type' => 'INT',
           'constraint' => 11,
           'null' => TRUE,
@@ -479,6 +494,21 @@ class Migration_Init extends CI_Migration {
           'null' => TRUE,
       ),
       'tg_acb_an' => array(
+          'type' => 'INT',
+          'constraint' => 11,
+          'null' => TRUE,
+      ),
+      'tg_afr_af' => array(
+          'type' => 'INT',
+          'constraint' => 11,
+          'null' => TRUE,
+      ),
+      'tg_amr_af' => array(
+          'type' => 'INT',
+          'constraint' => 11,
+          'null' => TRUE,
+      ),
+      'tg_asn_af' => array(
           'type' => 'INT',
           'constraint' => 11,
           'null' => TRUE,
@@ -659,6 +689,11 @@ class Migration_Init extends CI_Migration {
           'null' => TRUE,
       ),
       'tg_yri_an' => array(
+          'type' => 'INT',
+          'constraint' => 11,
+          'null' => TRUE,
+      ),
+      'tg_all_af' => array(
           'type' => 'INT',
           'constraint' => 11,
           'null' => TRUE,
