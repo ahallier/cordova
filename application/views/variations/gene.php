@@ -20,7 +20,7 @@
                     <td class="showinfo-popup"><?php echo format_table_cell('variantlocale', $variation->variantlocale); ?></td>
                     <td class="showinfo-popup"><code><?php echo format_table_cell('variation', $variation->variation); ?></code></td>
                     <td class="showinfo-popup"><?php echo format_table_cell('pathogenicity', $variation->pathogenicity); ?></td>
-                    <td class="showinfo-popup"><?php echo format_table_cell('disease', $variation->disease); ?></td>
+                    <td class="showinfo-popup"><?php echo format_table_cell('disease', urldecode($variation->disease)); ?></td>
                 <?php endforeach; ?>
                 </tr>
             </tbody>

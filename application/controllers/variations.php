@@ -337,9 +337,11 @@ class Variations extends MY_Controller {
     $annotation_path = $this->config->item('annotation_path');
     $mostReacentFile = "$annotation_path/mygenes$time_stamp.final";
     $cleanedFile = "$annotation_path/cleanedDiseaseNames$time_stamp.txt";
-    $uniqueDiseases = $this->variations_model->get_disease_names($mostReacentFile, $cleanedFile);
+    $uniqueDiseases = $this->variations_model->get_disease_names($mostReacentFile, $cleanedFile, $time_stamp);
+    //die(print_r($uniqueDiseases));
     $data['uniqueDiseases'] = $uniqueDiseases;
     $data['time_stamp'] = $time_stamp;
+    $data['excel_file_path'] = "$annotation_path/disease_excel_file$time_stamp.xlsx";
     //$submitedDiseaseNameFile = fopen("/ahallier/tmp/submitedDiseaseNames.txt");
     if($this->input->post('submit')){
       $diseaseNameUpdatesFileLocation = "$annotation_path/submittedDiseaseNames$time_stamp.txt";

@@ -77,7 +77,7 @@ $attributes = array('id'    => 'form_upload_genes',
                     );
 ?>
 <h1>Select Preferred Nomenclature</h1>
-<p>Below is a list of gathered phenotypes from the public databases that were queried. Please enter your team's preferred nomenclature for each phenotype to normalize the nomenclature throughout your database. To review any errors that may have occured durring collection look <a href="/asap/cordova_pipeline/myvariants.error_log" download="variant-CADIerrors.txt">here</a>.</p>
+<p>Below is a list of gathered phenotypes from the public databases that were queried. Please enter your team's preferred nomenclature for each phenotype to normalize the nomenclature throughout your database. To review any errors that may have occured durring collection look <a href="/asap/cordova_pipeline/myvariants.error_log" download="variant-CADIerrors.txt">here</a>. Download excel formatted data <a href=disease_excel_file20160406001640.xls download=nomenclatureNormalization.xls>here</a></p>
 <div>
   <h3>Public Database Nomenclature</h3>
 <?php echo form_open("variations/norm_nomenclature/$time_stamp", $attributes);?>

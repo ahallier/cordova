@@ -52,7 +52,7 @@
             </tr>
             <tr>
               <th scope="row">Phenotype</th>
-              <td><?php print $disease; ?></td>
+              <td><?php print urldecode($disease); ?></td>
             </tr>
           </table>
         </div>

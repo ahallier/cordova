@@ -573,6 +573,11 @@ class Migration_Init extends CI_Migration {
           'constraint' => 11,
           'null' => TRUE,
       ),
+      'tg_eur_af' => array(
+          'type' => 'INT',
+          'constraint' => 11,
+          'null' => TRUE,
+      ),
       'tg_fin_ac' => array(
           'type' => 'INT',
           'constraint' => 11,

@@ -1807,6 +1807,9 @@ EOF;
     $annotation_path = $this->config->item('annotation_path');
     $PATH = getenv('PATH');
     $vd_queue = $this->tables['vd_queue'];
+    
+    ini_set('memory_limit', '-1');
+    set_time_limit(0);
     //exec("nohup sh -c '$RUBY /asap/cordova_pipeline/genes2regions.rb $genesFile &> $regionsFile && $RUBY /asap/cordova_pipeline/regions2variants.rb $regionsFile &> $variantsFile && $RUBY /asap/cordova_pipeline/map.rb $variantsFile &> $mapFile ; cut -f1 $mapFile>$listFile && $RUBY /asap/kafeen/kafeen.rb --progress -i $listFile -o $kafeenFile && $RUBY /asap/cordova_pipeline/annotate_with_hgmd_clinvar.rb $kafeenFile $mapFile &> $hgmd_clinvarFile && cut -f-6  $kafeenFile > $f1File && cut -f2-4 $hgmd_clinvarFile > $f2File && cut -f10- $kafeenFile > $f3File && paste $f1File $f2File > $f4File && paste $f4File $f3File > $finalFile' &");
     //exec("nohup sh -c '$RUBY /Shared/utilities/cordova_pipeline_v2/pipeline.rb $genesFile' &");
     //$op = system("$RUBY /Shared/utilities/cordova_pipeline_v2/pipeline.rb $genesFile &> outPutLog.txt",$returns);
@@ -1819,52 +1822,104 @@ EOF;
     $mysqlPassword = $this->db->password;
     $mysqlUser = $this->db->username;
     $queueTable = $this->tables['vd_queue'];
+    $liveTable = $this->tables['vd_live'];
     $resultsTable = $this->tables['reviews'];
     $TSVfile = "$queueTable.tsv";
     $database = $this->db->database;
     $date = date("Y-m-d H:i:s"); 
     
     //$COLUMNS=("dbsnp","evs_all_ac","evs_all_an","evs_all_af","evs_ea_ac","evs_ea_an","evs_ea_af","evs_aa_ac","evs_aa_an","evs_aa_af","tg_all_ac","tg_all_an","tg_all_af","tg_afr_ac","tg_afr_an","tg_afr_af","tg_amr_ac","tg_amr_an","tg_amr_af","tg_eas_ac","tg_eas_an","tg_eas_af","tg_eur_ac","tg_eur_an","tg_eur_af","tg_sas_ac","tg_sas_an","tg_sas_af","otoscope_all_ac","otoscope_all_an","otoscope_all_af","otoscope_aj_ac","otoscope_aj_an","otoscope_aj_af","otoscope_co_ac","otoscope_co_an","otoscope_co_af","otoscope_us_ac","otoscope_us_an","otoscope_us_af","otoscope_jp_ac","otoscope_jp_an","otoscope_jp_af","otoscope_es_ac","otoscope_es_an","otoscope_es_af","otoscope_tr_ac","otoscope_tr_an","otoscope_tr_af","gene","sift_score","sift_pred","polyphen2_score","polyphen2_pred","lrt_score","lrt_pred,mutationtaster_score,mutationtaster_pred,gerp_rs,phylop_score,gerp_pred,phylop_pred,variation,hgvs_nucleotide_change,hgvs_protein_change,variantlocale,pathogenicity,disease,pubmed_id,comments,exac_afr_ac,exac_afr_an,exac_afr_af,exac_amr_ac,exac_amr_an,exac_amr_af,exac_eas_ac,exac_eas_an,exac_eas_af,exac_fin_ac,exac_fin_an,exac_fin_af,exac_nfe_ac,exac_nfe_an,exac_nfe_af,exac_oth_ac,exac_oth_an,exac_oth_af,exac_sas_ac,exac_sas_an,exac_sas_af,exac_all_ac,exac_all_an,exac_all_af");
-    $COLUMNS = "(id,gene,sift_score,sift_pred,polyphen2_score,polyphen2_pred,lrt_score,lrt_pred,mutationtaster_score,mutationtaster_pred,gerp_rs,phylop_score,gerp_pred,phylop_pred,variation,hgvs_nucleotide_change,hgvs_protein_change,variantlocale,pathogenicity,disease,pubmed_id,comments)";
-    exec("cd $annotation_path && export PATH=$PATH:/Shared/utilities/vcftools_0.1.13/bin/:/Shared/utilities/bin/ && $RUBY pipeline.rb $genesFile &> outPutLog$timeStamp.txt && gunzip mygenes$timeStamp.vcf.gz && bash convert_Cordova_VCF_to_mysqlimport_TSV.sh mygenes$timeStamp.vcf &> mygenes$timeStamp.final && cp mygenes$timeStamp.final $queueTable.tsv && cut -f 50-70 $queueTable.tsv > $queueTable.tsvcleaned");
+    $COLUMNS = "(id,gene,sift_score,sift_pred,polyphen2_score,polyphen2_pred,lrt_score,lrt_pred,mutationtaster_score,mutationtaster_pred,gerp_rs,phylop_score,gerp_pred,phylop_pred,variation,hgvs_nucleotide_change,hgvs_protein_change,variantlocale,pathogenicity,disease,pubmed_id,comments,dbsnp,evs_all_af,evs_ea_ac,evs_ea_af,evs_aa_ac,evs_aa_an,evs_aa_af,tg_all_af,tg_afr_af,tg_amr_af,tg_eur_af)";
+    exec("cd $annotation_path && export PATH=$PATH:/Shared/utilities/vcftools_0.1.13/bin/:/Shared/utilities/bin/ && $RUBY pipeline.rb $genesFile &> outPutLog$timeStamp.txt && gunzip mygenes$timeStamp.vcf.gz && bash convert_Cordova_VCF_to_mysqlimport_TSV.sh mygenes$timeStamp.vcf &> mygenes$timeStamp.final && cp mygenes$timeStamp.final $queueTable.tsv && cut -f 0-32 $queueTable.tsv > $queueTable.tsvcleaned");
     
-    /*
+    
     $file = fopen("$annotation_path/$queueTable.tsvcleaned", "r");
     //$numLines = count(file("$annotation_path/$queueTable.tsvcleaned"));
+    
+    
+    #$maxid = 0;
+    #$row = $this->db->query("SELECT MAX(id) AS `maxid` FROM $queueTable")->row();
+    #if ($row) {
+      #get max id from current queueTable
+      #$maxid = $row->maxid; 
+      #Increment the id
+      #$maxid = $maxid+1;
+    #}
+    #else the max id = 0
+    
     while($line = fgets($file)){
       $data = explode("\t", $line);
-      $maxid = 0;
-      $row = $this->db->query("SELECT MAX(id) AS `maxid` FROM $queueTable")->row();
-      if ($row) {
-        $maxid = $row->maxid; 
+      $variation = '';
+      if(isset($data[14])){
+        $variation = $data[14];
       }
-      $maxid = $maxid+1;
-      //$maxid = $numLines-$maxid;
+      $id = NULL;
+      #encode the disease name, prone to incompatable characters
+      if(isset($data[18])){
+        $data[18] = urlencode($data[18]);
+      }
+      // Check if variation is already in the live and/or queue database
+      $query_live  = $this->db->get_where($liveTable, array('variation' => $variation), 1);
+      $query_queue = $this->db->get_where($queueTable, array('variation' => $variation), 1);
+      //if variant is in live database
+      if($query_live->num_rows() > 0){
+        //set id, this is the id we want to use to update the variant  
+        foreach ($query_live->result() as $row){
+          $id = $row->id;
+        }
+      }
+      //if variant is in queue database
+      elseif($query_queue->num_rows() > 0){
+        #for every entry in the queue, set up the results table
+        foreach ($query_queue->result() as $row){
+          //If id has not been set from live database
+          if(!empty($id)){
+            $id = $row->id;
+          }
+          //remove old queue entry
+          $this->db->delete($queueTable, array('variation' => $variation));
+          //remove old result entry
+          $this->db->delete($resultsTable, array('variation' => $variation));
+        }
+      }
+      //if not in any database, get new auto_inc id
+      else{
+        // Create empty row in live table and get its unique ID
+        $keys = $this->get_variant_fields($liveTable);
+        $null_data = array_fill_keys($keys, NULL); // set all values to NULL
+        $this->db->insert($liveTable, $null_data);
+        $id = $this->db->insert_id();
+      }
+      //Build value string and insert into queue
       if(sizeof($data)>10){
-        $entries = "'$maxid',";
+        #add id to data column
+        $entries = "'$id',";
+        #create list from data array
         foreach($data as $entry){
           $entries = $entries."'".$entry."',"; 
         }
+        #remove trailing comma from list
         $trimmedEntries = rtrim($entries, ",");
         $sql = "INSERT INTO $queueTable $COLUMNS VALUES ($trimmedEntries)";
         $this->db->query($sql);
       }
-    }
+    }#end while
+    
     $this->db->select('id');
     $query = $this->db->get("$queueTable");
-    foreach ($query->result_array() as $row){
-      $sql = "INSERT INTO $resultsTable (variant_id, created) VALUES ('$row[id]','$date')";
-      $this->db->query($sql);
+    #for every entry in the queue, set up the results table
+    if ($query->num_rows() > 0){
+      foreach ($query->result() as $row){
+        #$sql = "INSERT INTO $resultsTable (variant_id, created) VALUES ('$row[id]','$date')";
+        $sql = "INSERT INTO $resultsTable (variant_id, created) VALUES ('$row->id','$date')";
+        $this->db->query($sql);
+      }
     }
-    
     //$db['development']['password'] = 'bUb78Nf7';
     //$db['development']['database'] = 'rdvd_test2';
-    */
-    
     
     //exec("mysqlimport -u root -p -L rdvd_test2 variations_1.tsv");
     return $timeStamp;
-    //return $returns;
   }
   /**
   * Get Disease Names
@@ -1876,7 +1931,82 @@ EOF;
   * @author Andrea Hallier
   * @input oldFile, newFile
   */
-  public function get_disease_names($oldFile, $newFile){
+  public function get_disease_names($oldFile, $newFile, $timeStamp){
+    $queueTable = $this->tables['vd_queue'];
+    $sql = "SELECT DISTINCT disease FROM $queueTable"; 
+    $query = $this->db->query($sql);
+    $result = $query->result();
+    $diseaseNames = array();
+    $annotation_path = $this->config->item('annotation_path');
+    // Instantiate a new PHPExcel object
+    $this->load->library('excel');
+    //$this->load->library('PHPExcel/iofactory');
+    $objPHPExcel = new PHPExcel();
+    $fileType = 'Excel5';
+    //$fileName = "$annotation_path/testFile.xls";
+
+    // Read the file
+    //$objReader = PHPExcel_IOFactory::createReader($fileType);
+    //$objPHPExcel = $objReader->load($fileName);
+
+    //$objPHPExcel = PHPExcel_IOFactory::load($file);
+    // Set the active Excel worksheet to sheet 0
+    $objPHPExcel->setActiveSheetIndex(0); 
+    // Initialise the Excel row number
+    $rowCount = 1; 
+    // Iterate through each result from the SQL query in turn
+    // We fetch each database result row into $row in turn
+    //while($row = mysql_fetch_array($result)){ 
+    foreach($result as $row){  
+      // Set cell An to the "name" column from the database (assuming you have a column called name)
+      //    where n is the Excel row number (ie cell A1 in the first row)
+      $objPHPExcel->getActiveSheet()->SetCellValue('A'.$rowCount, $row->disease); 
+      // Set cell Bn to the "age" column from the database (assuming you have a column called age)
+      //    where n is the Excel row number (ie cell A1 in the first row)
+      $objPHPExcel->getActiveSheet()->SetCellValue('B'.$rowCount, $row->disease); 
+      // Increment the Excel row counter
+      $rowCount++; 
+    } 
+    // Instantiate a Writer to create an OfficeOpenXML Excel .xlsx file
+    //$objWriter = new PHPExcel_Writer_Excel2007($objPHPExcel); 
+    $objWriter = PHPExcel_IOFactory::createWriter($this->excel, 'Excel5');
+    // Write the Excel file to filename some_excel_file.xlsx in the current directory
+    $objWriter->save("$annotation_path/disease_excel_file$timeStamp.xls"); 
+    foreach($query->result() as $row){
+      array_push($diseaseNames, urlencode(urldecode($row->disease)));
+    }
+    return $diseaseNames;
+  }  
+  public function build_disease_excel_file($timeStamp = 00000000){
+    $queueTable = $this->tables['vd_queue'];
+    $sql = "SELECT DISTINCT disease FROM $queueTable"; 
+    $query = $this->db->query($sql);
+    //$query->result()
+    // Instantiate a new PHPExcel object
+    $objPHPExcel = new PHPExcel(); 
+    // Set the active Excel worksheet to sheet 0
+    $objPHPExcel->setActiveSheetIndex(0); 
+    // Initialise the Excel row number
+    $rowCount = 1; 
+    // Iterate through each result from the SQL query in turn
+    // We fetch each database result row into $row in turn
+    while($row = mysql_fetch_array($result)){ 
+      // Set cell An to the "name" column from the database (assuming you have a column called name)
+      //    where n is the Excel row number (ie cell A1 in the first row)
+      $objPHPExcel->getActiveSheet()->SetCellValue('A'.$rowCount, $row['disease']); 
+      // Set cell Bn to the "age" column from the database (assuming you have a column called age)
+      //    where n is the Excel row number (ie cell A1 in the first row)
+      $objPHPExcel->getActiveSheet()->SetCellValue('B'.$rowCount, $row['age']); 
+      // Increment the Excel row counter
+      $rowCount++; 
+    } 
+    // Instantiate a Writer to create an OfficeOpenXML Excel .xlsx file
+    $objWriter = new PHPExcel_Writer_Excel2007($objPHPExcel); 
+    // Write the Excel file to filename some_excel_file.xlsx in the current directory
+    $annotation_path = $this->config->item('annotation_path');
+    $objWriter->save("$annotation_path/disease_excel_file$timeStamp.xlsx"); 
+  }
+  public function OLD_get_disease_names($oldFile,$newFile){
     $file = fopen($oldFile, "r");
     $cleanedFile = fopen($newFile, "w");
     $diseaseNames = array();
@@ -1907,17 +2037,56 @@ EOF;
   * @author Andrea Hallier
   * @input POST, uniqueDiseases, nameUpdatesFile, oldFileLocation, newFileLocation
   */
+
+
   public function update_disease_names($_POST, $uniqueDiseases, $nameUpdatesFile, $oldFileLocation,  $newFileLocation){
     $submittedNameUpdates = fopen($nameUpdatesFile, "w");
+    $queueTable = $this->tables['vd_queue'];
+    foreach($uniqueDiseases as $disease){
+      $string = str_replace(" ", "_", $disease);
+      if($_POST[$string]){
+        $newName = $_POST[$string];
+        $sql = "UPDATE $queueTable SET disease='$newName' WHERE disease='$disease'";
+        $query = $this->db->query($sql);
+      }
+      //else{
+      //  $newName=$disease;
+      //  $sql = "UPDATE $queueTable SET disease=$newName WHERE disease=$disease";
+      //  $query = $this->db->query($sql);
+      //}
+    }
+    return $query;
+  } 
+  
+  
+  public function OLD_update_disease_names($_POST, $uniqueDiseases, $nameUpdatesFile, $oldFileLocation,  $newFileLocation){
+   //$queueTable = $this->tables['vd_queue'];
+   //for each updated disease name
+   //$data = array('disease' => $updatedDisease);
+   //$this->db->where('disease', $oldDiseaseName);
+   //$this->db->update($queueTable, $data); 
+
+   // Produces:
+   // UPDATE $queueTable
+   // SET disease = '{$updatedDisease}'
+   // WHERE disease = $oldDiseaseName
+    $submittedNameUpdates = fopen($nameUpdatesFile, "w");
+    $queueTable = $this->tables['vd_queue'];
     foreach($uniqueDiseases as $disease){
       $string = str_replace(" ", "_", $disease);
       if($_POST[$string]){
         $newName = $_POST[$string];
         fwrite($submittedNameUpdates, $disease."\t".$newName);
+        $sql = "SELECT DISTINCT disease FROM $queueTable";
+        $query = $this->db->query($sql);
       }
       else{
+        $newName=$disease;
         fwrite($submittedNameUpdates, $disease."\t".$disease);
+        $sql = "SELECT DISTINCT disease FROM $queueTable";
+        $query = $this->db->query($sql);
       }
+  
     }
     $matchLocationUpdate = 0;
     $matchLocationOld = 7;
@@ -1938,7 +2107,20 @@ EOF;
   * @author Andrea Hallier
   * @input newFileLocation, oldFileLocation, updateFileLocation
   */
+
   public function expert_curation($newFileLocation, $oldFileLocation, $updateFileLocation){
+    $queueTable = $this->tables['vd_queue'];
+    while($fileLine = fgets($updateFileLocation)){
+      $lineArray=explode("\t", $fileLine);
+      $newDisease=$lineArray[3];
+      $newPath=$lineArray[2];
+      $variant=$lineArray[1];
+      $newPubMedID=$lineArray[4];
+      $sql = "UPDATE $queueTable SET disease='$newDisease', pathogenicity='$newPath', pubmedid='$newPubMedID' WHERE variant='$variant'";
+      $query = $this->db->query($sql);
+    }
+  }
+  public function OLD_expert_curation($newFileLocation, $oldFileLocation, $updateFileLocation){
     $updateDisease = 3;
     $updatePathogenicity = 2;
     $updateVariant = 1;
