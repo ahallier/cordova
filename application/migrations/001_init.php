@@ -101,6 +101,11 @@ class Migration_Init extends CI_Migration {
           'unsigned' => TRUE,
           'null' => FALSE,
       ),
+      'variation' => array(
+          'type' => 'VARCHAR',
+          'constraint' => 100, 
+          'null' => TRUE,
+      ),
       'created' => array(
           'type' => 'DATETIME',
           'null' => TRUE,
