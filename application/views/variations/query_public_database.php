@@ -70,15 +70,33 @@
  <li class="progtrckr-todo">Release Changes</li>
 </ol> 
 
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+
+<script>
+$(document).ready(function(){   
+    $("#submit").click(function()
+    {
+      $("#before").hide();
+      $("#after").show();
+    });// you have missed this bracket
+  });
+</script>
 <?php
   $attributes = array('class' => 'query_public_database',
                       'id' => 'query_public_database_form');
 ?>
 <h1>Query Public Databases</h1>
-<h2>Your file was successfully uploaded!</h3>
-<p>You have chosen to submit: </p>
-<?php echo $genes; ?>
+<div id="before">
+  <p>You have chosen to submit: </p>
+  <?php echo $genes; ?>
+  <br/>
+  <?php echo form_open("variations/query_public_database/$time_stamp", $attributes)?>
+  <input type="submit" value="submit" id="submit" name="submit" class="btn btn-success"></input>
+  </form>
+</div>
+<div id="after" style="display:none">
+  <p class="bg-success">Your request has been submitted. You will receive and email when your request has processed with instructions to continue.</p>
+</div>
 <br/>
-<?php echo form_open("variations/query_public_database/$time_stamp", $attributes)?>
-<input type="submit" value="submit" id="submit" name="submit" class="btn btn-success"></input>
-</form>

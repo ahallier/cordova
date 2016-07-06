@@ -1895,7 +1895,7 @@ EOF;
     //insert ids and dates into reviews where queue id is greater than maxid
     //There is a problem here, this only inserts restuls when id>max id, needs to be when case is in queue and not in results...
     //This works when not re-entering exsisting genes.
-    $query4 = $this->db->query("INSERT INTO $resultsTable (variant_id,created) SELECT id,'$date' FROM $queueTable WHERE id>=$maxid");
+    $query4 = $this->db->query("INSERT INTO $resultsTable (variant_id,created) SELECT id,'$date' FROM $queueTable WHERE id NOT IN(SELECT variant_id FROM $resultsTable)");
     
     
     
@@ -2064,6 +2064,7 @@ EOF;
     $result = $query->result();
     $diseaseNames = array();
     $annotation_path = $this->config->item('annotation_path');
+    $csvDiseasePath = "$annotation_path/csvDisease$timeStamp.csv";
     // Instantiate a new PHPExcel object
     $this->load->library('excel');
     //$this->load->library('PHPExcel/iofactory');
@@ -2098,8 +2099,10 @@ EOF;
     $objWriter = PHPExcel_IOFactory::createWriter($this->excel, 'Excel5');
     // Write the Excel file to filename some_excel_file.xlsx in the current directory
     $objWriter->save("$annotation_path/disease_excel_file$timeStamp.xls"); 
+    $csvDisease = fopen($csvDiseasePath, "w");
     foreach($query->result() as $row){
       array_push($diseaseNames, urlencode(urldecode($row->disease)));
+      fwrite($csvDisease, urldecode($row->disease)."\n");
     }
     return $diseaseNames;
   }  

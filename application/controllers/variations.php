@@ -288,7 +288,7 @@ class Variations extends MY_Controller {
     }
     $this->load->view($this->editor_layout, $data);
   }
-  
+
   /**
    * Query Public Database
    *
@@ -322,10 +322,8 @@ class Variations extends MY_Controller {
 
     if($this->input->post('submit'))
     {
-      $errors = $this->variations_model->run_annotation_pipeline($time_stamp, $genesFile);     
-      //die(print_r($errors));
+      $success = $this->variations_model->run_annotation_pipeline($time_stamp, $genesFile);     
       $this->email->send();
-      /*ADD SUCCESS OR INFO MESSAGE HERE*/
     }
    $this->load->view($this->editor_layout, $data);
   }
