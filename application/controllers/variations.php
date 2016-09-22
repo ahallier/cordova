@@ -439,7 +439,31 @@ class Variations extends MY_Controller {
         $data['header'] = "$num_unreleased Unreleased changes | Showing $range_limit_1 - $range_limit_2";
       }
     }
-
+    //get all gene names in queue
+//    $this->load->model('genes_model');
+//    $this->load->helper('genes');
+    
+//    $genes = $this->genes_model->get_genes(NULL, TRUE);
+//    //for each gene, get all variantsi
+//    $data['geneVariantSet'] = array();
+//    $queueTable = $this->tables['vd_queue'];
+//    $reviewsTable = $this->tables['reviews'];
+//    foreach($genes as $gene){
+//      $variants = array();
+      //$sql = "SELECT * FROM $reviewsTable 
+      //        INNER JOIN $queueTable 
+      //        ON $reviewsTable.variant_id = $queueTable.id
+      //        WHERE $reviewsTable.variant_id 
+      //        IN (SELECT id FROM $queueTable WHERE gene='$gene')";
+//      $sql = "SELECT id FROM $queueTable WHERE gene='$gene'";
+//      $results = $this->db->query($sql);
+//      while ($id = mysql_fetch_object($results)){
+//          $id[] = $id;
+//          $changes = $this->variations_model->get_unreleased_changes($id->id);
+//          array_push($variants, array_shift($changes)); // Take first (and only) result, push onto array
+//      }
+//      array_push($data['geneVariantSet'], array('gene'=>$gene, 'variants'=>$variants));
+//    }
     // Store this URL in order to refer back to it after saving
     $this->session->set_flashdata('refer_url', current_url());
 

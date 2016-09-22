@@ -10,6 +10,68 @@ echo form_open('variations/submit', $attributes);
         <!-- "Confirm" label (hide if no variant changes exist) -->
         <div id="notice-confirm-variant" class="span2 <?php echo hidden(empty($variants)); ?>"><small>Confirm</small></div>
     </div>
+    
+   <!--  <div id="mutation-tables">
+      <?php foreach ($geneVariantSet as $set): ?>
+        <fieldset>
+          <legend class="genename" id="<?php echo $set['gene'] ?>"><strong><?php echo $set['gene'] ?></strong> </legend>
+          <div id="table-<?php echo $set['gene'] ?>" class="variant-list-container">
+          
+          <?php foreach ($set['variants'] as $variant): ?>
+            <p>ANDREA</p>
+            <div class="row-fluid">
+              <div class="accordion span11" id="accordion-variant-changes-<?php echo $variant['id']; ?>">
+                <div class="accordion-group">
+                  <div class="accordion-heading">
+                    <a class="accordion-toggle rowlink" data-toggle="collapse" data-parent="#accordion-variant-changes-<?php echo $variant['id']; ?>" href="#variant-changes-<?php echo $variant['id']; ?>">
+                                <i class="icon-plus"></i> <b><?php echo $variant['name']; ?></b><?php echo new_variant_notice($variant['is_new']); ?>
+                            </a>
+                        </div>
+                        <div id="variant-changes-<?php echo $variant['id']; ?>" class="accordion-body collapse">
+                            <div class="accordion-inner">
+                                <?php echo deletion_notice($variant['id']); ?>
+                                <!-- Table of changes (only display if changes exist) -->
+                                <table class="variant-changes-table table table-striped table-bordered table-condensed <?php echo hidden(empty($variant['changes'])); ?>">
+                                    <thead>
+                                        <tr>
+                                            <th>Field</th>
+                                            <th>Current value</th>
+                                            <th>Unreleased value</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody data-provides="rowlink">
+                                        <?php foreach ($variant['changes'] as $field => $diffs): ?>
+                                            <tr>
+                                                <td><a href="<?php echo site_url('variations/edit/'.$variant['id'].'?expand=true'.'#'.$field); ?>"><?php echo $field; ?></a></td>
+                                                <td><?php echo $diffs['live_value']; ?></td>
+                                                <td><?php echo $diffs['queue_value']; ?></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                                <div>
+                                    <a href="<?php echo site_url('variations/edit/'.$variant['id'].'?expand=true#informatics_comments'); ?>" class="rowlink">
+                                        <?php echo informatics_team_comments($variant['id']); ?>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                  </div>
+            </div>
+            <label class="variant-change-confirm-label hold-change span1">
+                <i class="icon-off"></i>
+                <input name="unconfirmed-variants[]" value="<?php echo $variant['id']; ?>" class="variant-change-confirm" type="checkbox" <?php echo variant_confirmation_status($variant['id']) ?>/>
+                <input name="variants-on-this-page[]" value="<?php echo $variant['id']; ?>" class="hidden" type="checkbox" checked/>
+            </label>
+        </div>
+    <?php endforeach; ?>
+          
+          </div>
+        </fieldset>
+      <?php endforeach; ?>
+    </div>
+    --!>
+    
     <?php foreach ($variants as $variant): ?>
         <div class="row-fluid">
             <div class="accordion span11" id="accordion-variant-changes-<?php echo $variant['id']; ?>">
