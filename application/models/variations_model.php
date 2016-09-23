@@ -854,6 +854,8 @@ class Variations_model extends MY_Model {
     ini_set('memory_limit', '-1');
     set_time_limit(0);
 
+    //die(printf("HERE"));
+    
     // Get all variants to update
     $new_records = $this->variations_model->get_all_variants($this->tables['vd_queue']);
 
@@ -890,7 +892,7 @@ class Variations_model extends MY_Model {
 
     }
 
-    // Create new variation table
+/*    // Create new variation table
     $new_live_table = $this->variations_model->get_new_version_name($this->tables['vd_live']);
     $copy_success = $this->variations_model->copy_table($this->tables['vd_live'], $new_live_table);
     if ( ! $copy_success) {
@@ -922,7 +924,69 @@ class Variations_model extends MY_Model {
       // ERROR: problem copying table
       return FALSE;
     }
+*/
 
+/*    if(((int) $this->version) == 0){
+      //To maintain the versioning system, but speed up releases
+      //Only rename the table, do not create and copy all of the data
+    
+      // Rename variation table
+      $new_live_table = $this->variations_model->get_new_version_name($this->tables['vd_live']);
+      if(!strcmp($new_live_table,$this->tables['vd_live'])){
+        $rename_success = $this->variations_model->rename_table($this->tables['vd_live'], $new_live_table);
+        if ( ! $rename_success) {
+          // ERROR: problem copying live table
+          return FALSE;
+        }
+      }
+
+      // Rename queue table
+      $new_queue_table = $this->variations_model->get_new_version_name($this->tables['vd_queue']);
+      $rename_success = $this->variations_model->rename_table($this->tables['vd_queue'], $new_queue_table);
+      if ( ! $rename_success) {
+        // ERROR: problem copying queue table
+        return FALSE;
+      }
+
+      // Rename new reviews table
+      $new_reviews_table = $this->variations_model->get_new_version_name($this->tables['reviews']);
+      $rename_success = $this->variations_model->rename_table($this->tables['reviews'], $new_reviews_table);
+      if ( ! $rename_success) {
+        // ERROR: problem copying reviews table
+        return FALSE;
+      }
+
+      // Rename variant count table
+      $new_count_table = $this->variations_model->get_new_version_name($this->tables['variant_count']);
+      $rename_success = $this->variations_model->rename_table($this->tables['variant_count'], $new_count_table, FALSE);
+      if ( ! $rename_success) {
+        // ERROR: problem copying table
+        return FALSE;
+     }
+    
+      //Now we need to update versions
+    
+      // Get new version number
+      $new_version = ((int) $this->version) + 1;
+
+      // Update versions table
+      $datetime = date('Y-m-d H:i:s');
+      $data = array(
+        'id'       => NULL,
+        'version'  => $new_version,
+        'created'  => $datetime,
+        'updated'  => $datetime,
+        'variants' => $this->db->count_all($new_live_table),
+        'genes'    => count($genes),
+      );
+      $this->db->insert($this->tables['versions'], $data);
+    }
+*/
+    $new_live_table = $this->tables['vd_live'];
+    $new_queue_table = $this->tables['vd_queue'];
+    $new_reviews_table = $this->tables['reviews'];
+    $new_count_table = $this->tables['variant_count'];
+    
     // Update the *new* live table with the new changes
     foreach ($new_records as $record) {
       $this->db->update($new_live_table, $record, 'id = ' . $record->id);
@@ -964,8 +1028,8 @@ class Variations_model extends MY_Model {
     }
 
     // Get new version number
-    $new_version = ((int) $this->version) + 1;
-
+    $new_version = ((int) $this->version);
+    
     // Update versions table
     $datetime = date('Y-m-d H:i:s');
     $data = array(
@@ -977,8 +1041,9 @@ class Variations_model extends MY_Model {
       'genes'    => count($genes),
     );
     $this->db->insert($this->tables['versions'], $data);
+    $new_version_id = $this->db->query("SELECT MAX(id) FROM versions");
 
-    // Delete any intial import data/tables (they aren't needed anymore)
+/*    // Delete any intial import data/tables (they aren't needed anymore)
     // NOTE: initial import data is equal to Version 0
     $initial_live = $this->variations_model->get_new_version_name($this->tables['vd_live'], -1); // i.e. "variations_0"
     if ($this->db->table_exists($initial_live)) {
@@ -997,10 +1062,10 @@ class Variations_model extends MY_Model {
       // Delete version 0 from the versions table
       $this->db->delete($this->tables['versions'], array('version' => 0)); 
     }
-
+*/
     // Log it!
     $username = $this->ion_auth->user()->row()->username;
-    activity_log("User '$username' released a new version of the database -- Version $new_version", 'release');
+    activity_log("User '$username' released a new version of the database -- Version $new_version_id", 'release');
     
     return TRUE;
   }

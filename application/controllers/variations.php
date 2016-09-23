@@ -420,7 +420,6 @@ class Variations extends MY_Controller {
         array_push($data['variants'], array_shift($changes)); // Take first (and only) result, push onto array
       }
     }
-
     // Create proper header (depending on whether or not changes occurred)
     if (empty($data['variants'])) {
       $data['variants'] = array();
@@ -546,18 +545,21 @@ class Variations extends MY_Controller {
         }
         // Check that all variants in queue have been confirmed for release
         $all_queue_variants = $this->variations_model->get_unreleased_changes();
-        foreach ($all_queue_variants as $variant_id => $values) {
-          $variant_review = $this->variations_model->get_variant_review_info($variant_id);
-          if ($variant_review->confirmed_for_release == 0) {
-            // ERROR: found unconfirmed variants in the queue (not necessarily on this page)
-            $found_unconfirmed = TRUE;
+        //die($all_queue_variants);
+        if($all_queue_variants){
+          foreach ($all_queue_variants as $variant_id => $values) {
+            $variant_review = $this->variations_model->get_variant_review_info($variant_id);
+            if ($variant_review->confirmed_for_release == 0) {
+              // ERROR: found unconfirmed variants in the queue (not necessarily on this page)
+              $found_unconfirmed = TRUE;
+            }
           }
-        }
-        if ($found_unconfirmed) {
-          // Release failed! Not all variants have been confirmed for release
-          $html = 'All changes must be confirmed prior to release. Check the boxes on the right side to confirm each change, or see the bottom of this page for special release options.';
-          $this->session->set_flashdata('error', $html);
-          redirect('variations/unreleased');
+          if ($found_unconfirmed) {
+            // Release failed! Not all variants have been confirmed for release
+            $html = 'All changes must be confirmed prior to release. Check the boxes on the right side to confirm each change, or see the bottom of this page for special release options.';
+            $this->session->set_flashdata('error', $html);
+            redirect('variations/unreleased');
+          }
         }
       }
 

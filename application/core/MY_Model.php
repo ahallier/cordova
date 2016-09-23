@@ -366,6 +366,18 @@ class MY_Model extends CI_Model {
     }
     return TRUE;
   }
+  
+  /**
+  * Rename Table
+  * 
+  * To maintain versioning functionality without
+  * copying the table
+  * 
+  * @author arhallier@gmail.com
+  **/
+  public function rename_table($old_table_name, $new_table_name){
+    $this->db->query("RENAME TABLE $old_table_name TO $new_table_name");
+  }
 
   /**
    * Empty Table
