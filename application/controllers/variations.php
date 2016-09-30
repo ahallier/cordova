@@ -323,6 +323,7 @@ class Variations extends MY_Controller {
     if($this->input->post('submit'))
     {
       $success = $this->variations_model->run_annotation_pipeline($time_stamp, $genesFile);     
+      $this->email->attach("/var/www/html/cordova_sites_ah/rdvd/tmp/myvariants$time_stamp.log");
       $this->email->send();
     }
    $this->load->view($this->editor_layout, $data);

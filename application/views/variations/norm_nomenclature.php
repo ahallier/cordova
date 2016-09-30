@@ -79,14 +79,16 @@ $attributes = array('id'    => 'form_upload_genes',
 <h1>Select Preferred Nomenclature</h1>
 <p>Below is a list of gathered phenotypes from the public databases that were queried.
 Please enter your team's preferred nomenclature for each phenotype to normalize the nomenclature 
-throughout your database. To review any errors that may have occured durring collection look 
-<a href="/asap/cordova_pipeline/myvariants.error_log" download="variant-CADIerrors.txt">here</a>. 
-Download excel formatted data 
-<a href="http://cordova-dev.eng.uiowa.edu/cordova_sites_ah/rdvd/tmp/disease_excel_file.xls" download=nomenclatureNormalization.xls>here</a>. 
-Download csv <a type="application/octet-stream" href=/Shared/utilities/cordova_pipeline_v2/csvDisease20160621202814.csv download>here</a>
-<a href="http://cordova-dev.eng.uiowa.edu/cordova_sites_ah/rdvd/tmp/test.xlsx" download="testAndrea.txt">test</a></p>
+throughout your database. 
+<br>
+Download current <a type="application/octet-stream" href="http://cordova-dev.eng.uiowa.edu/cordova_sites_ah/rdvd/tmp/csvDisease<?echo $time_stamp?>.csv" download>nomenclature file</a>
+<br>
+Upload your nomenclature changes <input type="file" id="file" name="file"/>
+<br>
+<input type="submit" value="Upload" name="file-expert" class="btn btn-success"/>
 <div>
-  <h3>Public Database Nomenclature</h3>
+
+<h3>Public Database Nomenclature</h3>
 <?php echo form_open("variations/norm_nomenclature/$time_stamp", $attributes);?>
   
   <?php

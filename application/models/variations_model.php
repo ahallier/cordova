@@ -1899,11 +1899,12 @@ EOF;
     //$COLUMNS=("dbsnp","evs_all_ac","evs_all_an","evs_all_af","evs_ea_ac","evs_ea_an","evs_ea_af","evs_aa_ac","evs_aa_an","evs_aa_af","tg_all_ac","tg_all_an","tg_all_af","tg_afr_ac","tg_afr_an","tg_afr_af","tg_amr_ac","tg_amr_an","tg_amr_af","tg_eas_ac","tg_eas_an","tg_eas_af","tg_eur_ac","tg_eur_an","tg_eur_af","tg_sas_ac","tg_sas_an","tg_sas_af","otoscope_all_ac","otoscope_all_an","otoscope_all_af","otoscope_aj_ac","otoscope_aj_an","otoscope_aj_af","otoscope_co_ac","otoscope_co_an","otoscope_co_af","otoscope_us_ac","otoscope_us_an","otoscope_us_af","otoscope_jp_ac","otoscope_jp_an","otoscope_jp_af","otoscope_es_ac","otoscope_es_an","otoscope_es_af","otoscope_tr_ac","otoscope_tr_an","otoscope_tr_af","gene","sift_score","sift_pred","polyphen2_score","polyphen2_pred","lrt_score","lrt_pred,mutationtaster_score,mutationtaster_pred,gerp_rs,phylop_score,gerp_pred,phylop_pred,variation,hgvs_nucleotide_change,hgvs_protein_change,variantlocale,pathogenicity,disease,pubmed_id,comments,exac_afr_ac,exac_afr_an,exac_afr_af,exac_amr_ac,exac_amr_an,exac_amr_af,exac_eas_ac,exac_eas_an,exac_eas_af,exac_fin_ac,exac_fin_an,exac_fin_af,exac_nfe_ac,exac_nfe_an,exac_nfe_af,exac_oth_ac,exac_oth_an,exac_oth_af,exac_sas_ac,exac_sas_an,exac_sas_af,exac_all_ac,exac_all_an,exac_all_af");
     $COLUMNS = "(id,gene,sift_score,sift_pred,polyphen2_score,polyphen2_pred,lrt_score,lrt_pred,mutationtaster_score,mutationtaster_pred,gerp_rs,phylop_score,gerp_pred,phylop_pred,variation,hgvs_nucleotide_change,hgvs_protein_change,variantlocale,pathogenicity,disease,pubmed_id,comments,dbsnp,evs_all_af,evs_ea_ac,evs_ea_af,evs_aa_ac,evs_aa_an,evs_aa_af,tg_all_af,tg_afr_af,tg_amr_af,tg_eur_af)";
     exec("cd $annotation_path && export PATH=$PATH:/Shared/utilities/vcftools_0.1.13/bin/:/Shared/utilities/bin/ && $RUBY pipeline.rb $genesFile &> outPutLog$timeStamp.txt && gunzip mygenes$timeStamp.vcf.gz && bash convert_Cordova_VCF_to_mysqlimport_TSV.sh mygenes$timeStamp.vcf &> mygenes$timeStamp.final && cp mygenes$timeStamp.final $queueTable.tsv && cut -f 0-32 $queueTable.tsv > $queueTable.tsvcleaned");
-    
+    exec("cp /Shared/utilities/cordova_pipeline_v2/outPutLog$timeStamp.txt /var/www/html/cordova_sites_ah/rdvd/tmp/myvariants$timeStamp.log");
     
     $file = fopen("$annotation_path/$queueTable.tsvcleaned", "r");
     //$numLines = count(file("$annotation_path/$queueTable.tsvcleaned"));
     $finalTsvPath = "$annotation_path/final$queueTable.tsv";
+    exec("cp $finalTsvPath /tmp/");
     $finalTsv = fopen($finalTsvPath, 'w'); 
     //get max id from queuei
     $maxid = 0;
@@ -2125,12 +2126,14 @@ EOF;
   */
   public function get_disease_names($oldFile, $newFile, $timeStamp){
     $queueTable = $this->tables['vd_queue'];
-    $sql = "SELECT DISTINCT disease FROM $queueTable"; 
+    $sql = "SELECT gene, disease FROM $queueTable group by gene, disease"; 
     $query = $this->db->query($sql);
     $result = $query->result();
     $diseaseNames = array();
     $annotation_path = $this->config->item('annotation_path');
-    $csvDiseasePath = "$annotation_path/csvDisease$timeStamp.csv";
+    //NEED TO MAKE VAR FOR THIS PATH TO FIND ROOT OF SYSTEM
+    $tmpDir = "/var/www/html/cordova_sites_ah/rdvd/tmp";
+    $csvDiseasePath = "$tmpDir/csvDisease$timeStamp.csv";
     // Instantiate a new PHPExcel object
     $this->load->library('excel');
     //$this->load->library('PHPExcel/iofactory');
@@ -2164,13 +2167,18 @@ EOF;
     //$objWriter = new PHPExcel_Writer_Excel2007($objPHPExcel); 
     $objWriter = PHPExcel_IOFactory::createWriter($this->excel, 'Excel5');
     // Write the Excel file to filename some_excel_file.xlsx in the current directory
-    $objWriter->save("$annotation_path/csvDisease$timeStamp.xlsx");
-    rename("$annotation_path/csvDisease$timeStamp.xlsx", 'var/www/html/cordova_sites_ah/rdvd/tmp/test.xlsx');
+    $objWriter->save("$tmpDir/xlsDisease$timeStamp.xlsx");
+    //rename("$annotation_path/csvDisease$timeStamp.xlsx", "$tmpDir/DiseaseNomenclature$timeStamp.xlsx");
     $csvDisease = fopen($csvDiseasePath, "w");
+    fwrite($csvDisease, "Gene, Current, New\n");
     foreach($query->result() as $row){
-      array_push($diseaseNames, urlencode(urldecode($row->disease)));
-      fwrite($csvDisease, urldecode($row->disease)."\n");
+      if(strcmp($row->disease,"+")){
+        array_push($diseaseNames, urlencode(urldecode($row->disease)));
+        fwrite($csvDisease, "\"".$row->gene."\",\"".urldecode($row->disease)."\"\n");
+      }
     }
+    //exec("cp $annotation_path/csvDisease$timeStamp.xlsx $tmpDir/csvDisease$timeStamp.xlsx");
+    //exec("cp $annotation_path/csvDisease$timeStamp.xlsx $tmpDir/csvDisease$timeStamp.csv");
     return $diseaseNames;
   }  
   public function build_disease_excel_file($timeStamp = 00000000){
