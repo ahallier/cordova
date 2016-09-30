@@ -526,3 +526,204 @@ p.label-checkbox-pair label {
 #logs-header {
   float: left;
 }
+
+/* M U T A T I O N   T A B L E S */
+#show-unknown {
+position: relative;
+width: 100%;
+height: 40px;
+margin-top: 8px;
+}
+#show-unknown a:link,
+#show-unknown a:visited {
+position: absolute;
+right: 0px;
+border: 2px solid rgb(221,221,221);
+color: rgb(0,0,0);
+background: rgb(230,230,230);
+text-decoration: none;
+padding: 5px 10px;
+-webkit-border-radius: 5px;
+   -moz-border-radius: 5px;
+        border-radius: 5px;
+}
+#show-unknown a:hover {
+background: #C0C0C0;
+color: white;
+border-color: #C0C0C0;
+}
+#mutation-tables {
+margin-left:1px;
+padding:10px 0 10px 0;
+}
+
+/* Fieldset container */
+#mutation-tables fieldset {
+border:0;
+padding:5px 0 10px 3px;
+}
+#mutation-tables fieldset legend {
+font:1.5em/100% helvetica, arial, sans-serif;
+color:#FF0000;
+cursor:pointer;
+width:99%;
+background:url(../img/legend-collapsible-back.png) center left no-repeat !important;
+}
+#mutation-tables fieldset legend strong {
+background:#FFF;
+margin-left:25px;
+font-size: 24px;
+}
+#mutation-tables fieldset legend:hover {
+color:#FF6600;
+}
+#mutation-tables fieldset legend.collapsed {
+background:url(../img/legend-collapsed-back.png) center left no-repeat !important;
+}
+#mutation-tables fieldset legend.collapsed:hover {
+color:#FF3300;
+}
+#mutation-tables fieldset legend span {
+float:right;
+font:normal 9.6px/100% "lucida grande", "lucida sans unicode", lucida, helvetica, arial, sans-serif;
+margin:7px 0 0 0;
+background:white;
+}
+#mutation-tables fieldset legend span a {
+text-decoration:none;
+color:#999;
+padding:0 3px;
+border: 0px;
+}
+#mutation-tables fieldset legend span a:hover {
+color:#000;
+}
+
+.variant-list-container {
+  display: none;
+}
+
+/* A single table */
+#mutation-tables table {
+border-collapse:collapse;
+width:100%;
+border-bottom:1px solid #CCC;
+}
+#mutation-tables table thead tr th {
+font:bold 14.4px/120% helvetica, arial, sans-serif;
+text-align:left;
+color:#666;
+vertical-align:top;
+border-right:1px solid #CCC;
+border-bottom:1px solid #CCC;
+padding:5px 20px 5px 5px;
+cursor:pointer;
+background:#FFF url(../img/table-sort-arrow-double.png) top right no-repeat;
+}
+
+#mutation-tables table thead .header-link       {width:10px; background:none; padding:0;}
+#mutation-tables table thead .top-border        {border-top:1px solid #CCC;}
+#mutation-tables table thead .header-protein    {width:130px;}
+#mutation-tables table thead .header-nucleotide {width:130px;}
+#mutation-tables table thead .header-locale     {width:40px;}
+#mutation-tables table thead .header-position   {width:100px;}
+#mutation-tables table thead .header-variant    {width:120px;}
+#mutation-tables table thead .header-pubmed     {width:50px;}
+#mutation-tables table thead .header-omim       {width:50px;}
+#mutation-tables table thead .header-dbsnp      {width:50px;}
+#mutation-tables table tbody tr td {
+font:0.9em/100% "lucida grande", "lucida sans unicode", lucida, helvetica, arial, sans-serif;
+padding:5px;
+border-right:1px solid #CCC;
+vertical-align:top;
+}
+#mutation-tables table tbody tr td a {
+color:#000;
+text-decoration:none;
+border: 0px;
+}
+#mutation-tables table tbody tr td.external-link {
+padding:4px 2px 2px 2px;
+border-left:1px solid #CCC;
+}
+#mutation-tables table tbody tr td.external-link:hover {
+background:#FF3300!important;
+}
+#mutation-tables table tbody tr td.external-link a span {
+display:none;
+}
+#mutation-tables table tbody tr td.external-link a {
+display:block;
+width:15px;
+height:15px;
+background:url(../img/external-link.png) center no-repeat;
+border:1px solid #EEE;
+}
+#mutation-tables table tbody tr td.external-link a:hover {
+border:1px solid #FFF!important;
+}
+#mutation-tables table .odd {
+background:#EEE;
+}
+#mutation-tables table thead th.headerSortDown {
+color:#333;
+background:#FFEEAA url(../img/table-sort-arrow-down.png) top right no-repeat;
+}
+#mutation-tables table thead th.headerSortUp {
+color:#333;
+background:#FFEEAA url(../img/table-sort-arrow-up.png) top right no-repeat;
+}
+#mutation-tables table tbody tr:hover {
+background-color:#FFEEAA!important;
+cursor:pointer;
+}
+#mutation-tables table tbody tr:hover td.external-link {
+background:#FF9900;
+}
+#mutation-tables table tbody tr:hover td.external-link a {
+background:url(../img/external-link-hover.png) center no-repeat;
+border:1px solid #FFCC00;
+}
+
+/* Ajax info rows */
+#mutation-tables table .info {
+border-top:1px solid #EEE;
+border-bottom:1px solid #EEE;
+}
+#mutation-tables table .info td:hover {
+background:white!important;
+cursor:default!important;
+}
+
+/* Gene download links */
+#mutation-tables small.download-gene {
+display:block;
+padding: 0 10px 5px 0;
+font:0.7em/100% "lucida grande", "lucida sans unicode", lucida, helvetica, arial, sans-serif;
+text-transform:lowercase;
+text-align:center;
+}
+#mutation-tables small.download-gene strong {
+text-transform:uppercase;
+color:#CCC;
+}
+#mutation-tables small.download-gene a {
+text-decoration:none;
+color:#666;
+}
+#mutation-tables small.download-gene a:hover {
+color:#000;
+}
+/* Loading modal */
+#loading-modal {
+  text-align: center;
+}
+#loading-modal div {
+  padding: 8px;
+  display: inline-block;
+  color: #000000;
+  background: rgba(0,0,0,0.2);
+  -webkit-border-radius: 5px;
+     -moz-border-radius: 5px;
+          border-radius: 5px;
+}
