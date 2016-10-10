@@ -326,6 +326,26 @@ class Migration_Init extends CI_Migration {
           'constraint' => 100, 
           'null' => TRUE,
       ),
+      'chr' => array(
+          'type' => 'VARCHAR',
+          'constraint' => 100, 
+          'null' => TRUE,
+      ),
+      'pos' => array(
+          'type' => 'VARCHAR',
+          'constraint' => 100, 
+          'null' => TRUE,
+      ),
+      'ref' => array(
+          'type' => 'VARCHAR',
+          'constraint' => 100, 
+          'null' => TRUE,
+      ),
+      'alt' => array(
+          'type' => 'VARCHAR',
+          'constraint' => 100, 
+          'null' => TRUE,
+      ),
       'gene' => array(
           'type' => 'VARCHAR',
           'constraint' => 10, 
@@ -768,6 +788,58 @@ class Migration_Init extends CI_Migration {
       'genes' => 0,
     );
     $this->db->insert('versions', $data); 
+  
+    $fields = array(
+      'variation' => array(
+          'type' => 'VARCHAR',
+          'constraint' => 100, 
+          'null' => TRUE,
+      ),
+      'chr' => array(
+          'type' => 'VARCHAR',
+          'constraint' => 100, 
+          'null' => TRUE,
+      ),
+      'pos' => array(
+          'type' => 'VARCHAR',
+          'constraint' => 100, 
+          'null' => TRUE,
+      ),
+      'ref' => array(
+          'type' => 'VARCHAR',
+          'constraint' => 100, 
+          'null' => TRUE,
+      ),
+      'alt' => array(
+          'type' => 'VARCHAR',
+          'constraint' => 100, 
+          'null' => TRUE,
+      ),
+      'gene' => array(
+          'type' => 'VARCHAR',
+          'constraint' => 10, 
+          'null' => TRUE,
+      ),
+      'pathogenicity' => array(
+          'type' => 'VARCHAR',
+          'constraint' => 100, 
+          'null' => TRUE,
+      ),
+      'disease' => array(
+          'type' => 'VARCHAR',
+          'constraint' => 100, 
+          'null' => TRUE,
+      ),
+      'pubmed_id' => array(
+          'type' => 'VARCHAR',
+          'constraint' => 100, 
+          'null' => TRUE,
+      )
+    );
+    $this->dbforge->add_field($fields);
+    $this->dbforge->add_key('id', TRUE);
+    $this->dbforge->create_table('expert_curations', TRUE);
+  
   }
  
   /**
