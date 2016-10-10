@@ -343,10 +343,18 @@ class Variations extends MY_Controller {
     $data['excel_file_path'] = "$annotation_path/disease_excel_file$time_stamp.xlsx";
     //$submitedDiseaseNameFile = fopen("/ahallier/tmp/submitedDiseaseNames.txt");
     if($this->input->post('submit')){
-      $diseaseNameUpdatesFileLocation = "$annotation_path/submittedDiseaseNames$time_stamp.txt";
-      $oldFileLocation = "$annotation_path/cleanedDiseaseNames$time_stamp.txt";
-      $newFileLocation = "$annotation_path/diseaseNameUpdates$time_stamp.txt";
-      $updatedDiseaseNamesFile = $this->variations_model->update_disease_names($_POST, $uniqueDiseases, $diseaseNameUpdatesFileLocation, $oldFileLocation, $newFileLocation);
+      $nameUpdatesFile = "$annotation_path/submittedDiseaseNames$time_stamp.txt";
+      $updatedDiseaseNamesFile = $this->variations_model->update_disease_names($_POST, $uniqueDiseases, $nameUpdatesFile, $time_stamp);
+      redirect("/variations/expert_curration/$time_stamp");
+    }
+    if($this->input->post('file-submit')){ 
+      $this->load->library('upload');
+      $this->upload->set_allowed_types('*');
+      $nameUpdatesFile = "/Shared/utilities/cordova_pipeline_v2/submittedDiseaseNames$time_stamp.txt";
+      if (isset($_FILES["myfile"]["name"])){
+        move_uploaded_file($_FILES["myfile"]["tmp_name"], "/Shared/utilities/cordova_pipeline_v2/submittedDiseaseNames$time_stamp.txt");
+      }
+      $updatedDiseaseNamesFile = $this->variations_model->update_disease_names($_POST, $uniqueDiseases, $nameUpdatesFile, $time_stamp, $input_file_type = TRUE);
       redirect("/variations/expert_curration/$time_stamp");
     }
       

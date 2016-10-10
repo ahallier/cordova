@@ -85,7 +85,8 @@
 ?>
   <div class="span6">
     <p>If you wish to override any information gathered through this pipeline please upload a .txt file with the information you wish to change. The variation must match the existing file variation name exactly. </p>
-    <p>The current list of variations and their data points can be downloaded <a href="/asap/variant-CADI/tmp/diseaseNameUpdates<?php echo $time_stamp?>.txt" download="variant-CADIvariants">here</a> for reference.</p> 
+    <br>
+    <p>Download <a type="application/octet-stream" href="http://cordova-dev.eng.uiowa.edu/cordova_sites_ah/rdvd/tmp/queueNomenUpdates<?php echo $time_stamp?>.csv" download="variant-CADIvariants.csv">full data file</a> for reference.</p> 
     <input type="file" id="file" name="file"/>
     <br/>
     <br/>

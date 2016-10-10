@@ -81,17 +81,19 @@ $attributes = array('id'    => 'form_upload_genes',
 Please enter your team's preferred nomenclature for each phenotype to normalize the nomenclature 
 throughout your database. 
 <br>
+Download <a type="application/octet-stream" href="http://cordova-dev.eng.uiowa.edu/cordova_sites_ah/rdvd/tmp/queue<?echo $time_stamp?>.csv" download>full data file</a>
+<br>
 Download current <a type="application/octet-stream" href="http://cordova-dev.eng.uiowa.edu/cordova_sites_ah/rdvd/tmp/csvDisease<?echo $time_stamp?>.csv" download>nomenclature file</a>
 <br>
-Upload your nomenclature changes <input type="file" id="file" name="file"/>
-<br>
-<input type="submit" value="Upload" name="file-expert" class="btn btn-success"/>
 <div>
 
 <h3>Public Database Nomenclature</h3>
-<?php echo form_open("variations/norm_nomenclature/$time_stamp", $attributes);?>
-  
-  <?php
+<?php echo form_open_multipart("variations/norm_nomenclature/$time_stamp", $attributes);?>
+ Upload your nomenclature changes <input type="file" id="myfile" name="myfile"/>
+ <br>
+ <input type="submit" name="file-submit" id="file-submit" value="file-submit"></input>
+ <br>
+ <?php
    foreach ($uniqueDiseases as $disease){
      echo
      "<div class='control-group'>

@@ -1964,6 +1964,9 @@ EOF;
     //This works when not re-entering exsisting genes.
     $query4 = $this->db->query("INSERT INTO $resultsTable (variant_id,created) SELECT id,'$date' FROM $queueTable WHERE id NOT IN(SELECT variant_id FROM $resultsTable)");
     
+    //exec("touch /var/www/html/cordova_sites_ah/rdvd/tmp/queue.csv && chmod 777 /var/www/html/cordova_sites_ah/rdvd/tmp/queue.csv");
+    $query5 = $this->db->query("SELECT * from $queueTable INTO OUTFILE '/tmp/queue$timeStamp.csv' FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\n';");
+    exec("cp /tmp/queue$timeStamp.csv /var/www/html/cordova_sites_ah/rdvd/tmp/queue$timeStamp.csv");
 
 
 
@@ -2135,10 +2138,12 @@ EOF;
     $tmpDir = "/var/www/html/cordova_sites_ah/rdvd/tmp";
     $csvDiseasePath = "$tmpDir/csvDisease$timeStamp.csv";
     // Instantiate a new PHPExcel object
-    $this->load->library('excel');
+    //$this->load->file('third_party/PHPExcel.php');
+    //$this->load->library('excel');
     //$this->load->library('PHPExcel/iofactory');
-    $objPHPExcel = new PHPExcel();
-    $fileType = 'Excel5';
+    //$objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+    //$objPHPExcel = new PHPExcel();
+    //$fileType = 'Excel5';
     //$fileName = "$annotation_path/testFile.xls";
 
     // Read the file
@@ -2147,34 +2152,35 @@ EOF;
 
     //$objPHPExcel = PHPExcel_IOFactory::load($file);
     // Set the active Excel worksheet to sheet 0
-    $objPHPExcel->setActiveSheetIndex(0); 
+    //$objPHPExcel->setActiveSheetIndex(0); 
     // Initialise the Excel row number
+    
     $rowCount = 1; 
     // Iterate through each result from the SQL query in turn
     // We fetch each database result row into $row in turn
     //while($row = mysql_fetch_array($result)){ 
-    foreach($result as $row){  
+    //foreach($result as $row){  
       // Set cell An to the "name" column from the database (assuming you have a column called name)
       //    where n is the Excel row number (ie cell A1 in the first row)
-      $objPHPExcel->getActiveSheet()->SetCellValue('A'.$rowCount, $row->disease); 
+      //$objPHPExcel->getActiveSheet()->SetCellValue('A'.$rowCount, $row->disease); 
       // Set cell Bn to the "age" column from the database (assuming you have a column called age)
       //    where n is the Excel row number (ie cell A1 in the first row)
-      $objPHPExcel->getActiveSheet()->SetCellValue('B'.$rowCount, $row->disease); 
+      //$objPHPExcel->getActiveSheet()->SetCellValue('B'.$rowCount, $row->disease); 
       // Increment the Excel row counter
-      $rowCount++; 
-    } 
+      //$rowCount++; 
+    //} 
     // Instantiate a Writer to create an OfficeOpenXML Excel .xlsx file
     //$objWriter = new PHPExcel_Writer_Excel2007($objPHPExcel); 
-    $objWriter = PHPExcel_IOFactory::createWriter($this->excel, 'Excel5');
+    //$objWriter = PHPExcel_IOFactory::createWriter($this->excel, 'Excel5');
     // Write the Excel file to filename some_excel_file.xlsx in the current directory
-    $objWriter->save("$tmpDir/xlsDisease$timeStamp.xlsx");
+    //$objWriter->save("$tmpDir/xlsDisease$timeStamp.xlsx");
     //rename("$annotation_path/csvDisease$timeStamp.xlsx", "$tmpDir/DiseaseNomenclature$timeStamp.xlsx");
     $csvDisease = fopen($csvDiseasePath, "w");
     fwrite($csvDisease, "Gene, Current, New\n");
     foreach($query->result() as $row){
       if(strcmp($row->disease,"+")){
         array_push($diseaseNames, urlencode(urldecode($row->disease)));
-        fwrite($csvDisease, "\"".$row->gene."\",\"".urldecode($row->disease)."\"\n");
+        fwrite($csvDisease, "\"".$row->gene."\",\"".urldecode($row->disease)."\",\"NewName\"\n");
       }
     }
     //exec("cp $annotation_path/csvDisease$timeStamp.xlsx $tmpDir/csvDisease$timeStamp.xlsx");
@@ -2242,23 +2248,36 @@ EOF;
   * @input POST, uniqueDiseases, nameUpdatesFile, oldFileLocation, newFileLocation
   */
 
-
-  public function update_disease_names($_POST, $uniqueDiseases, $nameUpdatesFile, $oldFileLocation,  $newFileLocation){
-    $submittedNameUpdates = fopen($nameUpdatesFile, "w");
+  public function update_disease_names($_POST, $uniqueDiseases, $nameUpdatesFile, $timeStamp, $input_type_file = FALSE){
     $queueTable = $this->tables['vd_queue'];
-    foreach($uniqueDiseases as $disease){
-      $string = str_replace(" ", "_", $disease);
-      if($_POST[$string]){
-        $newName = $_POST[$string];
-        $sql = "UPDATE $queueTable SET disease='$newName' WHERE disease='$disease'";
-        $query = $this->db->query($sql);
-      }
-      //else{
-      //  $newName=$disease;
-      //  $sql = "UPDATE $queueTable SET disease=$newName WHERE disease=$disease";
-      //  $query = $this->db->query($sql);
-      //}
+    if($input_type_file == FALSE){
+      foreach($uniqueDiseases as $disease){
+        $string = str_replace(" ", "_", $disease);
+        if($_POST[$string]){
+          $newName = $_POST[$string];
+          $sql = "UPDATE $queueTable SET disease='$newName' WHERE disease='$disease'";
+          $query = $this->db->query($sql);
+        }
+      } 
     }
+    if($input_type_file == TRUE){
+      $submittedNameUpdates = fopen($nameUpdatesFile, "r");
+      $row = 1;
+      while($line = fgets($submittedNameUpdates)){
+        if($row != 1){
+          $data = explode("\",\"", $line);
+          $newName = urlencode(str_replace('"', "", $data[2]));
+          $disease = urlencode($data[1]);
+          $gene = str_replace('"', "", $data[0]);
+          $sql = "UPDATE $queueTable SET disease='$newName' WHERE disease='$disease' and gene='$gene'";
+          $query = $this->db->query($sql);
+        }
+        $row ++;
+      }
+    }
+
+    $query5 = $this->db->query("SELECT * from $queueTable INTO OUTFILE '/tmp/queueNomenUpdates$timeStamp.csv' FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\n';");
+    exec("cp /tmp/queueNomenUpdates$timeStamp.csv /var/www/html/cordova_sites_ah/rdvd/tmp/queueNomenUpdates$timeStamp.csv");
     return $query;
   } 
   
@@ -2315,14 +2334,16 @@ EOF;
   public function expert_curation($newFileLocation, $oldFileLocation, $updateFileLocation){
     $queueTable = $this->tables['vd_queue'];
     while($fileLine = fgets($updateFileLocation)){
-      $lineArray=explode("\t", $fileLine);
-      $newDisease=$lineArray[3];
+      $lineArray=explode("\",\"", $fileLine);
+      $newDisease=urlencode($lineArray[3]);
       $newPath=$lineArray[2];
       $variant=$lineArray[1];
       $newPubMedID=$lineArray[4];
       $sql = "UPDATE $queueTable SET disease='$newDisease', pathogenicity='$newPath', pubmedid='$newPubMedID' WHERE variant='$variant'";
       $query = $this->db->query($sql);
     }
+    $query5 = $this->db->query("SELECT * from $queueTable INTO OUTFILE '/tmp/queueExpertUpdates$timeStamp.csv' FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\n';");
+    exec("cp /tmp/queueExpertUpdates$timeStamp.csv /var/www/html/cordova_sites_ah/rdvd/tmp/queueExpertUpdates$timeStamp.csv");
   }
   public function OLD_expert_curation($newFileLocation, $oldFileLocation, $updateFileLocation){
     $updateDisease = 3;
