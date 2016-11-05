@@ -8,7 +8,7 @@
                                     list-style-type: none;
                                         }
 
-                       ol.progtrckr li {
+                                            ol.progtrckr li {
                                                     display: inline-block;
                                                             text-align: center;
                                                                     line-height: 3em;
@@ -62,50 +62,42 @@
 
                                                                                                                                                                                                                                                                                                                                                 </style>
 
+
+
+
+                                                                                                                                                                                                                                                                                                                                                
 <ol class="progtrckr" data-progtrckr-steps="5">
-     <li class="progtrckr-done">Upload Genes</li>
-         <li class="progtrckr-done">Gather Variants</li>
-             <li class="progtrckr-done">Normalize</li>
-                 <li class="progtrckr-todo">Expert Curation</li>
-                     <li class="progtrckr-todo">Release Changes</li>
-                     </ol>
-       
+      <li class="progtrckr-done">Upload Genes</li>
+          <li class="progtrckr-done">Gather Variants</li>
+              <li class="progtrckr-done">Normalize</li>
+                  <li class="progtrckr-done">Expert Curation</li>
+                      <li class="progtrckr-todo">Release Changes</li>
+                      </ol>
 
+<h1>Expert Curation</h1>
+<br/>
 <?php
-$attributes = array('id'    => 'form_upload_genes',
-                     'class' => 'rounded',
-                    );
+  $attributes = array('id'    => 'form_expert_curration',
+                       'class' => 'rounded',
+                      );
+   //echo $error;
+  echo form_open_multipart("variations/expert_curration/$time_stamp", $attributes);
 ?>
-<h1>Select Preferred Nomenclature</h1>
-<p>Below is a list of gathered phenotypes from the public databases that were queried.
-Please enter your team's preferred nomenclature for each phenotype to normalize the nomenclature 
-throughout your database. 
-<br>
-Download <a type="application/octet-stream" href="<?echo $uniqueDiseases['queueDownloadPath']?>" download>full data file</a>
-<br>
-Download current <a type="application/octet-stream" href="<?echo $uniqueDiseases['csvDiseaseDownloadPath']?>" download>nomenclature file</a>
-<br>
-<div>
-
-<h3>Public Database Nomenclature</h3>
-<?php echo form_open_multipart("variations/norm_nomenclature/", $attributes);?>
- Upload your nomenclature changes <input type="file" id="myfile" name="myfile"/>
- <br>
- <input type="submit" name="file-submit" id="file-submit" value="file-submit"></input>
- <br>
- <?php
-   foreach ($uniqueDiseases['diseaseNames'] as $disease){
-     echo
-     "<div class='control-group'>
-       <label class='control-label' for='".$disease."'>".urldecode($disease)."</label>
-        <div class='controls'>
-          <input class='align-right' type='text' name='".$disease."' id='".$disease."'></input>
-        </div>
-      </div>";   
-   }
-  ?>
-</div>
-<div>
-  <input type="submit" name="submit" id="submit" value="submit"></input>
-</div>
-</form>
+  <div class="span6">
+    <p>If you wish to override any information gathered through this pipeline please upload a .txt file with the information you wish to change. The variation must match the existing file variation name exactly. </p>
+    <br>
+    <p>Download <a type="application/octet-stream" href="http://cordova-dev.eng.uiowa.edu/cordova_sites_ah/rdvd/tmp/queueNomenUpdates<?php echo $time_stamp?>.csv" download="variant-CADIvariants.csv">full data file</a> for reference.</p> 
+    <input type="file" id="file" name="file"/>
+    <br/>
+    <br/>
+    <input type="submit" value="Upload" name="file-expert" class="btn btn-success"/>
+    <br/>
+  </div>
+  </form>
+  <div class = "span2">
+  </div>
+  <div class = "span4">
+    <p>This is an example of formatting required for the input file.</p>
+    <img src="<?php echo site_url('assets/editor/img/expertDataExample2.jpg'); ?>">
+    <p>The variation name must match exactly to that in the file. Please surround each point with quotations and separate with a comma. Please insert a new line between each row.</p>
+  </div>

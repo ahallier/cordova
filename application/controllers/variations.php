@@ -329,23 +329,26 @@ class Variations extends MY_Controller {
    $this->load->view($this->editor_layout, $data);
   }
 
-  public function norm_nomenclature($time_stamp) {
+  public function norm_nomenclature() {
     //redirect_all_nonmembers();
     $data['title'] = "Normalize Nomenclature";
     $data['content'] = 'variations/norm_nomenclature';
     $annotation_path = $this->config->item('annotation_path');
-    $mostReacentFile = "$annotation_path/mygenes$time_stamp.final";
-    $cleanedFile = "$annotation_path/cleanedDiseaseNames$time_stamp.txt";
-    $uniqueDiseases = $this->variations_model->get_disease_names($mostReacentFile, $cleanedFile, $time_stamp);
+    $time_stamp=date("YmdHis");
+    //$mostReacentFile = "$annotation_path/mygenes$time_stamp.final";
+    //$cleanedFile = "$annotation_path/cleanedDiseaseNames$time_stamp.txt";
+    $uniqueDiseases = $this->variations_model->get_disease_names();
     //die(print_r($uniqueDiseases));
     $data['uniqueDiseases'] = $uniqueDiseases;
-    $data['time_stamp'] = $time_stamp;
-    $data['excel_file_path'] = "$annotation_path/disease_excel_file$time_stamp.xlsx";
+    //$data['time_stamp'] = $time_stamp;
+    //$data['excel_file_path'] = "$annotation_path/disease_excel_file$time_stamp.xlsx";
+    $data['csv_file_path'] = $uniqueDiseases['csvDiseasePath'];
     //$submitedDiseaseNameFile = fopen("/ahallier/tmp/submitedDiseaseNames.txt");
     if($this->input->post('submit')){
-      $nameUpdatesFile = "$annotation_path/submittedDiseaseNames$time_stamp.txt";
-      $updatedDiseaseNamesFile = $this->variations_model->update_disease_names($_POST, $uniqueDiseases, $nameUpdatesFile, $time_stamp);
-      redirect("/variations/expert_curration/$time_stamp");
+      //$nameUpdatesFile = "$annotation_path/submittedDiseaseNames$time_stamp.txt";
+      //die(print_r($uniqueDiseases['diseaseNames']));
+      $updatedDiseaseNamesFile = $this->variations_model->update_disease_names($_POST, $nameUpdatesFile = null, $uniqueDiseases['diseaseNames']);
+      redirect("/variations/norm_nomenclature");
     }
     if($this->input->post('file-submit')){ 
       $this->load->library('upload');
@@ -354,17 +357,17 @@ class Variations extends MY_Controller {
       if (isset($_FILES["myfile"]["name"])){
         move_uploaded_file($_FILES["myfile"]["tmp_name"], "/Shared/utilities/cordova_pipeline_v2/submittedDiseaseNames$time_stamp.txt");
       }
-      $updatedDiseaseNamesFile = $this->variations_model->update_disease_names($_POST, $uniqueDiseases, $nameUpdatesFile, $time_stamp, $input_file_type = TRUE);
-      redirect("/variations/expert_curration/$time_stamp");
+      $updatedDiseaseNamesFile = $this->variations_model->update_disease_names($_POST, $nameUpdatesFile,  $uniqueDiseases['diseaseNames'], $input_file_type = TRUE);
+      redirect("/variations/norm_nomenclature");
     }
       
     $this->load->view($this->editor_layout, $data);
   }
 
-  public function expert_curration($time_stamp) {
+  public function expert_curation($time_stamp) {
     //redirect_all_nonmembers();
     $data['title'] = "Expert Curration";
-    $data['content'] = 'variations/expert_curration';
+    $data['content'] = 'variations/expert_curation';
     $data['time_stamp'] = $time_stamp;
     $annotation_path = $this->config->item('annotation_path');
     $data['variant_file'] = "$annotation_path/diseaseNameUpdates$time_stamp.txt";
@@ -374,7 +377,7 @@ class Variations extends MY_Controller {
       $this->load->library('upload');
       $this->upload->set_allowed_types('*');
       move_uploaded_file($_FILES["file"]["tmp_name"], "$annotation_path/expertFile$time_stamp.txt");
-      $finalFileLocation = "$annotation_path/expertCurrated.final$time_stamp.txt";
+      $finalFileLocation = "$annotation_path/expertCurated.final$time_stamp.txt";
       $oldFileLocation = "$annotation_path/diseaseNameUpdates$time_stamp.txt";
       $updateFileLocation = "$annotation_path/expertFile$time_stamp.txt";
       $this->variations_model->expert_curation($finalFileLocation, $oldFileLocation, $updateFileLocation);    

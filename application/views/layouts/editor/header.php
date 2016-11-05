@@ -29,6 +29,12 @@
        <li id="nav-login"><a href="<?php echo login_url(); ?>"><i></i> <?php echo login_text(); ?></a></li>
        <li id="nav-login"><a href="<?php echo site_url('auth/profile'); ?>"><i class="icon-user icon-white"></i>Profile</a></li> 
       </ul>
+      Variant-CADI
+      <ul id="nav" class="nav nav-pills">
+        <li><a href="<?php echo site_url('variations/upload_genes'); ?>"></i> Upload Genes</a></li>
+        <li><a href="<?php echo site_url('variations/norm_nomenclature'); ?>"></i> Normalize Nomenclature</a></li>
+        <li><a href="<?php echo site_url('variations/expert_curation'); ?>"></i> Expert Curations</a></li>
+      </ul>
     </div>
   </div>
   <div id="content-wrapper" class="container rounded"> <!-- begin content wrapper -->

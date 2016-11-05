@@ -2127,7 +2127,7 @@ EOF;
   * @author Andrea Hallier
   * @input oldFile, newFile
   */
-  public function get_disease_names($oldFile, $newFile, $timeStamp){
+  public function get_disease_names(){
     $queueTable = $this->tables['vd_queue'];
     $sql = "SELECT gene, disease FROM $queueTable group by gene, disease"; 
     $query = $this->db->query($sql);
@@ -2136,7 +2136,11 @@ EOF;
     $annotation_path = $this->config->item('annotation_path');
     //NEED TO MAKE VAR FOR THIS PATH TO FIND ROOT OF SYSTEM
     $tmpDir = "/var/www/html/cordova_sites_ah/rdvd/tmp";
-    $csvDiseasePath = "$tmpDir/csvDisease$timeStamp.csv";
+    $time_stamp = date("YmdHis");
+    $queueOutFilePath = "$tmpDir/queueOutputPath$time_stamp.csv";
+    $handle = fopen($queueOutFilePath, 'w') or die('Cannot open file:  '.$queueOutFilePath);
+    $sql = "SELECT * FROM $queueTable INTO OUTFILE '$handle' FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\n'";
+    $csvDiseasePath = "$tmpDir/csvDisease$time_stamp.csv";
     // Instantiate a new PHPExcel object
     //$this->load->file('third_party/PHPExcel.php');
     //$this->load->library('excel');
@@ -2179,13 +2183,20 @@ EOF;
     fwrite($csvDisease, "Gene, Current, New\n");
     foreach($query->result() as $row){
       if(strcmp($row->disease,"+")){
-        array_push($diseaseNames, urlencode(urldecode($row->disease)));
+        array_push($diseaseNames, $row->gene . " - " . urlencode(urldecode($row->disease)));
         fwrite($csvDisease, "\"".$row->gene."\",\"".urldecode($row->disease)."\",\"NewName\"\n");
       }
     }
+    $csvDiseaseDownloadPath = "http://cordova-dev.eng.uiowa.edu/cordova_sites_ah/rdvd/tmp/csvDisease$time_stamp.csv";
+    $csvQueueDownloadPath = "http://cordova-dev.eng.uiowa.edu/cordova_sites_ah/rdvd/tmp/queueOutputPath$time_stamp.csv";
     //exec("cp $annotation_path/csvDisease$timeStamp.xlsx $tmpDir/csvDisease$timeStamp.xlsx");
     //exec("cp $annotation_path/csvDisease$timeStamp.xlsx $tmpDir/csvDisease$timeStamp.csv");
-    return $diseaseNames;
+    $data = array('diseaseNames' => $diseaseNames,
+                  'csvDiseasePath' => $csvDiseasePath,
+                  'csvDiseaseDownloadPath' => $csvDiseaseDownloadPath,
+                  'queueDownloadPath' => $csvQueueDownloadPath);
+
+    return $data;
   }  
   public function build_disease_excel_file($timeStamp = 00000000){
     $queueTable = $this->tables['vd_queue'];
@@ -2248,13 +2259,14 @@ EOF;
   * @input POST, uniqueDiseases, nameUpdatesFile, oldFileLocation, newFileLocation
   */
 
-  public function update_disease_names($_POST, $uniqueDiseases, $nameUpdatesFile, $timeStamp, $input_type_file = FALSE){
+  public function update_disease_names($_POST, $nameUpdatesFile,  $uniqueDiseases, $input_type_file = FALSE){
     $queueTable = $this->tables['vd_queue'];
     if($input_type_file == FALSE){
       foreach($uniqueDiseases as $disease){
         $string = str_replace(" ", "_", $disease);
+        //$string = urlencode($disease);
         if($_POST[$string]){
-          $newName = $_POST[$string];
+          $newName = urlencode($_POST[$string]);
           $sql = "UPDATE $queueTable SET disease='$newName' WHERE disease='$disease'";
           $query = $this->db->query($sql);
         }
@@ -2274,8 +2286,8 @@ EOF;
         }
         $row ++;
       }
-    }
-
+    } 
+    $timeStamp = date("Ymdhms");
     $query5 = $this->db->query("SELECT * from $queueTable INTO OUTFILE '/tmp/queueNomenUpdates$timeStamp.csv' FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\n';");
     exec("cp /tmp/queueNomenUpdates$timeStamp.csv /var/www/html/cordova_sites_ah/rdvd/tmp/queueNomenUpdates$timeStamp.csv");
     return $query;

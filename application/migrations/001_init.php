@@ -790,6 +790,13 @@ class Migration_Init extends CI_Migration {
     $this->db->insert('versions', $data); 
   
     $fields = array(
+      'id' => array(
+          'type' => 'INT',
+          'constraint' => 11, 
+          'unsigned' => TRUE,
+          'null' => FALSE,
+          'auto_increment' => TRUE
+      ),
       'variation' => array(
           'type' => 'VARCHAR',
           'constraint' => 100, 
