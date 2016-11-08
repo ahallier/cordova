@@ -818,6 +818,71 @@ class Variations_model extends MY_Model {
     return TRUE;
   }
 
+  public function push_data_live($confirmed_only=TRUE){
+    $queueTable = $this->tables['vd_queue'];
+    $liveTable = $this->tables['vd_live'];
+    $reviewsTable = $this->tables['reviews'];
+    $varLogTable = "variations_log"; 
+    if($confirmed_only=TRUE){
+    
+    }
+    else{
+      //get all variants for deletion
+      $deleteMe = "SELECT variant_id FROM $reviewsTable WHERE scheduled_for_deletion = 1";
+      $deleteVariantsResult = mysql_query($deleteMe) or die;
+      $deleteVariants = array();
+      while($row = mysql_fetch_assoc($deleteVariantsResult))
+      {
+          $deleteVariants[] = $row['variant_id'];
+      }
+      $deleteVariantsString = implode(",", $array);
+      //add these live variants to log
+      $q2 = "INSERT INTO $varLogTable SELECT * FROM $liveTable WHERE id IN ($deleteVariantsString)";
+      $r2 = mysql_query($q2) or die;
+      //delete them from the reviews table
+      $q3 = "DELETE FROM $reviewsTable WHERE id IN ($deleteVariantsString)"
+      $r3 = mysql_query($q3) or die;
+      //delete them from the queue
+      $q4 = "DELETE FROM $queueTable WHERE id IN ($deleteVariantsString)"
+      $r4 = mysql_query($q4) or die;
+      //delete these from live varitions
+      $q5 = "DELETE FROM $liveTable WHERE id IN ($deleteVariantsString)";
+      $r5 = mysql_query($q5) or die;
+    
+    
+      //get all variants for updating
+    
+      $updateMe = "SELECT variant_id FROM $reviewsTable";
+      $updateVariantsResult = mysql_query($updateMe) or die;
+      $updateVariants = array();
+      while($row = mysql_fetch_assoc($deleteVariantsResult))
+      {
+          $updateVariants[] = $row['variant_id'];
+      }
+      $updateVariantsString = implode(",", $array);
+      //add these live variants to log
+      $q7 = "INSERT INTO $varLogTable SELECT * FROM $liveTable WHERE id IN ($updateVariantsString)";
+      $r7 = mysql_query($q2) or die;
+      //Update them in the live varitions
+      $q10 = "UPDATE $liveTable FROM $queueTable WHERE id IN ($deleteVariantsString)";
+      $r10 = mysql_query($q5) or die;
+      //delete them from the reviews table
+      $q8 = "DELETE FROM $reviewsTable WHERE id IN ($deleteVariantsString)"
+      $r8 = mysql_query($q3) or die;
+      //delete them from the queue
+      $q9 = "DELETE FROM $queueTable WHERE id IN ($deleteVariantsString)"
+      $r9 = mysql_query($q4) or die;
+    }
+
+    //Update versions
+    ""
+    
+    //Drop current data from Variant Count
+    "TRUNCATE $varCountTable";
+    //Update Variant Count
+    "INSERT INTO $varCountTable (SELECT gene, count(*) from $liveTable GROUP BY gene)";
+
+  }
   /**
    * Push Data Live
    *
@@ -2183,7 +2248,7 @@ EOF;
     fwrite($csvDisease, "Gene, Current, New\n");
     foreach($query->result() as $row){
       if(strcmp($row->disease,"+")){
-        array_push($diseaseNames, $row->gene . " - " . urlencode(urldecode($row->disease)));
+        array_push($diseaseNames, urlencode(urldecode($row->disease)));
         fwrite($csvDisease, "\"".$row->gene."\",\"".urldecode($row->disease)."\",\"NewName\"\n");
       }
     }
@@ -2288,8 +2353,8 @@ EOF;
       }
     } 
     $timeStamp = date("Ymdhms");
-    $query5 = $this->db->query("SELECT * from $queueTable INTO OUTFILE '/tmp/queueNomenUpdates$timeStamp.csv' FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\n';");
-    exec("cp /tmp/queueNomenUpdates$timeStamp.csv /var/www/html/cordova_sites_ah/rdvd/tmp/queueNomenUpdates$timeStamp.csv");
+    //$query5 = $this->db->query("SELECT * from $queueTable INTO OUTFILE '/tmp/queueNomenUpdates$timeStamp.csv' FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\n';");
+    //exec("cp /tmp/queueNomenUpdates$timeStamp.csv /var/www/html/cordova_sites_ah/rdvd/tmp/queueNomenUpdates$timeStamp.csv");
     return $query;
   } 
   

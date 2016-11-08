@@ -364,11 +364,11 @@ class Variations extends MY_Controller {
     $this->load->view($this->editor_layout, $data);
   }
 
-  public function expert_curation($time_stamp) {
+  public function expert_curation() {
     //redirect_all_nonmembers();
     $data['title'] = "Expert Curration";
     $data['content'] = 'variations/expert_curation';
-    $data['time_stamp'] = $time_stamp;
+    $data['time_stamp'] = $date("Ymdhms");
     $annotation_path = $this->config->item('annotation_path');
     $data['variant_file'] = "$annotation_path/diseaseNameUpdates$time_stamp.txt";
     #on file submit
