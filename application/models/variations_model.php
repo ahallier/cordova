@@ -818,70 +818,142 @@ class Variations_model extends MY_Model {
     return TRUE;
   }
 
-  public function push_data_live($confirmed_only=TRUE){
+  public function push_data_live($confirmed_only = TRUE){
+    // Set unlimited memory/time when retrieving all variants in the queue (queue could be quite large)
+    ini_set('memory_limit', '-1');
+    set_time_limit(0);
+    
     $queueTable = $this->tables['vd_queue'];
     $liveTable = $this->tables['vd_live'];
     $reviewsTable = $this->tables['reviews'];
     $varLogTable = "variations_log"; 
-    if($confirmed_only=TRUE){
-    
-    }
-    else{
-      //get all variants for deletion
-      $deleteMe = "SELECT variant_id FROM $reviewsTable WHERE scheduled_for_deletion = 1";
-      $deleteVariantsResult = mysql_query($deleteMe) or die;
-      $deleteVariants = array();
+    $varCountTable = $this->tables['variant_count'];
+    //$databaseName = $this->db->database;
+    $databaseName = $this->config->item('database_name');
+
+    $deleteVariants = array();
+    $deleteVariantsString = "";
+    $updateVariants = array();    
+    $updateVariantsString = "";
+    if($confirmed_only){
+      //get confirmed variations for deletion
+      $deleteMe = "SELECT variant_id FROM $reviewsTable WHERE confirmed_for_release = 1 AND scheduled_for_deletion = 1";
+      $deleteVariantsResult = mysql_query($deleteMe) or die("here1a");
       while($row = mysql_fetch_assoc($deleteVariantsResult))
       {
           $deleteVariants[] = $row['variant_id'];
       }
-      $deleteVariantsString = implode(",", $array);
-      //add these live variants to log
-      $q2 = "INSERT INTO $varLogTable SELECT * FROM $liveTable WHERE id IN ($deleteVariantsString)";
-      $r2 = mysql_query($q2) or die;
-      //delete them from the reviews table
-      $q3 = "DELETE FROM $reviewsTable WHERE id IN ($deleteVariantsString)"
-      $r3 = mysql_query($q3) or die;
-      //delete them from the queue
-      $q4 = "DELETE FROM $queueTable WHERE id IN ($deleteVariantsString)"
-      $r4 = mysql_query($q4) or die;
-      //delete these from live varitions
-      $q5 = "DELETE FROM $liveTable WHERE id IN ($deleteVariantsString)";
-      $r5 = mysql_query($q5) or die;
-    
-    
-      //get all variants for updating
-    
-      $updateMe = "SELECT variant_id FROM $reviewsTable";
-      $updateVariantsResult = mysql_query($updateMe) or die;
-      $updateVariants = array();
-      while($row = mysql_fetch_assoc($deleteVariantsResult))
+      $deleteVariantsString = implode(",", $deleteVariants);
+      
+      //get confirmed variations for updating
+      $updateMe = "SELECT variant_id FROM $reviewsTable WHERE confirmed_for_release = 1";
+      $updateVariantsResult = mysql_query($updateMe) or die('here6a');
+      while($row = mysql_fetch_assoc($updateVariantsResult))
       {
           $updateVariants[] = $row['variant_id'];
       }
-      $updateVariantsString = implode(",", $array);
+      $updateVariantsString = implode(",", $updateVariants);
+    }
+    else{
+      //get all variants for deletion
+      $deleteMe = "SELECT variant_id FROM $reviewsTable WHERE scheduled_for_deletion = 1";
+      $deleteVariantsResult = mysql_query($deleteMe) or die("here1");
+      while($row = mysql_fetch_assoc($deleteVariantsResult))
+      {
+          $deleteVariants[] = $row['variant_id'];
+      }
+      $deleteVariantsString = implode(",", $deleteVariants);
+      
+      //get all variants for updating
+      $updateMe = "SELECT variant_id FROM $reviewsTable";
+      $updateVariantsResult = mysql_query($updateMe) or die('here6');
+      while($row = mysql_fetch_assoc($updateVariantsResult))
+      {
+          $updateVariants[] = $row['variant_id'];
+      }
+      $updateVariantsString = implode(",", $updateVariants);
+    }
+    
+    //Delete Variants that need deleting
+    if(sizeof($deleteVariants) > 0){
+      //add these live variants to log
+      $q2 = "INSERT INTO $varLogTable SELECT * FROM $liveTable WHERE id IN ($deleteVariantsString)";
+      $r2 = mysql_query($q2) or die($q2);
+      //delete them from the reviews table
+      $q3 = "DELETE FROM $reviewsTable WHERE id IN ($deleteVariantsString)";
+      $r3 = mysql_query($q3) or die("here3");
+      //delete them from the queue
+      $q4 = "DELETE FROM $queueTable WHERE id IN ($deleteVariantsString)";
+      $r4 = mysql_query($q4) or die("here4");
+      //delete these from live varitions
+      $q5 = "DELETE FROM $liveTable WHERE id IN ($deleteVariantsString)";
+      $r5 = mysql_query($q5) or die("here5");
+    }
+    
+    //Update Variants that need updating
+    if(sizeof($updateVariants)>0){
       //add these live variants to log
       $q7 = "INSERT INTO $varLogTable SELECT * FROM $liveTable WHERE id IN ($updateVariantsString)";
-      $r7 = mysql_query($q2) or die;
+      $r7 = mysql_query($q7) or die('here7');
       //Update them in the live varitions
-      $q10 = "UPDATE $liveTable FROM $queueTable WHERE id IN ($deleteVariantsString)";
-      $r10 = mysql_query($q5) or die;
+      //$q10 = "UPDATE $liveTable FROM $queueTable WHERE id IN ($deleteVariantsString)";
+      //$q10 = "UPDATE $liveTable SET A.gene = B.gene, A.pathogenicty = B.pathogenicty FROM $liveTable A INNER JOIN $queueTable B ON A.id = B.id WHERE A.id = B.id";
+      $getCols = "SELECT GROUP_CONCAT(column_name ORDER BY ordinal_position SEPARATOR ',') AS columns FROM information_schema.columns WHERE table_schema = '$databaseName' AND table_name = '$liveTable'";
+      $colsR = mysql_query($getCols) or die('hereCols');
+      while($row = mysql_fetch_assoc($colsR))
+      {
+          $attributestring = $row['columns'];
+          $attributeArray = explode(',', $attributestring);
+          $setString = "";
+          foreach ($attributeArray as $attribute){
+            $setString = $setString."A.$attribute = B.$attribute,";
+          }
+      }
+      $setString = rtrim($setString, ',');
+      $q10 = "UPDATE $liveTable A, $queueTable B SET $setString WHERE A.id = B.id AND A.id in ($updateVariantsString)";
+      //$q10 = "MERGE INTO $liveTable USING $queueTable ON $liveTable.id = $queueTable.id WHEN MATCHED THEN UPDATE SET $liveTable.gene = $queueTable.gene";
+      $r10 = mysql_query($q10) or die('here8');
+      //die($r10);
       //delete them from the reviews table
-      $q8 = "DELETE FROM $reviewsTable WHERE id IN ($deleteVariantsString)"
-      $r8 = mysql_query($q3) or die;
+      $q8 = "DELETE FROM $reviewsTable WHERE id IN ($updateVariantsString)";
+      $r8 = mysql_query($q8) or die('here9');
       //delete them from the queue
-      $q9 = "DELETE FROM $queueTable WHERE id IN ($deleteVariantsString)"
-      $r9 = mysql_query($q4) or die;
+      $q9 = "DELETE FROM $queueTable WHERE id IN ($updateVariantsString)";
+      $r9 = mysql_query($q9) or die('here10');
     }
-
     //Update versions
-    ""
+    // Get new version number
+    $new_version = ((int) $this->version);
+    $genesQ = "SELECT count(*) AS num_genes FROM $liveTable GROUP BY gene";
+    $genesR = mysql_query($genesQ) or die('here11');
+    while($row = mysql_fetch_assoc($genesR)){
+      $genes = $row['num_genes'];
+    }
+    // Update versions table
+    $datetime = date('Y-m-d H:i:s');
+    $data = array(
+      'id'       => NULL,
+      'version'  => $new_version,
+      'created'  => $datetime,
+      'updated'  => $datetime,
+      'variants' => $this->db->count_all($liveTable),
+      'genes'    => count($genes),
+    );
+    $this->db->insert($this->tables['versions'], $data);
+    $new_version_id = $this->db->query("SELECT MAX(id) FROM versions");
     
     //Drop current data from Variant Count
-    "TRUNCATE $varCountTable";
+    $q10 = "TRUNCATE $varCountTable";
+    $r10 = mysql_query($q10) or die('here12');
     //Update Variant Count
-    "INSERT INTO $varCountTable (SELECT gene, count(*) from $liveTable GROUP BY gene)";
+    $q11 = "INSERT INTO $varCountTable (gene, count) SELECT gene, count(*) FROM $liveTable GROUP BY gene";
+    $r11 = mysql_query($q11) or die('here13');
 
+    // Log it!
+    //$username = $this->ion_auth->user()->row()->username;
+    //activity_log("User '$username' released a new version of the database -- Version $new_version_id", 'release');
+    
+    return TRUE;
   }
   /**
    * Push Data Live
@@ -913,7 +985,7 @@ class Variations_model extends MY_Model {
    *    (optional) Only release confirmed variants?
    * @return  boolean   TRUE on success, else FALSE
    */
-  public function push_data_live($confirmed_only = TRUE)
+  public function OLD_push_data_live($confirmed_only = TRUE)
   {
     // Set unlimited memory/time when retrieving all variants in the queue (queue could be quite large)
     ini_set('memory_limit', '-1');

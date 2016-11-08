@@ -124,7 +124,9 @@ echo form_open('variations/submit', $attributes);
 
     <div class="row-fluid">
         <!-- "Release changes" button (hide if no variant changes exist) -->
-        <div id="release-changes-wrapper" class="span3 rounded <?php echo hidden(($this->version == 0) || (empty($variants))); ?>">
+        <!-- <div id="release-changes-wrapper" class="span3 rounded <?#php echo hidden(($this->version == 0) || (empty($variants))); ?>">
+        -->
+        <div id="release-changes-wrapper" class="span3 rounded <?php echo hidden((empty($variants))); ?>">
             <h4>Ready to release these changes?</h4> 
             <!--<form action="" method="">
               <input type="radio" name="versioning" value="minorVersion">Minor Version<br>

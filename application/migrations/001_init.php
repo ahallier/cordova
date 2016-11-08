@@ -732,7 +732,11 @@ class Migration_Init extends CI_Migration {
     $this->dbforge->add_field($fields);
     $this->dbforge->add_key('id', TRUE);
     $this->dbforge->create_table('variations_0', TRUE);
-
+    #create variaitons log
+    $fields['id']['auto_increment'] = FALSE;
+    $this->dbforge->add_field($fields);
+    #$this->dbforge->add_key('id', TRUE);
+    $this->dbforge->create_table('variations_log', TRUE);
     # Variations queue table
     # NOTE: This is the EXACT same structure as the variations_0
     #       table (described above) except that the 'id' field
@@ -788,7 +792,8 @@ class Migration_Init extends CI_Migration {
       'genes' => 0,
     );
     $this->db->insert('versions', $data); 
-  
+    
+    #create expert curations table 
     $fields = array(
       'id' => array(
           'type' => 'INT',
@@ -841,12 +846,15 @@ class Migration_Init extends CI_Migration {
           'type' => 'VARCHAR',
           'constraint' => 100, 
           'null' => TRUE,
-      )
+      ),
     );
     $this->dbforge->add_field($fields);
     $this->dbforge->add_key('id', TRUE);
     $this->dbforge->create_table('expert_curations', TRUE);
-  
+    //create expert log 
+    $this->dbforge->add_field($fields);
+    $this->dbforge->add_key('id', TRUE);
+    $this->dbforge->create_table('expert_log', TRUE);
   }
  
   /**
