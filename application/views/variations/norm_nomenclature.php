@@ -81,18 +81,16 @@ $attributes = array('id'    => 'form_upload_genes',
 Please enter your team's preferred nomenclature for each phenotype to normalize the nomenclature 
 throughout your database. 
 <br>
-Download <a type="application/octet-stream" href="<?echo $uniqueDiseases['queueDownloadPath']?>" download>full data file</a>
 <br>
-Download current <a type="application/octet-stream" href="<?echo $uniqueDiseases['csvDiseaseDownloadPath']?>" download>nomenclature file</a>
+Download <a type="application/octet-stream" href="<?echo $uniqueDiseases['queueDownloadPath']?>" download>Queue Data</a>
 <br>
-<div>
+Download <a type="application/octet-stream" href="<?echo $uniqueDiseases['csvDiseaseDownloadPath']?>" download>Nomenclature File</a>
+
+<div class="span6">
 
 <h3>Public Database Nomenclature</h3>
 <?php echo form_open_multipart("variations/norm_nomenclature/", $attributes);?>
- Upload your nomenclature changes <input type="file" id="myfile" name="myfile"/>
- <br>
- <input type="submit" name="file-submit" id="file-submit" value="file-submit"></input>
- <br>
+ <h4>Update Through Form Submit</h4>
  <?php
    foreach ($uniqueDiseases['diseaseNames'] as $disease){
      echo
@@ -104,8 +102,19 @@ Download current <a type="application/octet-stream" href="<?echo $uniqueDiseases
       </div>";   
    }
   ?>
+  <br/>
+  <input type="submit" name="submit" id="submit" value="Submit" class="btn btn-success"></input>
 </div>
-<div>
-  <input type="submit" name="submit" id="submit" value="submit"></input>
+<div class="span4">
+<br>
+<br>
+<br>
+ <h4>Update Through File Upload</h4>
+Download <a type="application/octet-stream" href="<?echo $uniqueDiseases['csvDiseaseDownloadPath']?>" download>Nomenclature File</a>
+ <br>
+ Upload your nomenclature changes <input type="file" id="myfile" name="myfile"/>
+ <br>
+ <input type="submit" name="file-submit" id="file-submit" value="Upload" class="btn btn-success"></input>
+ <br>
 </div>
 </form>

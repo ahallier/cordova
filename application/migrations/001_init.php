@@ -405,6 +405,10 @@ class Migration_Init extends CI_Migration {
           'type' => 'LONGTEXT',
           'null' => TRUE,
       ),
+      'release_date' => array(
+          'type' => 'DATETIME',
+          'null' => FALSE,
+      ),
       'lrt_omega' => array(
           'type' => 'FLOAT',
           'null' => TRUE,
@@ -735,7 +739,6 @@ class Migration_Init extends CI_Migration {
     #create variaitons log
     $fields['id']['auto_increment'] = FALSE;
     $this->dbforge->add_field($fields);
-    #$this->dbforge->add_key('id', TRUE);
     $this->dbforge->create_table('variations_log', TRUE);
     # Variations queue table
     # NOTE: This is the EXACT same structure as the variations_0
@@ -847,13 +850,23 @@ class Migration_Init extends CI_Migration {
           'constraint' => 100, 
           'null' => TRUE,
       ),
+      'date' => array(
+          'type' => 'DATETIME'
+          'null' => FALSE,
+      ),
+      'delete' => array(
+          'type' => 'INT'
+          'constraint' => 1, 
+          'unsigned' => TRUE,
+          'null' => TRUE,
+      )
     );
     $this->dbforge->add_field($fields);
     $this->dbforge->add_key('id', TRUE);
     $this->dbforge->create_table('expert_curations', TRUE);
     //create expert log 
+    $fields['id']['auto_increment'] = FALSE;
     $this->dbforge->add_field($fields);
-    $this->dbforge->add_key('id', TRUE);
     $this->dbforge->create_table('expert_log', TRUE);
   }
  

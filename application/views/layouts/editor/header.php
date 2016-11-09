@@ -25,15 +25,15 @@
         <li><a href="<?php echo base_url(); ?>"><i class="icon-home icon-white"></i> Home</a></li>
         <li><a href="<?php echo site_url('variations/add'); ?>"><i class="icon-plus icon-white"></i> Add</a></li>
         <li><a href="<?php echo site_url('genes'); ?>"><i class="icon-pencil icon-white"></i> Edit</a></li>
-        <li><a href="<?php echo site_url('variations/unreleased'); ?>"><i class="icon-edit icon-white"></i> Review changes</a></li>
        <li id="nav-login"><a href="<?php echo login_url(); ?>"><i></i> <?php echo login_text(); ?></a></li>
        <li id="nav-login"><a href="<?php echo site_url('auth/profile'); ?>"><i class="icon-user icon-white"></i>Profile</a></li> 
       </ul>
-      Variant-CADI
+      <h3>Variant-CADI</h3>
       <ul id="nav" class="nav nav-pills">
         <li><a href="<?php echo site_url('variations/upload_genes'); ?>"></i> Upload Genes</a></li>
         <li><a href="<?php echo site_url('variations/norm_nomenclature'); ?>"></i> Normalize Nomenclature</a></li>
         <li><a href="<?php echo site_url('variations/expert_curation'); ?>"></i> Expert Curations</a></li>
+        <li><a href="<?php echo site_url('variations/unreleased'); ?>"></i> Review changes</a></li>
       </ul>
     </div>
   </div>

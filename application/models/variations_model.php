@@ -910,12 +910,14 @@ class Variations_model extends MY_Model {
           }
       }
       $setString = rtrim($setString, ',');
-      $q10 = "UPDATE $liveTable A, $queueTable B SET $setString WHERE A.id = B.id AND A.id in ($updateVariantsString)";
+      //return $setString;
+      //$q10 = "UPDATE $liveTable A, $queueTable B SET $setString WHERE A.id = B.id AND A.id in ($updateVariantsString)";
+      $q10 = "UPDATE $liveTable A, $queueTable B SET $setString WHERE A.id = B.id";
       //$q10 = "MERGE INTO $liveTable USING $queueTable ON $liveTable.id = $queueTable.id WHEN MATCHED THEN UPDATE SET $liveTable.gene = $queueTable.gene";
       $r10 = mysql_query($q10) or die('here8');
       //die($r10);
       //delete them from the reviews table
-      $q8 = "DELETE FROM $reviewsTable WHERE id IN ($updateVariantsString)";
+      $q8 = "DELETE FROM $reviewsTable WHERE variant_id IN ($updateVariantsString)";
       $r8 = mysql_query($q8) or die('here9');
       //delete them from the queue
       $q9 = "DELETE FROM $queueTable WHERE id IN ($updateVariantsString)";
@@ -926,6 +928,7 @@ class Variations_model extends MY_Model {
     $new_version = ((int) $this->version);
     $genesQ = "SELECT count(*) AS num_genes FROM $liveTable GROUP BY gene";
     $genesR = mysql_query($genesQ) or die('here11');
+    $genes =array();
     while($row = mysql_fetch_assoc($genesR)){
       $genes = $row['num_genes'];
     }
@@ -2041,7 +2044,7 @@ EOF;
     $file = fopen("$annotation_path/$queueTable.tsvcleaned", "r");
     //$numLines = count(file("$annotation_path/$queueTable.tsvcleaned"));
     $finalTsvPath = "$annotation_path/final$queueTable.tsv";
-    exec("cp $finalTsvPath /tmp/");
+    exec("cp $finalTsvPath /var/www/html/cordova_sites_ah/rdvd/tmp/");
     $finalTsv = fopen($finalTsvPath, 'w'); 
     //get max id from queuei
     $maxid = 0;

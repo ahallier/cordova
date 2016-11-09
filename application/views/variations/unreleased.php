@@ -5,12 +5,17 @@ $attributes = array('id' => 'form-release-changes',
                    );
 echo form_open('variations/submit', $attributes);
 ?>
+    <div>
+      <p>Download <a type="application/octet-stream" href="http://cordova-dev.eng.uiowa.edu/cordova_sites_ah/rdvd/tmp/queue<?php #echo $time_stamp?>.csv" download="variant-CADIvariants.csv">Queue Data</a>
+      <br/>Download <a type="application/octet-stream" href="http://cordova-dev.eng.uiowa.edu/cordova_sites_ah/rdvd/tmp/expertData<?php #echo $time_stamp?>.csv" download="expertData.csv">Live Data</a>
+      <br/>Download <a type="application/octet-stream" href="http://cordova-dev.eng.uiowa.edu/cordova_sites_ah/rdvd/tmp/expertDataLog<?php #echo $time_stamp?>.csv" download="expertDataLog.csv">Diff Summary</a>
+      </p>
+    </div>
     <div class="row-fluid">
         <h3 id="unreleased-header" class="span10"><?php echo $header; ?></h3> 
         <!-- "Confirm" label (hide if no variant changes exist) -->
         <div id="notice-confirm-variant" class="span2 <?php echo hidden(empty($variants)); ?>"><small>Confirm</small></div>
     </div>
-    
    <!--  <div id="mutation-tables">
       <?php foreach ($geneVariantSet as $set): ?>
         <fieldset>

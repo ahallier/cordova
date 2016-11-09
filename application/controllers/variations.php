@@ -368,7 +368,7 @@ class Variations extends MY_Controller {
     //redirect_all_nonmembers();
     $data['title'] = "Expert Curration";
     $data['content'] = 'variations/expert_curation';
-    $data['time_stamp'] = $date("Ymdhms");
+    $data['time_stamp'] = date("YmdHis");;
     $annotation_path = $this->config->item('annotation_path');
     $data['variant_file'] = "$annotation_path/diseaseNameUpdates$time_stamp.txt";
     #on file submit
@@ -578,6 +578,7 @@ class Variations extends MY_Controller {
       if ($_POST['special-release'] === 'force-all' || $this->version == 0) {
         // Release all variants regardless of confirmation status
         $success = $this->variations_model->push_data_live(FALSE);
+        //die($success);
       }
       else {
         // Only release the confirmed variants
