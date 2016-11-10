@@ -851,11 +851,11 @@ class Migration_Init extends CI_Migration {
           'null' => TRUE,
       ),
       'date' => array(
-          'type' => 'DATETIME'
+          'type' => 'DATETIME',
           'null' => FALSE,
       ),
       'delete' => array(
-          'type' => 'INT'
+          'type' => 'INT',
           'constraint' => 1, 
           'unsigned' => TRUE,
           'null' => TRUE,

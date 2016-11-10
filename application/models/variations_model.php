@@ -875,7 +875,7 @@ class Variations_model extends MY_Model {
     }
     
     //Delete Variants that need deleting
-    if(sizeof($deleteVariants) > 0){
+    if(sizeof($deleteVariants)){
       //add these live variants to log
       $q2 = "INSERT INTO $varLogTable SELECT * FROM $liveTable WHERE id IN ($deleteVariantsString)";
       $r2 = mysql_query($q2) or die($q2);
@@ -893,8 +893,11 @@ class Variations_model extends MY_Model {
     //Update Variants that need updating
     if(sizeof($updateVariants)>0){
       //add these live variants to log
-      $q7 = "INSERT INTO $varLogTable SELECT * FROM $liveTable WHERE id IN ($updateVariantsString)";
-      $r7 = mysql_query($q7) or die('here7');
+      //$q7 = "INSERT INTO $varLogTable SELECT * FROM $liveTable WHERE id IN ($updateVariantsString)";
+      
+      //$q7 = "INSERT INTO $varLogTable SELECT * FROM $liveTable";
+      //$r7 = mysql_query($q7) or die('here7');
+      
       //Update them in the live varitions
       //$q10 = "UPDATE $liveTable FROM $queueTable WHERE id IN ($deleteVariantsString)";
       //$q10 = "UPDATE $liveTable SET A.gene = B.gene, A.pathogenicty = B.pathogenicty FROM $liveTable A INNER JOIN $queueTable B ON A.id = B.id WHERE A.id = B.id";
@@ -917,10 +920,12 @@ class Variations_model extends MY_Model {
       $r10 = mysql_query($q10) or die('here8');
       //die($r10);
       //delete them from the reviews table
-      $q8 = "DELETE FROM $reviewsTable WHERE variant_id IN ($updateVariantsString)";
+      //$q8 = "DELETE FROM $reviewsTable WHERE variant_id IN ($updateVariantsString)";
+      $q8 = "DELETE FROM $reviewsTable";
       $r8 = mysql_query($q8) or die('here9');
       //delete them from the queue
-      $q9 = "DELETE FROM $queueTable WHERE id IN ($updateVariantsString)";
+      //$q9 = "DELETE FROM $queueTable WHERE id IN ($updateVariantsString)";
+      $q9 = "DELETE FROM $queueTable";
       $r9 = mysql_query($q9) or die('here10');
     }
     //Update versions
@@ -940,13 +945,13 @@ class Variations_model extends MY_Model {
       'created'  => $datetime,
       'updated'  => $datetime,
       'variants' => $this->db->count_all($liveTable),
-      'genes'    => count($genes),
+      'genes'    => sizeof($genes),
     );
     $this->db->insert($this->tables['versions'], $data);
     $new_version_id = $this->db->query("SELECT MAX(id) FROM versions");
     
     //Drop current data from Variant Count
-    $q10 = "TRUNCATE $varCountTable";
+    $q10 = "DELETE FROM $varCountTable";
     $r10 = mysql_query($q10) or die('here12');
     //Update Variant Count
     $q11 = "INSERT INTO $varCountTable (gene, count) SELECT gene, count(*) FROM $liveTable GROUP BY gene";

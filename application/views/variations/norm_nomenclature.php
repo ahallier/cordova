@@ -115,6 +115,6 @@ Download <a type="application/octet-stream" href="<?echo $uniqueDiseases['csvDis
  Upload your nomenclature changes <input type="file" id="myfile" name="myfile"/>
  <br>
  <input type="submit" name="file-submit" id="file-submit" value="Upload" class="btn btn-success"></input>
- <br>
+ <br><br><br>
 </div>
 </form>
