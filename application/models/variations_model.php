@@ -2518,7 +2518,7 @@ EOF;
         $comments = urlencode($data[9]);
         $disable = ($data[10]);
         $delete = str_replace('"', "", $data[11]);
-        $update = "UPDATE $expertTable SET pathogenicty='$path', disease='$newName', pubmed_id='$pubmed',comments='$comments',delete='$delete',disabled='$disable',date='$date' WHERE variation='$variation' and gene='$gene' WHERE $variation IN ($currentVariantsString)";
+        $update = "UPDATE $expertTable SET pathogenicty='$path', disease='$disease', pubmed_id='$pubmed',comments='$comments',delete='$delete',disabled='$disable',date='$date' WHERE variation='$variation' and gene='$gene' and $variation IN ($currentVariantsString)";
         $insert = "INSERT INTO $expertTable VALUES ($gene,$chr,$pos,$ref,$alt,$variation,$path,$disease,$pubmed,$comments,$delete,$disable) WHERE $variation NOT IN ($currentVariantsString)";
         $insertR = $this->db->query($insert);
         if ($insertR->num_rows <= 0){  
@@ -2530,13 +2530,19 @@ EOF;
     return $numUpdates;
   }
   public function apply_expert_curations(){
-    $updateQueue = "UPDATE $queueTable SET $queueTable.pathogenicity = $expertTable.pathogenicty,$queueTable.disease = $expertTable.disease,$queueTable.pubmed_id = $expertTable.pubmed_id,$queueTable.comments = $expertTable.comments FROM $queueTable INNER JOIN $expertTable ON $queueTable.variation = $expertTable.variation WHERE $expertTable.delete != 'TRUE' AND $expertTable.disabled != 'TRUE'";
-    $deleteVariants = "";
-    $insertVariants  = "";
+    //update queue where curation is not disabled
+    $updateQueue = "UPDATE $queueTable SET $queueTable.pathogenicity = $expertTable.pathogenicty, $queueTable.disease = $expertTable.disease, $queueTable.pubmed_id = $expertTable.pubmed_id, $queueTable.comments = $expertTable.comments FROM $queueTable INNER JOIN $expertTable ON $queueTable.variation = $expertTable.variation WHERE $expertTable.delete != 'TRUE' AND $expertTable.disabled != 'TRUE'";
+    $deleteVariants = "UPDATE $reviewTable SET delete = 1 WHERE variant_id IN (SELECT id FROM $queueTable WHERE variation IN (SELECT variation FROM $expertTable WHERE delete = 'TRUE' and disabled != 'TRUE'))";
+    //get all that are not in queue now
+    //get id if in live table now
+    //add to queue with largest live table id or matching live table id
+    //add to reviews what was added to queue, be sure you are checking for deletes
+    //$insertVariants  = "";
     $insertR = $this->db->query($insert);
     if ($insertR->num_rows <= 0){  
       $updateR = $this->db->query($update);
     }
+    $numUpdates = "Working on it"
     return $numUpdates; 
   }
   public function expert_curation($newFileLocation, $oldFileLocation, $updateFileLocation){
