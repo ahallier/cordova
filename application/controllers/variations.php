@@ -253,7 +253,7 @@ class Variations extends MY_Controller {
    */
 
   public function upload_genes() {
-    //redirect_all_nonmembers();
+    redirect_all_nonmembers();
     $data['title'] = "Uplaod Genes";
     $data['content'] = 'variations/upload_genes';
     $this->load->helper('file');
@@ -300,7 +300,7 @@ class Variations extends MY_Controller {
    * @param none
    */
   public function query_public_database($time_stamp) {
-    //redirect_all_nonmembers();
+    redirect_all_nonmembers();
     $data['title'] = "Query Public Databases";
     $data['content'] = 'variations/query_public_database';
     $annotation_path = $this->config->item('annotation_path');
@@ -330,7 +330,7 @@ class Variations extends MY_Controller {
   }
 
   public function norm_nomenclature() {
-    //redirect_all_nonmembers();
+    redirect_all_nonmembers();
     $data['title'] = "Normalize Nomenclature";
     $data['content'] = 'variations/norm_nomenclature';
     $annotation_path = $this->config->item('annotation_path');
@@ -365,7 +365,7 @@ class Variations extends MY_Controller {
   }
 
   public function expert_curation() {
-    //redirect_all_nonmembers();
+    redirect_all_nonmembers();
     $data['title'] = "Expert Curration";
     $data['content'] = 'variations/expert_curation';
     $data['time_stamp'] = date("YmdHis");;
