@@ -92,6 +92,19 @@
     <input type="submit" value="Upload" name="file-expert" class="btn btn-success"/>
     <br/>
     <br/>
+    <!--<label class='control-label' for='gene'>Gene</label> 
+    <input class='align-right' type='text' name='gene' id='gene'></input>
+    <label class='control-label' for='variations'>Variation</label> 
+    <input class='align-right' type='text' name='variation' id='variation'></input>
+    <label class='control-label' for='pathogenicity'>Pathogenicity</label> 
+    <input class='align-right' type='text' name='pathogenicity' id='pathogenicity'></input>
+    <label class='control-label' for='pubmed'>PubMed ID</label> 
+    <input class='align-right' type='text' name='pubmed' id='pubmed'></input>
+    <label class='control-label' for='disease'>Disease</label> 
+    <input class='align-right' type='text' name='disease' id='disease'></input>
+    <br>
+    <br>
+    -->
     After expert curations have been submitted, select Apply Curations to apply these curations to the data in the queue prior to release.
     <br>
     <br>

@@ -805,6 +805,11 @@ class Migration_Init extends CI_Migration {
           'null' => FALSE,
           'auto_increment' => TRUE
       ),
+      'gene' => array(
+          'type' => 'VARCHAR',
+          'constraint' => 10, 
+          'null' => TRUE,
+      ),
       'variation' => array(
           'type' => 'VARCHAR',
           'constraint' => 100, 
@@ -830,11 +835,6 @@ class Migration_Init extends CI_Migration {
           'constraint' => 100, 
           'null' => TRUE,
       ),
-      'gene' => array(
-          'type' => 'VARCHAR',
-          'constraint' => 10, 
-          'null' => TRUE,
-      ),
       'pathogenicity' => array(
           'type' => 'VARCHAR',
           'constraint' => 100, 
@@ -854,12 +854,22 @@ class Migration_Init extends CI_Migration {
           'type' => 'DATETIME',
           'null' => FALSE,
       ),
-      'delete' => array(
-          'type' => 'INT',
-          'constraint' => 1, 
-          'unsigned' => TRUE,
+      'comments' => array(
+          'type' => 'LONGTEXT',
           'null' => TRUE,
       )
+      'delete' => array(
+          'type' => 'VARCHAR',
+          'constraint' => 5, 
+          'unsigned' => TRUE,
+          'null' => TRUE,
+      ),
+      'disabled' => array(
+          'type' => 'VARCHAR',
+          'constraint' => 5, 
+          'unsigned' => TRUE,
+          'null' => TRUE,
+      ),
     );
     $this->dbforge->add_field($fields);
     $this->dbforge->add_key('id', TRUE);

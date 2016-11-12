@@ -370,6 +370,7 @@ class Variations extends MY_Controller {
     $data['content'] = 'variations/expert_curation';
     $data['time_stamp'] = date("YmdHis");;
     $annotation_path = $this->config->item('annotation_path');
+    $time_stamp = date("YmdHms");
     $data['variant_file'] = "$annotation_path/diseaseNameUpdates$time_stamp.txt";
     #on file submit
     if($this->input->post('file-expert'))
@@ -377,15 +378,18 @@ class Variations extends MY_Controller {
       $this->load->library('upload');
       $this->upload->set_allowed_types('*');
       move_uploaded_file($_FILES["file"]["tmp_name"], "$annotation_path/expertFile$time_stamp.txt");
-      $finalFileLocation = "$annotation_path/expertCurated.final$time_stamp.txt";
-      $oldFileLocation = "$annotation_path/diseaseNameUpdates$time_stamp.txt";
-      $updateFileLocation = "$annotation_path/expertFile$time_stamp.txt";
-      $this->variations_model->expert_curation($finalFileLocation, $oldFileLocation, $updateFileLocation);    
+      $expertCurations = "$annotation_path/expertFile$time_stamp.txt";
+      $this->variations_model->load_expert_curations($expertCurations);    
       #upload file data into database!!!
-      $returned = $this->variations_model->UploadCADIData($finalFileLocation);
+      //$returned = $this->variations_model->UploadCADIData($finalFileLocation);
       //die($returned);
-      $this->variations_model->remove_variantCADI_files($time_stamp);
-      redirect("variations/unreleased");
+      //$this->variations_model->remove_variantCADI_files($time_stamp);
+      redirect("variations/expert_curation");
+    }
+    if($this->input->post('apply-curations')){
+      $numUpdated = $this->variations_model->apply_expert_curations();
+      //set flash data 
+      redirect("variations/expert_curation");
     }
     $this->load->view($this->editor_layout,$data);
   }

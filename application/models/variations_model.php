@@ -2488,6 +2488,57 @@ EOF;
   * @input newFileLocation, oldFileLocation, updateFileLocation
   */
 
+  public function load_expert_curations($expertCurations){
+    $expertTable = $this->tables['expert_curations'];
+    $expertLogTable = $this->tables['expert_curations_log'];
+    $submittedExpertCurations = fopen($expertCurations, "r");
+    $row = 1;
+    $sql="SELECT variation FROM $expertTable";
+    $query = $this->db->query($sql);
+    $date = date("YmdHms");
+    $currentVariants = array();
+    while($row = mysql_fetch_assoc($deleteVariantsResult))
+    {
+        $currentVariants[] = $row['variation'];
+    }     
+    $currentVariantsString = implode(",", $currentVariants);
+
+    while($line = fgets($submittedExpertCurations)){
+      if($row != 1){
+        $data = explode("\",\"", $line);
+        $gene = (str_replace('"', "", $data[0]));
+        $chr = ($data[1]);
+        $pos = ($data[2]);
+        $ref = ($data[3]);
+        $alt = ($data[4]);
+        $variation = ($data[5]);
+        $path = ($data[6]);
+        $disease = urlencode($data[7]);
+        $pubmed = ($data[8]);
+        $comments = urlencode($data[9]);
+        $disable = ($data[10]);
+        $delete = str_replace('"', "", $data[11]);
+        $update = "UPDATE $expertTable SET pathogenicty='$path', disease='$newName', pubmed_id='$pubmed',comments='$comments',delete='$delete',disabled='$disable',date='$date' WHERE variation='$variation' and gene='$gene' WHERE $variation IN ($currentVariantsString)";
+        $insert = "INSERT INTO $expertTable VALUES ($gene,$chr,$pos,$ref,$alt,$variation,$path,$disease,$pubmed,$comments,$delete,$disable) WHERE $variation NOT IN ($currentVariantsString)";
+        $insertR = $this->db->query($insert);
+        if ($insertR->num_rows <= 0){  
+          $updateR = $this->db->query($update);
+        }
+      }
+      $row ++;
+    }
+    return $numUpdates;
+  }
+  public function apply_expert_curations(){
+    $updateQueue = "UPDATE $queueTable SET $queueTable.pathogenicity = $expertTable.pathogenicty,$queueTable.disease = $expertTable.disease,$queueTable.pubmed_id = $expertTable.pubmed_id,$queueTable.comments = $expertTable.comments FROM $queueTable INNER JOIN $expertTable ON $queueTable.variation = $expertTable.variation WHERE $expertTable.delete != 'TRUE' AND $expertTable.disabled != 'TRUE'";
+    $deleteVariants = "";
+    $insertVariants  = "";
+    $insertR = $this->db->query($insert);
+    if ($insertR->num_rows <= 0){  
+      $updateR = $this->db->query($update);
+    }
+    return $numUpdates; 
+  }
   public function expert_curation($newFileLocation, $oldFileLocation, $updateFileLocation){
     $queueTable = $this->tables['vd_queue'];
     while($fileLine = fgets($updateFileLocation)){
