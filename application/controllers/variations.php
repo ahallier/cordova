@@ -366,7 +366,7 @@ class Variations extends MY_Controller {
 
   public function expert_curation() {
     redirect_all_nonmembers();
-    $data['title'] = "Expert Curration";
+    $data['title'] = "Expert Curation";
     $data['content'] = 'variations/expert_curation';
     $data['time_stamp'] = date("YmdHis");;
     $annotation_path = $this->config->item('annotation_path');
@@ -379,11 +379,13 @@ class Variations extends MY_Controller {
       $this->upload->set_allowed_types('*');
       move_uploaded_file($_FILES["file"]["tmp_name"], "$annotation_path/expertFile$time_stamp.txt");
       $expertCurations = "$annotation_path/expertFile$time_stamp.txt";
-      $this->variations_model->load_expert_curations($expertCurations);    
+      $results = $this->variations_model->load_expert_curations($expertCurations);    
+      //die($results);
       #upload file data into database!!!
       //$returned = $this->variations_model->UploadCADIData($finalFileLocation);
       //die($returned);
       //$this->variations_model->remove_variantCADI_files($time_stamp);
+      
       redirect("variations/expert_curation");
     }
     if($this->input->post('apply-curations')){

@@ -798,21 +798,9 @@ class Migration_Init extends CI_Migration {
     
     #create expert curations table 
     $fields = array(
-      'id' => array(
-          'type' => 'INT',
-          'constraint' => 11, 
-          'unsigned' => TRUE,
-          'null' => FALSE,
-          'auto_increment' => TRUE
-      ),
       'gene' => array(
           'type' => 'VARCHAR',
           'constraint' => 10, 
-          'null' => TRUE,
-      ),
-      'variation' => array(
-          'type' => 'VARCHAR',
-          'constraint' => 100, 
           'null' => TRUE,
       ),
       'chr' => array(
@@ -835,6 +823,11 @@ class Migration_Init extends CI_Migration {
           'constraint' => 100, 
           'null' => TRUE,
       ),
+      'variation' => array(
+          'type' => 'VARCHAR',
+          'constraint' => 100, 
+          'null' => TRUE,
+      ),
       'pathogenicity' => array(
           'type' => 'VARCHAR',
           'constraint' => 100, 
@@ -850,32 +843,29 @@ class Migration_Init extends CI_Migration {
           'constraint' => 100, 
           'null' => TRUE,
       ),
-      'date' => array(
-          'type' => 'DATETIME',
-          'null' => FALSE,
-      ),
       'comments' => array(
           'type' => 'LONGTEXT',
           'null' => TRUE,
+      ),
+      'delete_on_release' => array(
+          'type' => 'VARCHAR',
+          'constraint' => 5, 
+          'null' => TRUE,
+      ),
+      'disabled_curation' => array(
+          'type' => 'VARCHAR',
+          'constraint' => 5, 
+          'null' => TRUE,
+      ),
+      'date_inserted' => array(
+          'type' => 'DATETIME',
+          'null' => FALSE,
       )
-      'delete' => array(
-          'type' => 'VARCHAR',
-          'constraint' => 5, 
-          'unsigned' => TRUE,
-          'null' => TRUE,
-      ),
-      'disabled' => array(
-          'type' => 'VARCHAR',
-          'constraint' => 5, 
-          'unsigned' => TRUE,
-          'null' => TRUE,
-      ),
     );
     $this->dbforge->add_field($fields);
-    $this->dbforge->add_key('id', TRUE);
+    $this->dbforge->add_key('variation', TRUE);
     $this->dbforge->create_table('expert_curations', TRUE);
     //create expert log 
-    $fields['id']['auto_increment'] = FALSE;
     $this->dbforge->add_field($fields);
     $this->dbforge->create_table('expert_log', TRUE);
   }

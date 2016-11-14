@@ -74,11 +74,11 @@
 <h1>Expert Curation</h1>
 <br/>
 <?php
-  $attributes = array('id'    => 'form_expert_curration',
+  $attributes = array('id'    => 'form_expert_curation',
                        'class' => 'rounded',
                       );
    //echo $error;
-  echo form_open_multipart("variations/expert_curration/$time_stamp", $attributes);
+  echo form_open_multipart("variations/expert_curation", $attributes);
 ?>
   <div>
     <p>If you wish to override any information gathered through this pipeline please upload a .csv file with the information you wish to change. The variation must match the existing file variation name exactly. These curations will be maintainted in the Cordova database for easy application to variations in the queue.</p>

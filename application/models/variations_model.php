@@ -2490,19 +2490,19 @@ EOF;
 
   public function load_expert_curations($expertCurations){
     $expertTable = $this->tables['expert_curations'];
-    $expertLogTable = $this->tables['expert_curations_log'];
+    $expertLogTable = $this->tables['expert_log'];
     $submittedExpertCurations = fopen($expertCurations, "r");
-    $row = 1;
     $sql="SELECT variation FROM $expertTable";
-    $query = $this->db->query($sql);
-    $date = date("YmdHms");
+    $query = mysql_query($sql);
+    $date = date ("Y-m-d H:i:s");
     $currentVariants = array();
-    while($row = mysql_fetch_assoc($deleteVariantsResult))
+    while($row = mysql_fetch_assoc($query))
     {
         $currentVariants[] = $row['variation'];
     }     
-    $currentVariantsString = implode(",", $currentVariants);
-
+    $currentVariantsString = implode("','", $currentVariants);
+    //return $currentVariants;
+    $row = 1;
     while($line = fgets($submittedExpertCurations)){
       if($row != 1){
         $data = explode("\",\"", $line);
@@ -2516,33 +2516,51 @@ EOF;
         $disease = urlencode($data[7]);
         $pubmed = ($data[8]);
         $comments = urlencode($data[9]);
-        $disable = ($data[10]);
-        $delete = str_replace('"', "", $data[11]);
-        $update = "UPDATE $expertTable SET pathogenicty='$path', disease='$disease', pubmed_id='$pubmed',comments='$comments',delete='$delete',disabled='$disable',date='$date' WHERE variation='$variation' and gene='$gene' and $variation IN ($currentVariantsString)";
-        $insert = "INSERT INTO $expertTable VALUES ($gene,$chr,$pos,$ref,$alt,$variation,$path,$disease,$pubmed,$comments,$delete,$disable) WHERE $variation NOT IN ($currentVariantsString)";
-        $insertR = $this->db->query($insert);
-        if ($insertR->num_rows <= 0){  
-          $updateR = $this->db->query($update);
-        }
+        $delete = ($data[10]);
+        $disable = str_replace('"', "", $data[11]);
+        $upsert = "REPLACE INTO $expertTable (gene, chr, pos, ref, alt, variation, pathogenicity, disease, pubmed_id, comments, delete_on_release, disabled_curation, date_inserted) VALUES ('$gene','$chr','$pos','$ref','$alt','$variation','$path','$disease','$pubmed','$comments','$delete','$disable','$date')";
+        $upsertR = $this->db->query($upsert);
+        //$update = "UPDATE $expertTable SET pathogenicity='$path', disease='$disease', pubmed_id='$pubmed',comments='$comments',delete_on_release='$delete',disabled_curation='$disable',date_inserted='$date' WHERE chr=$chr AND pos=$pos AND ref='$ref' AND alt='$alt' AND gene='$gene'";
+        //$insert = "INSERT INTO $expertTable (gene, chr, pos, ref, alt, variation, pathogenicity, disease, pubmed_id, comments, delete_on_release, disabled_curation, date_inserted) VALUES ('$gene','$chr','$pos','$ref','$alt','$variation','$path','$disease','$pubmed','$comments','$delete','$disable','$date')";
+        //if ((sizeof($currentVariants))>0){
+        //  $updateR = $this->db->query($update);
+        //  //add updated variants to log!!!!!!!
+        //}
+        //if (sizeof($currentVariants)<=0 or $updateR->num_rows <= 0){  
+        //  $insertR = $this->db->query($insert);
+        //} 
       }
       $row ++;
     }
+
+    $sql="SELECT variation FROM $expertTable";
+    $query = mysql_query($sql) or die('cant get expert variations 2');
+    $currentVariants = array();
+    while($row = mysql_fetch_assoc($query))
+    {
+        $currentVariants[] = $row['variation'];
+    }     
+    $numUpdates = sizeof($currentVariants);
     return $numUpdates;
   }
+
   public function apply_expert_curations(){
+    $expertTable = $this->tables['expert_curations'];
+    $queueTable = $this->tables['vd_queue'];
+    $reviewTable = $this->tables['reviews'];
+
     //update queue where curation is not disabled
-    $updateQueue = "UPDATE $queueTable SET $queueTable.pathogenicity = $expertTable.pathogenicty, $queueTable.disease = $expertTable.disease, $queueTable.pubmed_id = $expertTable.pubmed_id, $queueTable.comments = $expertTable.comments FROM $queueTable INNER JOIN $expertTable ON $queueTable.variation = $expertTable.variation WHERE $expertTable.delete != 'TRUE' AND $expertTable.disabled != 'TRUE'";
-    $deleteVariants = "UPDATE $reviewTable SET delete = 1 WHERE variant_id IN (SELECT id FROM $queueTable WHERE variation IN (SELECT variation FROM $expertTable WHERE delete = 'TRUE' and disabled != 'TRUE'))";
+    //$updateQueue = "UPDATE a SET a.pathogenicity = b.pathogenicity, a.disease = b.disease, a.pubmed_id = b.pubmed_id, a.comments = b.comments FROM $queueTable AS a INNER JOIN $expertTable AS b ON a.variation = b.variation WHERE b.delete_on_release != 'TRUE' AND b.disabled_curation != 'TRUE'";
+    $updateQueue = "UPDATE $queueTable a INNER JOIN $expertTable b ON a.variation = b.variation SET a.pathogenicity = b.pathogenicity, a.disease = b.disease, a.pubmed_id = b.pubmed_id, a.comments = b.comments";
+    $deleteVariants = "UPDATE $reviewTable SET scheduled_for_deletion = 1 WHERE variant_id IN (SELECT id FROM $queueTable WHERE variation IN (SELECT variation FROM $expertTable WHERE delete_on_release = 'TRUE' and disabled_curation != 'TRUE'))";
     //get all that are not in queue now
     //get id if in live table now
     //add to queue with largest live table id or matching live table id
     //add to reviews what was added to queue, be sure you are checking for deletes
     //$insertVariants  = "";
-    $insertR = $this->db->query($insert);
-    if ($insertR->num_rows <= 0){  
-      $updateR = $this->db->query($update);
-    }
-    $numUpdates = "Working on it"
+    $deleteR = $this->db->query($deleteVariants);
+    $updateR = $this->db->query($updateQueue);
+    $numUpdates = "Working on it";
     return $numUpdates; 
   }
   public function expert_curation($newFileLocation, $oldFileLocation, $updateFileLocation){
@@ -2575,6 +2593,163 @@ EOF;
     $this->update_variant($updateVariant, $oldVariant, $newFileLocation, $oldFileLocation, $updateFileLocation, $replacementPairs);
     
     return $newFileLocation;
+  }
+  public function get_diff_stats(){
+    $date = date("YmdHms");
+    //create a file to wrtie to
+    $diffStatsPath = ("/var/www/html/cordova_sites_ah/rdvd/test/diffStats$date.txt");    
+    $diffStats = fopen($diffStatsPath, "w");
+    //get stats
+    $createView = "create view commonVariants AS select ot.variation, ot.gene, ot.pathogenicity as old_path, nt.pathogenicity as new_path, ot.disease, nt.disease, ot.comments, nt.comments, ot.reason, nt.reason, ot.pmid, nt.pmid, ot.sift, nt.sift, ot.hdiv, nt.hdiv, ot.lrt, nt.lrt, ot.mut, nt.mut, ot.gerp, nt.gerp, ot.phylop2, nt.phylop2 from $liveTable ot join $queueTable nt where ot.variation=nt.variation";
+    $query = "select g.gene as gene,IFNULL(num_old_var,0) AS num_old_var, IFNULL(num_new_var,0) AS num_new_var, IFNULL(added,0) AS added, IFNULL(dropped,0) AS dropped, IFNULL(num_path, 0) AS num_path, IFNULL(num_lp, 0) AS num_lp, IFNULL(num_us, 0) AS num_us, IFNULL(num_lb, 0) AS num_lb, IFNULL(num_b, 0) AS num_b, IFNULL(num_bs, 0) AS num_bs, IFNULL(old_num_path, 0) AS old_num_path, IFNULL(old_num_lp, 0) AS old_num_lp, IFNULL(old_num_us, 0) AS old_num_us, IFNULL(old_num_lb, 0) AS old_num_lb, IFNULL(old_num_b, 0) AS old_num_b, IFNULL(old_num_bs, 0) AS old_num_bs, IFNULL(changed,0) AS changed, IFNULL(unchanged,0) AS unchanged, IFNULL(num_p_to_lp,0) AS num_p_to_lp, IFNULL(num_p_to_us,0) AS num_p_to_us, IFNULL(num_p_to_lb,0) AS num_p_to_lb, IFNULL(num_p_to_b,0) AS num_p_to_b, IFNULL(num_p_to_bs,0) AS num_p_to_bs, IFNULL(num_lp_to_p,0) AS num_lp_to_p, IFNULL(num_lp_to_us,0) AS num_lp_to_us, IFNULL(num_lp_to_lb,0) AS num_lp_to_lb, IFNULL(num_lp_to_b,0) AS num_lp_to_b, IFNULL(num_lp_to_bs,0) AS num_lp_to_bs, IFNULL(num_us_to_p,0) AS num_us_to_p, IFNULL(num_us_to_lp,0) AS num_us_to_lp, IFNULL(num_us_to_lb,0) AS num_us_to_lb, IFNULL(num_us_to_b,0) AS num_us_to_b, IFNULL(num_us_to_bs,0) AS num_us_to_bs, IFNULL(num_lb_to_p,0) AS num_lb_to_p, IFNULL(num_lb_to_lp,0) AS num_lb_to_lp, IFNULL(num_lb_to_us,0) AS num_lb_to_us, IFNULL(num_lb_to_b,0) AS num_lb_to_b, IFNULL(num_lb_to_bs,0) AS num_lb_to_bs, IFNULL(num_b_to_p,0) AS num_b_to_p, IFNULL(num_b_to_lp,0) AS num_b_to_lp, IFNULL(num_b_to_us,0) AS num_b_to_us, IFNULL(num_b_to_lb,0) AS num_b_to_lb, IFNULL(num_b_to_bs,0) AS num_b_to_bs, IFNULL(num_bs_to_p,0) AS num_bs_to_p, IFNULL(num_bs_to_lp,0) AS num_bs_to_lp, IFNULL(num_bs_to_us,0) AS num_bs_to_us, IFNULL(num_bs_to_lb,0) AS num_bs_to_lb, IFNULL(num_bs_to_b,0) AS num_bs_to_b
+    from
+    (select distinct gene from (select distinct gene from oldTable union select distinct gene from newTable)) g
+    left join
+    (select gene, count(*) as num_old_var from oldTable group by gene) ot
+    on g.gene=ot.gene
+    left join
+    (select gene, count(*) as num_new_var from newTable group by gene) nt
+    on g.gene=nt.gene
+    left join
+    (select gene, count(*) as added from newTable where variation not in (select variation from commonVariants) group by gene) a
+    on g.gene=a.gene
+    left join
+    (select gene, count(*) as dropped from oldTable where variation not in (select variation from commonVariants) group by gene) d
+    on g.gene=d.gene
+    left join
+    (select gene, count(*) as num_path from newTable where pathogenicity='Pathogenic' group by gene) pn
+    on g.gene=pn.gene
+    left join
+    (select gene, count(*) as num_lp from newTable where pathogenicity='Likely pathogenic' group by gene) lpn
+    on g.gene=lpn.gene
+    left join
+    (select gene, count(*) as num_us from newTable where pathogenicity='Unknown significance' group by gene) usn
+    on g.gene=usn.gene
+    left join
+    (select gene, count(*) as num_lb from newTable where pathogenicity='Likely benign' group by gene) lbn
+    on g.gene=lbn.gene
+    left join
+    (select gene, count(*) as num_b from newTable where pathogenicity='Benign' group by gene) bn
+    on g.gene=bn.gene
+    left join
+    (select gene, count(*) as num_bs from newTable where pathogenicity='Benign*' group by gene) bsn
+    on g.gene=bsn.gene
+    left join
+    (select gene, count(*) as old_num_path from oldTable where pathogenicity='Pathogenic' group by gene) pno
+    on g.gene=pno.gene
+    left join
+    (select gene, count(*) as old_num_lp from oldTable where pathogenicity='Likely pathogenic' group by gene) lpno
+    on g.gene=lpno.gene
+    left join
+    (select gene, count(*) as old_num_us from oldTable where pathogenicity='Unknown significance' group by gene) usno
+    on g.gene=usno.gene
+    left join
+    (select gene, count(*) as old_num_lb from oldTable where pathogenicity='Likely benign' group by gene) lbno
+    on g.gene=lbno.gene
+    left join
+    (select gene, count(*) as old_num_b from oldTable where pathogenicity='Benign' group by gene) bno
+    on g.gene=bno.gene
+    left join
+    (select gene, count(*) as old_num_bs from oldTable where pathogenicity='Benign*' group by gene) bsno
+    on g.gene=bsno.gene
+    left join
+    (select gene, count(*) as changed from commonVariants where old_path != new_path group by gene) c
+    on g.gene=c.gene
+    left join
+    (select gene, count(*) as unchanged from commonVariants where old_path = new_path group by gene) u
+    on g.gene=u.gene
+    left join
+    (select gene, count(*) as num_p_to_lp from commonVariants where old_path='Pathogenic' and new_path='Likely pathogenic' group by gene) t1
+    on g.gene=t1.gene
+    left join
+    (select gene, count(*) as num_p_to_us from commonVariants where old_path='Pathogenic' and new_path='Unknown significance' group by gene) t2
+    on g.gene = t2.gene
+    left join
+    (select gene, count(*) as num_p_to_lb from commonVariants where old_path='Pathogenic' and new_path='Likely benign' group by gene) t3
+    on g.gene = t3.gene
+    left join
+    (select gene, count(*) as num_p_to_b from commonVariants where old_path='Pathogenic' and new_path='Benign' group by gene) t4
+    on g.gene = t4.gene
+    left join
+    (select gene, count(*) as num_p_to_bs from commonVariants where old_path='Pathogenic' and new_path='Benign*' group by gene) t5
+    on g.gene = t5.gene
+    left join
+    (select gene, count(*) as num_lp_to_p from commonVariants where old_path='Likely pathogenic' and new_path='Pathogenic' group by gene) t6
+    on g.gene = t6.gene
+    left join
+    (select gene, count(*) as num_lp_to_us from commonVariants where old_path='Likely pathogenic' and new_path='Unknown significance' group by gene) t7
+    on g.gene = t7.gene
+    left join
+    (select gene, count(*) as num_lp_to_lb from commonVariants where old_path='Likely pathogenic' and new_path='Likely benign' group by gene) t8
+    on g.gene = t8.gene
+    left join
+    (select gene, count(*) as num_lp_to_b from commonVariants where old_path='Likely pathogenic' and new_path='Benign' group by gene) t9
+    on g.gene = t9.gene
+    left join
+    (select gene, count(*) as num_lp_to_bs from commonVariants where old_path='Likely pathogenic' and new_path='Benign*' group by gene) t10
+    on g.gene = t10.gene
+    left join
+    (select gene, count(*) as num_us_to_p from commonVariants where old_path='Unknown significance' and new_path='Pathogenic' group by gene) t11
+    on g.gene = t11.gene
+    left join
+    (select gene, count(*) as num_us_to_lp from commonVariants where old_path='Unknown significance' and new_path='Likely pathogenic' group by gene) t12
+    on g.gene = t12.gene
+    left join
+    (select gene, count(*) as num_us_to_lb from commonVariants where old_path='Unknown significance' and new_path='Likely benign' group by gene) t13
+    on g.gene = t13.gene
+    left join
+    (select gene, count(*) as num_us_to_b from commonVariants where old_path='Unknown significance' and new_path='Benign' group by gene) t14
+    on g.gene = t14.gene
+    left join
+    (select gene, count(*) as num_us_to_bs from commonVariants where old_path='Unknown significance' and new_path='Benign*' group by gene) t15
+    on g.gene = t15.gene
+    left join
+    (select gene, count(*) as num_lb_to_p from commonVariants where old_path='Likely benign' and new_path='Pathogenic' group by gene) t16
+    on g.gene = t16.gene
+    left join
+    (select gene, count(*) as num_lb_to_lp from commonVariants where old_path='Likely benign' and new_path='Likely pathogenic' group by gene) t17
+    on g.gene = t17.gene
+    left join
+    (select gene, count(*) as num_lb_to_us from commonVariants where old_path='Likely benign' and new_path='Unknown significance' group by gene) t18
+    on g.gene = t18.gene
+    left join
+    (select gene, count(*) as num_lb_to_b from commonVariants where old_path='Likely benign' and new_path='Benign' group by gene) t19
+    on g.gene = t19.gene
+    left join
+    (select gene, count(*) as num_lb_to_bs from commonVariants where old_path='Likely benign' and new_path='Benign*' group by gene) t20
+    on g.gene = t20.gene
+    left join
+    (select gene, count(*) as num_b_to_p from commonVariants where old_path='Benign' and new_path='Pathogenic' group by gene) t21
+    on g.gene = t21.gene
+    left join
+    (select gene, count(*) as num_b_to_lp from commonVariants where old_path='Benign' and new_path='Likely pathogenic' group by gene) t22
+    on g.gene = t22.gene
+    left join
+    (select gene, count(*) as num_b_to_us from commonVariants where old_path='Benign' and new_path='Unknown significance' group by gene) t23
+    on g.gene = t23.gene
+    left join
+    (select gene, count(*) as num_b_to_lb from commonVariants where old_path='Benign' and new_path='Likely benign' group by gene) t24
+    on g.gene = t24.gene
+    left join
+    (select gene, count(*) as num_b_to_bs from commonVariants where old_path='Benign' and new_path='Benign*' group by gene) t25
+    on g.gene = t25.gene
+    left join
+    (select gene, count(*) as num_bs_to_p from commonVariants where old_path='Benign*' and new_path='Pathogenic' group by gene) t26
+    on g.gene = t26.gene
+    left join
+    (select gene, count(*) as num_bs_to_lp from commonVariants where old_path='Benign*' and new_path='Likely pathogenic' group by gene) t27
+    on g.gene = t27.gene
+    left join
+    (select gene, count(*) as num_bs_to_us from commonVariants where old_path='Benign*' and new_path='Unknown significance' group by gene) t28
+    on g.gene = t28.gene
+    left join
+    (select gene, count(*) as num_bs_to_lb from commonVariants where old_path='Benign*' and new_path='Likely benign' group by gene) t29
+    on g.gene = t29.gene
+    left join
+    (select gene, count(*) as num_bs_to_b from commonVariants where old_path='Benign*' and new_path='Benign' group by gene) t30
+    on g.gene = t30.gene"; 
+    //write to file
+    return $difStatsPath;
   }
   /**
   * Update Variant
