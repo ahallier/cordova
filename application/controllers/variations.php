@@ -396,11 +396,31 @@ class Variations extends MY_Controller {
     $this->load->view($this->editor_layout,$data);
   }
 
+  public function get_live_data(){
+    echo "collecting your data..."; 
+    $timeStamp = date("YmdHms");
+    
+    $result = $this->variations_model->get_live_data($timeStamp);
+    echo $result;
+    $download = site_url("tmp/liveData$timeStamp.csv");
+    redirect($download);
+  }
+  public function get_queue_data(){
+    echo "collecting your data...";
+    $timeStamp = date("YmdHms");
+    
+    $result = $this->variations_model->get_queue_data($timeStamp);
+    echo $result;
+    $download = site_url("tmp/queueData$timeStamp.csv");
+    redirect($download);
+  }
   public function get_diff_stats(){
     $timeStamp = date("YmdHms");
-    $this->variations_model->get_diff_stats($timeStamp);
+    
+    $result = $this->variations_model->get_diff_stats($timeStamp);
+    echo $result;
     $download = site_url("tmp/diffStats$timeStamp.csv");
-    redirect($download);
+    //redirect($download);
   }
 
   /**

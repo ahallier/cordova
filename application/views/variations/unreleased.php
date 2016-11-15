@@ -9,6 +9,8 @@ echo form_open('variations/submit', $attributes);
       <p>Download <a type="application/octet-stream" href="http://cordova-dev.eng.uiowa.edu/cordova_sites_ah/rdvd/tmp/queue<?php #echo $time_stamp?>.csv" download="variant-CADIvariants.csv">Queue Data</a>
       <br/>Download <a type="application/octet-stream" href="http://cordova-dev.eng.uiowa.edu/cordova_sites_ah/rdvd/tmp/expertData<?php #echo $time_stamp?>.csv" download="expertData.csv">Live Data</a>
       <br/>Download <a href="http://cordova-dev.eng.uiowa.edu/cordova_sites_ah/rdvd/variations/get_diff_stats" target="blank">Diff Summary</a>
+      <br/>Download <a href="http://cordova-dev.eng.uiowa.edu/cordova_sites_ah/rdvd/variations/get_queue_data" target="blank">Queue Data</a>
+      <br/>Download <a href="http://cordova-dev.eng.uiowa.edu/cordova_sites_ah/rdvd/variations/get_live_data" target="blank">Live Data</a>
       </p>
     </div>
     <div class="row-fluid">
