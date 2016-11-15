@@ -73,6 +73,7 @@ $route['variations/norm_nomenclature'] = 'variations/norm_nomenclature';
 $route['variations/norm_nomenclature/(:any)'] = 'variations/norm_nomenclature/$1';
 $route['variations/expert_curation'] = 'variations/expert_curation';
 $route['variations/expert_curation/(:any)'] = 'variations/expert_curation/$1';
+$route['variations/get_diff_stats'] = 'variations/get_diff_stats';
 $route['variations/submit'] = 'variations/submit_changes';
 $route['variations/unreleased'] = 'variations/show_unreleased';
 $route['variations/unreleased/(:any)'] = 'variations/show_unreleased/$1';

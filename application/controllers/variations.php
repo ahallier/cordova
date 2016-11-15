@@ -396,6 +396,12 @@ class Variations extends MY_Controller {
     $this->load->view($this->editor_layout,$data);
   }
 
+  public function get_diff_stats(){
+    $timeStamp = date("YmdHms");
+    $this->variations_model->get_diff_stats($timeStamp);
+    $download = site_url("tmp/diffStats$timeStamp.csv");
+    redirect($download);
+  }
 
   /**
    * Show unreleased

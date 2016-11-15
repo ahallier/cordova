@@ -70,8 +70,45 @@
                  <li class="progtrckr-done">Expert Curation</li>
                      <li class="progtrckr-todo">Release Changes</li>
                      </ol>
-       
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+<script src="<?php echo site_url("assets/editor/js/bootstrap.min.js") ?>"></script>
+<script src="<?php echo site_url("assets/editor/js/bootstrap-rowlink.min.js") ?>"></script>
+<script src="<?php echo site_url("assets/editor/js/jquery.tablesorter.min.js") ?>"></script>
+<script src="<?php echo site_url("assets/editor/js/script.js") ?>"></script>
+
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script type="text/javascript">
+
+// Ajax post
+$(document).ready(function() {
+$("#diffStats").click(function(event) {
+event.preventDefault();
+
+$.ajax(
+  url: "<?php echo base_url() . 'variations/get_diff_stats'; ?>",
+  type: "get",
+  success: function(res) {
+    alert(res);
+    if (res)
+    {
+      alert("success");
+      // Show Entered Value
+      jQuery("div#result").show();
+      jQuery("div#value").html(res.username);
+      jQuery("div#value_pwd").html(res.pwd);
+    }
+  },
+  'json'
+);
+});
+});
+</script>
+
 <h1>Expert Curation</h1>
+<!--<button id=diffStats>Diff Stats</button>-->
 <br/>
 <?php
   $attributes = array('id'    => 'form_expert_curation',
