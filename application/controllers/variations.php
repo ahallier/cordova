@@ -396,6 +396,40 @@ class Variations extends MY_Controller {
     $this->load->view($this->editor_layout,$data);
   }
 
+  public function get_var_log(){
+    echo "collecting your data..."; 
+    $timeStamp = date("YmdHms");
+    
+    $path = FCPATH . "/tmp/varLog$timeStamp.csv";
+    $orderby = "";
+    $table = "variations_log";
+    $result = $this->variations_model->get_table_data($table, $path, $orderby);
+    echo $result;
+    $download = site_url("tmp/varLog$timeStamp.csv");
+    redirect($download);
+  }
+  public function get_expert_log(){
+    echo "collecting your data..."; 
+    $timeStamp = date("YmdHms"); 
+    $path = FCPATH . "/tmp/expertLogData$timeStamp.csv";
+    $orderby = "";
+    $table = "expert_log";
+    $result = $this->variations_model->get_table_data($table, $path, $orderby);
+    echo $result;
+    $download = site_url("tmp/expertLogData$timeStamp.csv");
+    redirect($download);
+  }
+  public function get_expert_data(){
+    echo "collecting your data..."; 
+    $timeStamp = date("YmdHms");
+    $path = FCPATH . "/tmp/expertData$timeStamp.csv";
+    $orderby = "";
+    $table = "expert_curations";
+    $result = $this->variations_model->get_table_data($table, $path, $orderby);
+    echo $result;
+    $download = site_url("tmp/expertData$timeStamp.csv");
+    redirect($download);
+  }
   public function get_live_data(){
     echo "collecting your data..."; 
     $timeStamp = date("YmdHms");

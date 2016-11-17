@@ -154,9 +154,13 @@ $.ajax(
   <div class = "span1">
   </div>
   <div class = "span3">
-    <p>Download <a type="application/octet-stream" href="http://cordova-dev.eng.uiowa.edu/cordova_sites_ah/rdvd/tmp/queue<?php echo $time_stamp?>.csv" download="variant-CADIvariants.csv">Queue Data</a> 
+    <!--<p>Download <a type="application/octet-stream" href="http://cordova-dev.eng.uiowa.edu/cordova_sites_ah/rdvd/tmp/queue<?php echo $time_stamp?>.csv" download="variant-CADIvariants.csv">Queue Data</a> 
     <br/>Download <a type="application/octet-stream" href="http://cordova-dev.eng.uiowa.edu/cordova_sites_ah/rdvd/tmp/expertData<?php echo $time_stamp?>.csv" download="expertData.csv">Expert Curations Data</a> 
     <br/>Download <a type="application/octet-stream" href="http://cordova-dev.eng.uiowa.edu/cordova_sites_ah/rdvd/tmp/expertDataLog<?php echo $time_stamp?>.csv" download="expertDataLog.csv">Expert Curations Log</a> 
+    -->
+    <br/>Download <a href="http://cordova-dev.eng.uiowa.edu/cordova_sites_ah/rdvd/variations/get_queue_data" target="blank">Queue Data</a>
+    <br/>Download <a href="http://cordova-dev.eng.uiowa.edu/cordova_sites_ah/rdvd/variations/get_expert_data" target="blank">Expert Data</a>
+    <br/>Download <a href="http://cordova-dev.eng.uiowa.edu/cordova_sites_ah/rdvd/variations/get_expert_log" target="blank">Expert Log</a>
     <br/>Download <a type="application/octet-stream" href="http://cordova-dev.eng.uiowa.edu/cordova_sites_ah/rdvd/expertDataTemplate.csv" download="expertDataTemplate.csv">Template</a></p>
   </div>
   <!--
